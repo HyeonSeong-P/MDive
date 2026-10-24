@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>화면 설계서 작성 템플릿 — 앱 요구사항 아님</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0 auto; padding: 24px; max-width: 1100px; color: #202124; background: #fff; font: 16px/1.6 system-ui, sans-serif; }
+a { color: #174ea6; }
+a:focus-visible { outline: 3px solid #174ea6; outline-offset: 4px; }
+header, section { margin-bottom: 28px; }
+.notice { padding: 12px; border: 2px solid #777; }
+.layout { display: grid; grid-template-columns: minmax(240px, 340px) minmax(0, 1fr); gap: 32px; }
+.wireframe { border: 2px solid #555; padding: 16px; min-height: 360px; }
+.placeholder { border: 1px dashed #777; padding: 20px; margin-top: 16px; }
+h1 { font-size: 1.65rem; }
+h2 { font-size: 1.3rem; }
+h3 { font-size: 1.05rem; }
+@media (max-width: 680px) { .layout { grid-template-columns: 1fr; } body { padding: 16px; } }
+@media print { body { max-width: none; padding: 0; } .layout { grid-template-columns: 1fr 1.5fr; gap: 16px; } .wireframe { min-height: 240px; } }
+</style>
+</head>
+<body>
+<header>
+<h1>화면 설계서</h1>
+<p class="notice">작성 템플릿입니다. 아래 항목과 도형은 MDive의 확정 기능이나 화면이 아닙니다.</p>
+<p>문서 상태: 초안 · 관련 기능 명세 링크: 작성 시 추가</p>
+<nav aria-label="화면 목록"><a href="#s-template">화면 작성 예시</a></nav>
+</header>
+<main>
+<section id="s-template" aria-labelledby="screen-title">
+<h2 id="screen-title">화면 ID / 화면 이름 — 작성 시 지정</h2>
+<p>시나리오 · 진입 조건 · 이전/다음 화면: 합의된 내용으로 작성</p>
+<div class="layout">
+<div class="wireframe" role="img" aria-label="화면 배치를 설명하기 위한 빈 와이어프레임">
+<strong>와이어프레임 영역</strong>
+<div class="placeholder">① 화면 요소 위치</div>
+<div class="placeholder">본문 영역</div>
+</div>
+<div>
+<h3>요소별 동작</h3>
+<p>① 요소 이름, 사용자의 행동, 결과와 이동 대상. 미정이면 미정으로 표시합니다.</p>
+<h3>화면 상태</h3>
+<p>필요한 정상·로딩·빈 상태·실패·재시도 모습을 각각 표현합니다. 불필요한 상태는 생략합니다.</p>
+<h3>열린 결정</h3>
+<p>구현 전에 결정할 질문을 기록합니다. 공통 정책과 수용 기준은 관련 Markdown 명세로 연결합니다.</p>
+</div>
+</div>
+</section>
+</main>
+</body>
+</html>

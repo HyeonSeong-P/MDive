@@ -5,7 +5,7 @@
 ## 현재 범위
 
 - MDive는 Android용 Markdown 뷰어 앱이다.
-- 사용자 시나리오, 기능 범위, 파일 획득 방식, Markdown 지원 범위는 아직 미정이다. `docs/product/overview.md`의 열린 질문을 임의로 확정하지 않는다.
+- 사용자 시나리오와 첫 버전의 기능 방향은 `docs/product/overview.md` 및 연결된 기능 명세에서 관리한다. 홈·읽기 기본 시안은 승인됐으며 세부 디자인과 일부 동작은 미정이다. 열린 질문을 임의로 확정하지 않는다.
 - 지금은 단일 `app` 모듈의 Compose 템플릿이다. 필요가 확인되기 전에는 모듈, 라이브러리, 추상화를 선행 추가하지 않는다.
 
 ## 구현 원칙
@@ -43,6 +43,11 @@
 | 요청받은 변경 커밋·푸시 | `git_committer` | `git-commit-push` |
 | 요청받은 PR/MR 작성 | `pr_creator` | `git-open-pr` |
 
+### 제품 기획 문서
+
+- 와이어프레임과 화면별 설명은 저장소의 HTML 화면 설계서로 작성한다. 문서 위치, 원본의 역할 분담, 작성·검증 방식은 `docs/product/planning.md`를 따른다.
+- 기획을 변경할 때 `feature-spec` 스킬을 사용하고, HTML의 초안이나 예시를 확정 요구사항으로 간주하지 않는다.
+
 ### 일반 작업
 
 1. 기능 작업 전 `docs/product/overview.md`에서 확정된 요구사항과 미정 사항을 확인한다. 미정 사항이 구현 결과를 바꾸면 사용자와 결정한다.
@@ -66,3 +71,4 @@
 - [Git 작업 규칙](docs/engineering/git-workflow.md)
 - [앱 버전 전략](docs/engineering/versioning.md)
 - [제품 방향과 열린 질문](docs/product/overview.md)
+- [제품 기획과 HTML 화면 설계서](docs/product/planning.md)
