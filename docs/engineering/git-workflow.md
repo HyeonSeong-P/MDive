@@ -45,7 +45,7 @@ feat(parser)!: change document identifier format
 
 - `<slug>`는 작업 내용을 나타내는 짧은 소문자 kebab-case 이름을 쓴다. 이슈 번호가 있으면 앞에 넣어도 된다. 예: `feat/42-document-search`.
 - 새 작업은 최신 `develop`에서 브랜치를 만든다. 하나의 브랜치에는 하나의 목적을 담는다. 변경을 검증한 뒤 대상 브랜치로 PR을 열고, 병합 후 작업 브랜치를 삭제한다.
-- `main`에는 일반 기능 작업을 직접 넣지 않는다. 릴리스할 때 검증된 `develop`을 `main`으로 병합하고 `vMAJOR.MINOR.PATCH` 태그를 단다. 실제 버전 번호는 릴리스 시 정한다.
+- `main`에는 일반 기능 작업을 직접 넣지 않는다. 릴리스할 때 검증된 `develop`을 `main`으로 병합하고 `vMAJOR.MINOR.PATCH` 태그를 단다. 버전 번호와 `versionCode` 규칙은 [앱 버전 전략](versioning.md)을 따른다.
 - 배포 버전의 긴급 수정은 `main`에서 `hotfix/*`를 만들고 `main`에 반영한 후 같은 수정이 `develop`에도 들어가도록 병합한다.
 - 릴리스 안정화 기간이나 여러 유지 버전이 생기기 전에는 `release/*` 브랜치를 만들지 않는다. 필요해지면 이 문서에 출발점·병합 대상을 정한다.
 - 이 문서는 작업 규칙이다. GitHub 브랜치 보호 및 필수 리뷰 설정은 별도 저장소 설정으로 적용할 수 있다.
