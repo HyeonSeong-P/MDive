@@ -3,6 +3,12 @@
 ## 제품 기획
 
 - [제품 방향과 열린 질문](product/overview.md): 확정된 방향, 미정 사항, 다음 기획 산출물.
+- [읽기 화면 시안 S-01](product/screens/reader.html#s-01): 본문·코드·표·이미지 표현을 검토하는 HTML 초안.
+- [문서 표시와 읽기 설정](product/document-viewing.md): Markdown·코드·수식·Mermaid·이미지·링크·테마·본문 크기의 범위와 수용 기준.
+- [읽기 도구](product/reading-tools.md): 목차·검색 TopBar·읽던 위치 기억·위치 책갈피 명세.
+- [홈과 문서 바로가기](product/home.md): 첫 버전의 파일 열기·즐겨찾기·최근 문서 기준.
+- [홈 화면 시안 S-02](product/screens/home.html#s-02): 문서가 있는 홈과 첫 실행 상태의 HTML 초안.
+- [제품 기획과 화면 설계서](product/planning.md): Markdown과 로컬 HTML의 역할, 화면 ID, 작성·검증 절차.
 
 ## 개발 규칙
 
