@@ -23,6 +23,27 @@
 ## 작업 절차
 
 브랜치 선택, 커밋 메시지, PR 및 릴리스 절차는 `docs/engineering/git-workflow.md`를 따른다.
+앱의 `versionName`과 `versionCode`는 `docs/engineering/versioning.md`를 따른다. 새 배포 빌드를 만들 때 모든 트랙의 기존 업로드 코드를 확인한다.
+
+### 서브에이전트 활용
+
+- `.codex/agents/*.toml`은 작업 때마다 호출할 프로젝트 서브에이전트의 역할 정의다. 각 서브에이전트는 `.agents/skills/`의 대응 스킬을 작업 절차의 원천으로 사용한다. 역할 파일과 이 문서에 절차를 복사하지 않는다.
+- 호출할 때는 프롬프트에 역할 이름과 작업 범위를 직접 쓴다. 예: "`change_reviewer` 서브에이전트에게 현재 변경 사항을 검토하게 하고, 완료될 때까지 기다린 뒤 파일 위치와 근거를 요약해줘." 스킬의 `$이름`과 달리 서브에이전트 전용 접두사는 쓰지 않는다.
+- 범위를 분리할 수 있는 기획, API 조사, 기능 구현, 코드 검토, Git 작업은 가능한 한 대응 서브에이전트에 위임한다. 메인은 요구사항과 의사결정, 작업 순서, 결과 통합을 맡아 긴 탐색 기록과 로그를 메인 컨텍스트에 쌓지 않는다. 짧은 단일 작업은 직접 처리한다.
+- 독립적인 읽기·조사·검토 작업은 서브에이전트로 병렬 실행한다. 선행 결정이 필요한 구현은 순서대로 진행한다. 같은 파일을 수정하는 작업은 동시에 위임하지 않고, 각 서브에이전트에 범위와 파일 소유권을 명시한다.
+- 커밋·푸시는 다른 서브에이전트의 파일 수정과 검증이 끝난 뒤 수행한다. PR 작성은 브랜치 푸시 이후 수행한다. Git 서브에이전트는 요청받은 변경 범위만 다룬다.
+- 서브에이전트 결과는 요약, 근거가 있는 발견 사항, 변경 파일, 검증 결과, 남은 결정 사항만 받아 통합한다. 제품 요구사항이 미정이면 서브에이전트가 임의로 확정하지 않는다.
+
+| 작업 | 대응 서브에이전트 | 절차 스킬 |
+| --- | --- | --- |
+| 사용자 시나리오와 수용 기준 | `product_planner` | `feature-spec` |
+| 확정된 Android 기능 구현 | `feature_builder` | `android-feature` |
+| 변경 사항 독립 검토 | `change_reviewer` | `change-review` |
+| Android API·의존성 확인 | `android_api_researcher` | `android-api-check` |
+| 요청받은 변경 커밋·푸시 | `git_committer` | `git-commit-push` |
+| 요청받은 PR/MR 작성 | `pr_creator` | `git-open-pr` |
+
+### 일반 작업
 
 1. 기능 작업 전 `docs/product/overview.md`에서 확정된 요구사항과 미정 사항을 확인한다. 미정 사항이 구현 결과를 바꾸면 사용자와 결정한다.
 2. 변경되는 화면의 상태, 액션, 데이터 경계, 실패·로딩 상태를 먼저 정리한다. 작은 변경에는 코드에 바로 반영해도 된다.
@@ -43,4 +64,5 @@
 - [MVI 화면 구현 규칙](docs/engineering/mvi.md)
 - [Navigation 3 규칙](docs/engineering/navigation.md)
 - [Git 작업 규칙](docs/engineering/git-workflow.md)
+- [앱 버전 전략](docs/engineering/versioning.md)
 - [제품 방향과 열린 질문](docs/product/overview.md)

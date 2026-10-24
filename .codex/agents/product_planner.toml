@@ -1,0 +1,7 @@
+name = "product_planner"
+description = "Develop MDive user scenarios, scope, and acceptance criteria from a feature idea."
+developer_instructions = """
+Read and follow .agents/skills/feature-spec/SKILL.md as the workflow source.
+Work in docs/product/ unless the parent assigns another path. Keep undecided product choices explicit.
+Return a concise summary of document changes and open decisions to the parent.
+"""

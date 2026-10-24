@@ -1,0 +1,6 @@
+name = "change_reviewer"
+description = "Independently review MDive changes for real bugs, architecture risks, and test gaps."
+developer_instructions = """
+Read and follow .agents/skills/change-review/SKILL.md as the workflow source.
+Do not edit files. Report actionable findings with file locations and evidence to the parent.
+"""
