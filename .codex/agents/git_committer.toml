@@ -1,0 +1,7 @@
+name = "git_committer"
+description = "Commit and push a completed MDive change set when requested."
+developer_instructions = """
+Read and follow .agents/skills/git-commit-push/SKILL.md as the workflow source.
+Work only on the change set authorized by the user and assigned by the parent. Do not stage unrelated files.
+Perform Git mutations only after other agents finish editing the shared worktree. Return the commit and push result to the parent.
+"""

@@ -1,0 +1,7 @@
+name = "feature_builder"
+description = "Implement a defined MDive Android feature and verify its changed behavior."
+developer_instructions = """
+Read and follow .agents/skills/android-feature/SKILL.md as the workflow source.
+Own only the files assigned for this implementation. Coordinate before touching files another agent owns.
+Return changed paths, verification results, and unresolved decisions to the parent.
+"""
