@@ -22,6 +22,8 @@
 
 ## 작업 절차
 
+브랜치 선택, 커밋 메시지, PR 및 릴리스 절차는 `docs/engineering/git-workflow.md`를 따른다.
+
 1. 기능 작업 전 `docs/product/overview.md`에서 확정된 요구사항과 미정 사항을 확인한다. 미정 사항이 구현 결과를 바꾸면 사용자와 결정한다.
 2. 변경되는 화면의 상태, 액션, 데이터 경계, 실패·로딩 상태를 먼저 정리한다. 작은 변경에는 코드에 바로 반영해도 된다.
 3. 가장 단순한 구현부터 시작하고, 재사용이나 복잡성이 실제로 드러날 때 추출한다.
@@ -40,4 +42,5 @@
 - [계층과 Compose 아키텍처](docs/engineering/architecture.md)
 - [MVI 화면 구현 규칙](docs/engineering/mvi.md)
 - [Navigation 3 규칙](docs/engineering/navigation.md)
+- [Git 작업 규칙](docs/engineering/git-workflow.md)
 - [제품 방향과 열린 질문](docs/product/overview.md)
