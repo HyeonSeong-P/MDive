@@ -10,4 +10,11 @@ object CatalogSamples {
     val favorites = listOf(listOf("ocean-notes.md", "생각을 정리하는 작은 기록"), listOf("compose-notes.md", "Compose 학습 노트"))
     val recents = listOf(listOf("kotlin-study.md", "최근에 읽은 문서"), listOf("architecture.md", "다시 이어 읽기"), listOf("reading-notes.md", "읽으며 남긴 기록"))
     const val longFilename = "매우 긴 이름의 Markdown 문서를 다시 읽으며 남긴 기록과 참고 자료.md"
+    const val removeDialogTitle = "목록에서 제거할까요?"
+    const val removeDialogDetail = "목록에서만 제거하며 원본 파일은 삭제하지 않습니다."
+    const val toastSuccess = "코드를 복사했어요"
+    const val toastInformation = "읽기 설정을 적용했어요"
+    const val bannerRetryTitle = "책갈피 저장에 실패했어요"
+    const val bannerPersistentTitle = "저장하지 못한 책갈피가 있어요"
+    const val bannerPersistentDetail = "본문은 계속 읽을 수 있어요."
 }

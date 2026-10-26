@@ -75,6 +75,16 @@ class GeneratorTest(unittest.TestCase):
         self.assertIn('--font-uiTitle: 20px', css)
         self.assertIn('.type-uiTitle { font-family: var(--family-ui); font-size: var(--font-uiTitle); line-height: var(--leading-ui); font-weight: 600;', css)
 
+    def test_overlay_measurements_follow_tokens_in_both_catalogs(self):
+        self.change('tokens.json', lambda t: t['sizes'].update(dialogMaxWidth=420))
+        self.assertEqual(0, self.run_generator().returncode)
+        page = (self.root / 'design-system/generated/catalog.html').read_text()
+        kotlin = (self.root / 'designsystem/src/main/java/com/parka/mdive/designsystem/generated/CatalogEntries.kt').read_text()
+        css = (self.root / 'design-system/generated/tokens.css').read_text()
+        self.assertIn('sizes.dialogMaxWidth · 420dp', page)
+        self.assertIn('sizes.dialogMaxWidth · 420dp', kotlin)
+        self.assertIn('--size-dialogMaxWidth: 420px', css)
+
     def test_unbundled_code_weight_is_rejected(self):
         self.change('tokens.json', lambda t: t['typography']['code'].update(weight=600))
         self.assertNotEqual(0, self.run_generator().returncode)

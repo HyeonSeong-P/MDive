@@ -58,8 +58,21 @@ def generate():
     kotlin += '    )\n}\n'
     def kotlin_list(items):
         return 'listOf(' + ', '.join(map(quote, items)) + ')'
-    fields = ['anatomy', 'variants', 'behavior', 'accessibility', 'usage']
-    items = ',\n'.join('    CatalogEntry(' + quote(entry['id']) + ', ' + quote(entry['title']) + ', ' + kotlin_list(entry['states']) + ', category = ' + quote(entry['category']) + ', purpose = ' + quote(entry['purpose']) + ', ' + ', '.join(key + ' = ' + kotlin_list(entry[key]) for key in fields) + ')' for entry in entries)
+    fields = ['anatomy', 'variants', 'behavior', 'accessibility', 'usage', 'measurements']
+    def metric_lines(entry):
+        result = []
+        for reference in entry.get('measurements', []):
+            group, key = reference.split('.')
+            value = tokens[group][key]
+            if group == 'typography':
+                size = tokens['fontSizes'][value['size']]
+                leading = round(size * tokens['lineHeights'][value['leading']], 2)
+                rendered = f'{size}sp / 행간 {leading}sp / {value["weight"]}'
+            else:
+                rendered = str(value) + ('dp' if group in ['sizes', 'spacing', 'radii'] else '')
+            result.append(reference + ' · ' + rendered)
+        return result
+    items = ',\n'.join('    CatalogEntry(' + quote(entry['id']) + ', ' + quote(entry['title']) + ', ' + kotlin_list(entry['states']) + ', category = ' + quote(entry['category']) + ', purpose = ' + quote(entry['purpose']) + ', ' + ', '.join(key + ' = ' + kotlin_list(metric_lines(entry) if key == 'measurements' else entry.get(key, [])) for key in fields) + ')' for entry in entries)
     manifest = header + f'object CatalogThemes {{ val names = mapOf({names}) }}\n\n' + 'data class CatalogEntry(val id: String, val title: String, val states: List<String>, val category: String = "components", val purpose: String = "", ' + ', '.join('val ' + key + ': List<String> = emptyList()' for key in fields) + ')\n\nval catalogEntries = listOf(\n' + items + ',\n)\n'
     samples = header + 'object CatalogSamples {\n'
     for key, value in catalog['samples'].items():
@@ -120,6 +133,51 @@ def generate():
         bar = f'<div class="search"><button type="button" class="icon-button" aria-label="검색 닫기">{icon("back")}</button><input aria-label="검색어 정적 예시" value="{query}" placeholder="문서 검색" readonly><span>{result}</span><button type="button" class="icon-button"{disabled} aria-label="이전 결과">{icon("up")}</button><button type="button" class="icon-button"{disabled} aria-label="다음 결과">{icon("down")}</button></div>'
         return bar + ('<p>일치하는 내용을 찾지 못했어요.</p>' if empty is True else '')
 
+    def state_panel(kind):
+        title, detail = {
+            'loading': ('문서를 준비하고 있어요', '본문을 읽을 준비가 되면 표시합니다.'),
+            'empty': ('아직 문서가 없어요', '첫 Markdown 문서를 열어보세요.'),
+            'error': ('문서를 열 수 없어요', '파일이 이동되었거나 접근 권한이 바뀌었을 수 있어요.'),
+        }[kind]
+        symbol = '<span class="loading-dot" role="status" aria-label="불러오는 중"></span>' if kind == 'loading' else icon('file')
+        actions = '' if kind == 'loading' else '<div class="ds-state-actions">' + button('파일 열기' if kind == 'empty' else '다시 선택', leading='plus' if kind == 'empty' else None) + (button('다시 시도', 'quiet') if kind == 'error' else '') + '</div>'
+        return f'<div class="ds-state"><div class="ds-state-visual">{symbol}</div><h3>{e(title)}</h3><p>{e(detail)}</p>{actions}</div>'
+
+    def inline_notice():
+        return f'<div class="ds-inline">{icon("file")}<div><strong>이미지를 불러오지 못했어요</strong><p>본문은 계속 읽을 수 있어요.</p>{button("이미지 폴더 연결", "quiet")}</div></div>'
+
+    def confirmation(state):
+        busy = state == 'busy'
+        detail = sample['removeDialogDetail'] if state != 'longText' else (sample['removeDialogDetail'] + ' 긴 안내와 큰 글자에서도 본문을 스크롤하고 동작에 접근할 수 있습니다. ') * 12
+        markup = f'<div class="ds-dialog-body"><h3>{e(sample["removeDialogTitle"])}</h3><p>{e(detail)}</p><div class="ds-file-context">{icon("file")}<strong>{e(sample["longFilename"] if state == "longText" else sample["filename"])}</strong></div></div><div class="ds-dialog-actions">{button("제거 중" if busy else "목록에서 제거", "loading" if busy else "", disabled=busy)}<button type="button" class="button quiet" data-close-demo{ " disabled" if busy else ""}>취소</button></div>'
+        return f'<button type="button" class="button secondary" data-open-demo>확인 다이얼로그 열기</button><dialog class="ds-overlay ds-dialog" aria-label="목록 제거 확인" data-busy="{str(busy).lower()}">{markup}</dialog><p class="ds-demo-result" role="status"></p>'
+
+    def bottom_sheet(state):
+        body = '<p>현재 문서에서 원하는 위치를 선택합니다.</p>' + ''.join(f'<div class="document-row">{icon("bookmark")}<div><strong>다시 읽을 위치 {index + 1}</strong><small>제목과 본문 미리보기 · 시연 데이터</small></div></div>' for index in range(16 if state == 'scrolling' else 3))
+        return f'<button type="button" class="button secondary" data-open-demo>바텀시트 열기</button><dialog class="ds-overlay ds-sheet" aria-label="읽기 도구 시연"><button type="button" class="ds-sheet-handle" data-sheet-drag data-close-demo aria-label="패널 닫기 · 아래로 드래그"><span></span></button><div class="ds-sheet-heading"><strong>읽기 도구</strong><button type="button" class="icon-button" aria-label="패널 닫기" data-close-demo>{icon("close")}</button></div><div class="ds-sheet-body">{body}</div></dialog><p class="ds-demo-result" role="status"></p>'
+
+    def toast(state):
+        message = sample['toastSuccess'] if state == 'success' else sample['toastInformation']
+        return f'<div class="ds-toast" role="status">{icon("check" if state == "success" else "file")}<span>{e(message)}</span></div><p class="ds-caption">정보성 안내의 정적 표현 · 표시 시간은 호스트가 결정</p>'
+
+    def banner(state):
+        if state == 'retry':
+            message = sample['bannerRetryTitle']
+            detail = ''
+            action = '<button type="button" class="button quiet" data-banner-retry>다시 시도</button>'
+        else:
+            message = sample['bannerPersistentTitle']
+            detail = '<p>' + e(sample['bannerPersistentDetail']) + '</p>'
+            action = f'<button type="button" class="icon-button" data-banner-dismiss aria-label="안내 닫기">{icon("close")}</button>'
+        return f'<div class="ds-banner" role="status">{icon("warning")}<div class="ds-banner-content"><strong>{e(message)}</strong>{detail}</div><div class="ds-banner-action">{action}</div></div><p class="ds-demo-result" role="status"></p>'
+
+    def text_field(state):
+        error = state == 'error'
+        return f'<label class="ds-field{ " is-error" if error else ""}"><span>책갈피 이름</span><input type="text" aria-label="책갈피 이름" value="{e(sample["filename"])}"{ " disabled" if state == "disabled" else ""} aria-invalid="{str(error).lower()}"><small>{"이름을 저장하지 못했어요. 다시 확인해주세요." if error else "이름 입력 예시 · 실제 저장하지 않습니다."}</small></label>'
+
+    def slider(state):
+        return f'<label class="ds-slider"><span>본문 크기 <output>18</output></span><input type="range" min="14" max="28" value="18" step="1" aria-label="본문 크기 예시"{ " disabled" if state == "disabled" else ""}><small>14~28은 조작 예시이며 제품 범위는 미정입니다.</small></label>'
+
     renders = {
         'colors': {'light': swatches, 'dark': swatches},
         'typography': {name: f'<p class="type-spec">{e(tokens["fontRoles"][role["family"]])} · {tokens["fontSizes"][role["size"]]}px · {role["weight"]} · 행간 {round(tokens["fontSizes"][role["size"]] * tokens["lineHeights"][role["leading"]], 2)}px</p><p class="type-{e(name)}">{e(sample["body"] if name in ["body","bodySmall"] else "깊이 읽는 시간 · Markdown 0123456789" if name != "code" else "fun dive(depth: Int) / 0 O 1 l I")}</p>' for name, role in tokens['typography'].items()},
@@ -145,11 +203,13 @@ def generate():
         'content': {'code': f'<pre>{e(sample["code"])}</pre>', 'table': table},
         'icons': {'brand': '<p>MDive · 대표 심볼</p><div class="brand-original" data-palette="deepsea" data-theme="dark">' + brand_svg + '</div><p>대표 심볼은 앱 정체성에, 동작 아이콘은 조작에 사용합니다.</p>', 'normal': '<div class="icon-grid">' + ''.join(f'<div>{icon(key)}<small>{e(key)}</small></div>' for key in icons['paths']) + '</div>'},
         'navigation': {'normal': '<div class="tabs"><span class="selected">목차</span><span>책갈피</span></div><p class="muted">한 패널의 두 탭 · 배치 초안</p>'},
-        'feedback': {
-            'loading': '<div class="notice"><span class="loading-dot"></span><div><strong>문서를 준비하고 있어요</strong><p>로딩 표현 초안</p></div></div>',
-            'empty': f'<div class="notice">{icon("bookmark")}<div><strong>아직 책갈피가 없어요</strong><p>다시 읽고 싶은 위치를 저장해보세요.</p></div></div>',
-            'error': f'<div class="notice error">{icon("file")}<div><strong>문서를 열지 못했어요</strong><p>다시 선택하거나 목록에서 제거할 수 있어요.</p>{button("다시 선택", "secondary")}</div></div>',
-        },
+        'feedback': {**{state: state_panel(state) for state in ['loading', 'empty', 'error']}, 'inline': inline_notice()},
+        'dialog': {state: confirmation(state) for state in ['confirmation', 'longText', 'busy']},
+        'bottomsheet': {state: bottom_sheet(state) for state in ['default', 'scrolling']},
+        'toast': {state: toast(state) for state in ['success', 'information']},
+        'banner': {state: banner(state) for state in ['retry', 'persistent']},
+        'textfield': {state: text_field(state) for state in ['default', 'error', 'disabled']},
+        'slider': {state: slider(state) for state in ['default', 'disabled']},
     }
     if not set(ids).issubset(renders):
         raise ValueError('Register each catalog ID in both platform renderers')
@@ -179,6 +239,9 @@ def generate():
                     states = ''.join(f'<div class="example" data-state="{e(state)}"><p><small>{e(state)} · 초안</small></p>{renders[entry["id"]][state]}</div>' for state in entry['states'] if entry['id'] != 'colors' or state == mode)
                 anatomy = ' · '.join(map(e, entry['anatomy']))
                 rules = ''.join(f'<div class="guide"><h3>{title}</h3><ul>' + ''.join(f'<li>{e(item)}</li>' for item in entry[key]) + '</ul></div>' for key, title in [('behavior','동작과 상태'),('usage','사용 기준'),('accessibility','접근성')])
+                metrics = metric_lines(entry)
+                if metrics:
+                    rules += '<div class="guide"><h3>치수·토큰</h3><ul>' + ''.join(f'<li>{e(line)}</li>' for line in metrics) + '</ul><p>HTML은 CSS px 기준 시각 표현이며 위 수치는 Android dp/sp 기준 토큰입니다.</p></div>'
                 sections += f'<section data-entry="{e(entry["id"])}" id="{e(theme_id)}-{mode}-{e(entry["id"])}"><p class="eyebrow">{e(entry["category"])} / 초안</p><h2>{e(entry["title"])}</h2><p class="purpose">{e(entry["purpose"])}</p><div class="guide"><h3>구성</h3><p>{anatomy}</p></div><h3>변형과 상태</h3>{states}{rules}</section>'
             columns += f'<div class="theme" data-palette="{e(theme_id)}" data-theme="{mode}"><h2>{e(theme["name"])} · {mode.title()}</h2>{sections}</div>'
     nav = ''
@@ -188,6 +251,15 @@ def generate():
     script = '''<script>
 const palette = document.querySelector('#palette'), mode = document.querySelector('#mode');
 let entry = 'buttons';
+for (const theme of document.querySelectorAll('.theme')) {
+  const prefix = '#' + theme.dataset.palette + '-' + theme.dataset.theme + '-';
+  if (location.hash.startsWith(prefix)) {
+    const target = location.hash.slice(prefix.length);
+    if ([...document.querySelectorAll('nav a[data-entry]')].some(link => link.dataset.entry === target)) {
+      palette.value = theme.dataset.palette; mode.value = theme.dataset.theme; entry = target;
+    }
+  }
+}
 function update() {
   document.querySelectorAll('.theme').forEach(theme => {
     theme.hidden = theme.dataset.palette !== palette.value || theme.dataset.theme !== mode.value;
@@ -200,8 +272,107 @@ function update() {
 }
 document.querySelectorAll('nav a[data-entry]').forEach(link => link.addEventListener('click', () => { entry = link.dataset.entry; update(); }));
 palette.addEventListener('change', update); mode.addEventListener('change', update); update();
+const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+function openDemo(modal) {
+  modal.style.transform = ''; delete modal.dataset.closing;
+  modal.showModal();
+  if (modal.classList.contains('ds-sheet') && !reducedMotion()) {
+    modal.animate([{transform:'translateY(100%)'}, {transform:'translateY(0)'}], {duration:280, easing:'cubic-bezier(.2,0,0,1)'});
+  }
+}
+async function closeDemo(modal) {
+  if (!modal.open || modal.dataset.closing === 'true' || modal.dataset.busy === 'true') return;
+  modal.dataset.closing = 'true';
+  let animation;
+  if (modal.classList.contains('ds-sheet') && !reducedMotion()) {
+    animation = modal.animate([{transform:getComputedStyle(modal).transform}, {transform:'translateY(100%)'}], {duration:220, easing:'cubic-bezier(.4,0,1,1)', fill:'forwards'});
+    try { await animation.finished; } catch (_) { /* Interrupted animations still release the modal. */ }
+  }
+  modal.close(); animation?.cancel(); modal.style.transform = ''; delete modal.dataset.closing;
+}
+for (const opener of document.querySelectorAll('[data-open-demo]')) opener.addEventListener('click', () => {
+  const modal = opener.nextElementSibling;
+  openDemo(modal);
+  if (modal.dataset.busy === 'true') {
+    setTimeout(() => { modal.close(); modal.nextElementSibling.textContent = '처리 중 시연을 종료했습니다. 실제 목록은 변경하지 않았습니다.'; opener.focus(); }, 2500);
+  }
+});
+for (const closer of document.querySelectorAll('[data-close-demo]')) closer.addEventListener('click', () => closeDemo(closer.closest('dialog')));
+for (const modal of document.querySelectorAll('dialog')) {
+  if (modal.dataset.busy === 'true') modal.setAttribute('closedby', 'none');
+  modal.addEventListener('keydown', event => {
+    if (modal.dataset.busy === 'true' && event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); }
+  });
+  modal.addEventListener('cancel', event => {
+    if (modal.dataset.busy === 'true') event.preventDefault();
+    else if (modal.classList.contains('ds-sheet')) { event.preventDefault(); closeDemo(modal); }
+  });
+  modal.addEventListener('click', event => {
+    if (event.target !== modal || modal.dataset.busy === 'true') return;
+    const rect = modal.getBoundingClientRect();
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeDemo(modal);
+  });
+  modal.querySelector('.ds-dialog-actions .button:not([data-close-demo])')?.addEventListener('click', () => {
+    if (modal.dataset.busy === 'true') return;
+    modal.close(); modal.nextElementSibling.textContent = '목록 제거 확인 시연입니다. 실제 파일과 목록은 변경하지 않았습니다.';
+  });
+}
+for (const handle of document.querySelectorAll('[data-sheet-drag]')) {
+  let startY = null, distance = 0, suppressClick = false;
+  const modal = handle.closest('dialog');
+  handle.addEventListener('pointerdown', event => {
+    if (modal.dataset.closing === 'true') return;
+    startY = event.clientY; distance = 0; handle.setPointerCapture(event.pointerId);
+  });
+  handle.addEventListener('pointermove', event => {
+    if (startY === null) return;
+    distance = Math.max(0, event.clientY - startY);
+    modal.style.transform = 'translateY('+distance+'px)';
+  });
+  handle.addEventListener('pointerup', () => {
+    if (startY === null) return;
+    startY = null; suppressClick = distance > 5;
+    if (distance > Math.min(120, modal.offsetHeight*.25)) closeDemo(modal);
+    else {
+      if (!reducedMotion() && distance > 0) modal.animate([{transform:'translateY('+distance+'px)'}, {transform:'translateY(0)'}], {duration:180, easing:'ease-out'});
+      modal.style.transform = '';
+    }
+  });
+  handle.addEventListener('pointercancel', () => { startY = null; modal.style.transform = ''; });
+  handle.addEventListener('click', event => {
+    if (suppressClick) { event.preventDefault(); event.stopImmediatePropagation(); suppressClick = false; }
+  }, true);
+}
+for (const range of document.querySelectorAll('.ds-slider input')) {
+  const renderRange = () => {
+    range.closest('label').querySelector('output').value = range.value;
+    range.style.setProperty('--slider-progress', ((Number(range.value)-Number(range.min))/(Number(range.max)-Number(range.min))*100)+'%');
+    range.style.setProperty('--slider-direction', getComputedStyle(range).direction === 'rtl' ? 'to left' : 'to right');
+  };
+  renderRange(); range.addEventListener('input', renderRange);
+}
+document.querySelectorAll('.ds-field input').forEach((input,index) => {
+  const support = input.closest('label').querySelector('small');
+  support.id = 'input-support-'+index;
+  input.setAttribute('aria-describedby', support.id);
+});
+for (const banner of document.querySelectorAll('.ds-banner')) {
+  const layoutBanner = () => {
+    const style = getComputedStyle(banner);
+    const hasBoth = banner.querySelector('[data-banner-retry]') && banner.querySelector('[data-banner-dismiss]');
+    const breakpoint = parseFloat(style.getPropertyValue(hasBoth ? '--size-bannerDismissActionBreakpoint' : '--size-bannerActionBreakpoint'));
+    const fontScale = parseFloat(getComputedStyle(banner.querySelector('strong')).fontSize) / parseFloat(style.getPropertyValue('--font-ui'));
+    banner.dataset.stacked = String(banner.clientWidth / fontScale < breakpoint);
+  };
+  new ResizeObserver(layoutBanner).observe(banner); layoutBanner();
+}
+for (const dismiss of document.querySelectorAll('[data-banner-dismiss]')) dismiss.addEventListener('click', () => {
+  const banner = dismiss.closest('.ds-banner'); banner.hidden = true;
+  banner.nextElementSibling.textContent = '안내를 닫았습니다. 실제 데이터는 변경하지 않았습니다.';
+});
+for (const retry of document.querySelectorAll('[data-banner-retry]')) retry.addEventListener('click', () => { retry.closest('.ds-banner').nextElementSibling.textContent = '복구 동작 시연 · 실제 저장 요청은 하지 않습니다.'; });
 </script>'''
-    page = '<!doctype html>\n<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MDive 디자인 시스템</title><link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="../catalog.css"><main><header class="site-head"><div><p class="eyebrow">MDIVE / DESIGN SYSTEM</p><h1>디자인 시스템</h1><p>컴포넌트 검토용 초안 · 화면 적용 전의 독립 예시입니다.</p></div><div class="review-controls"><label>색상안 <select id="palette">' + options + '</select></label><label>밝기 <select id="mode"><option value="light">라이트</option><option value="dark">다크</option></select></label></div></header><div class="doc-shell"><nav aria-label="디자인 시스템 목차">' + nav + '<hr><a href="../../docs/product/design-system.md">관리 설명</a><a href="../../docs/product/design-system-references.md">공식 사례 조사</a></nav><div class="themes">' + columns + '</div></div><footer>사용 규칙과 상태는 공통 원본에서 생성합니다. HTML 예시는 정적이며 실제 입력·포커스·동작 검증은 Compose 카탈로그에서 진행합니다.</footer></main>' + script + '</html>\n'
+    page = '<!doctype html>\n<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MDive 디자인 시스템</title><link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="../catalog.css"><link rel="stylesheet" href="../feedback.css"><main><header class="site-head"><div><p class="eyebrow">MDIVE / DESIGN SYSTEM</p><h1>디자인 시스템</h1><p>컴포넌트 검토용 초안 · 화면 적용 전의 독립 예시입니다.</p></div><div class="review-controls"><label>색상안 <select id="palette">' + options + '</select></label><label>밝기 <select id="mode"><option value="light">라이트</option><option value="dark">다크</option></select></label></div></header><div class="doc-shell"><nav aria-label="디자인 시스템 목차">' + nav + '<hr><a href="../../docs/product/design-system.md">관리 설명</a><a href="../../docs/product/design-system-references.md">공식 사례 조사</a></nav><div class="themes">' + columns + '</div></div><footer>사용 규칙과 상태는 공통 원본에서 생성합니다. HTML의 오버레이·입력은 샘플 조작입니다. 실제 파일·저장은 수행하지 않으며 Android 동작은 Compose 카탈로그에서 검증합니다.</footer></main>' + script + '</html>\n'
     return {GENERATED / 'DesignTokens.kt': kotlin, GENERATED / 'CatalogEntries.kt': manifest, GENERATED / 'CatalogSamples.kt': samples, GENERATED / 'CatalogIcons.kt': icon_kotlin, ROOT / 'design-system/generated/tokens.css': css, ROOT / 'design-system/generated/catalog.html': page}
 
 
