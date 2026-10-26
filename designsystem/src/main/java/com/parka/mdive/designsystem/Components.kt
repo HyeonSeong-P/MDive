@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
@@ -116,17 +117,10 @@ fun MDiveSearchBar(
 
 @Composable
 fun MDiveNotice(title: String, detail: String, kind: String, modifier: Modifier = Modifier) {
-    val tint = if (kind == "error") MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-    Row(modifier.fillMaxWidth().padding(vertical = 20.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-        if (kind == "loading") MDiveLoadingMark(Modifier.padding(top = 3.dp))
-        else MDiveIcon(if (kind == "error") "close" else "file", tint = tint)
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium, color = tint)
-            Text(detail, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
+    MDiveInlineNotice(title, detail, modifier, error = kind == "error", loading = kind == "loading")
 }
 
+/** Presentation only: callers own highlighting and clipboard behavior. */
 @Composable
 fun MDiveCodeSample(modifier: Modifier = Modifier) {
     val colors = LocalOceanColors.current

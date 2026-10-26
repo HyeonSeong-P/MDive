@@ -134,6 +134,15 @@ internal object DesignTokens {
         "touch" to 48.dp,
         "topBar" to 56.dp,
         "icon" to 24.dp,
+        "dialogMaxWidth" to 360.dp,
+        "sheetMaxWidth" to 640.dp,
+        "stateSymbol" to 80.dp,
+        "sliderTrack" to 4.dp,
+        "sliderThumb" to 18.dp,
+        "sliderThumbCore" to 14.dp,
+        "sliderInset" to 10.dp,
+        "bannerActionBreakpoint" to 300.dp,
+        "bannerDismissActionBreakpoint" to 360.dp,
     )
     val FontSizes = mapOf(
         "body" to 18.sp,
@@ -170,6 +179,7 @@ internal object DesignTokens {
         "pressed" to 0.08f,
         "disabledIcon" to 0.38f,
         "buttonEdge" to 0.14f,
+        "scrim" to 0.32f,
     )
     val Typography = mapOf(
         "title" to TypographyToken("body", 28.sp, 40.6.sp, 600),

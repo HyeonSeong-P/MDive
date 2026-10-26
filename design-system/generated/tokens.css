@@ -141,6 +141,15 @@
   --size-touch: 48px;
   --size-topBar: 56px;
   --size-icon: 24px;
+  --size-dialogMaxWidth: 360px;
+  --size-sheetMaxWidth: 640px;
+  --size-stateSymbol: 80px;
+  --size-sliderTrack: 4px;
+  --size-sliderThumb: 18px;
+  --size-sliderThumbCore: 14px;
+  --size-sliderInset: 10px;
+  --size-bannerActionBreakpoint: 300px;
+  --size-bannerDismissActionBreakpoint: 360px;
 }
 :root { --icon-stroke: 1.7; }
 :root {
@@ -148,6 +157,7 @@
   --opacity-pressed: 0.08;
   --opacity-disabledIcon: 0.38;
   --opacity-buttonEdge: 0.14;
+  --opacity-scrim: 0.32;
 }
 .type-title { font-family: var(--family-body); font-size: var(--font-title); line-height: var(--leading-title); font-weight: 600; }
 .type-section { font-family: var(--family-ui); font-size: var(--font-body); line-height: var(--leading-ui); font-weight: 600; }

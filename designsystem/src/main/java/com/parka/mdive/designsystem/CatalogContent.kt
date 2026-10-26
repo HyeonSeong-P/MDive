@@ -25,8 +25,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,6 +49,7 @@ import com.parka.mdive.designsystem.generated.CatalogSamples
 import com.parka.mdive.designsystem.generated.CatalogThemes
 import com.parka.mdive.designsystem.generated.DesignTokens
 import com.parka.mdive.designsystem.generated.catalogEntries
+import kotlinx.coroutines.delay
 
 /** A component guide. Review controls never imply product theme settings. */
 @Composable
@@ -159,6 +163,7 @@ private fun CatalogDetail(entry: CatalogEntry, darkTheme: Boolean, modifier: Mod
         GuideSection("동작", entry.behavior)
         GuideSection("접근성", entry.accessibility)
         GuideSection("사용 기준", entry.usage)
+        GuideSection("치수·토큰", entry.measurements)
     }
 }
 
@@ -257,9 +262,39 @@ private fun CatalogExample(entry: CatalogEntry, state: String, darkTheme: Boolea
             Row { MDiveTextTab("목차", tab == 0, { tab = 0 }, Modifier.testTag("sample-tab-toc")); MDiveTextTab("책갈피", tab == 1, { tab = 1 }, Modifier.testTag("sample-tab-bookmarks")) }
         }
         "feedback" -> when (state) {
-            "loading" -> MDiveNotice("문서를 준비하고 있어요", "본문을 읽을 준비가 되면 표시합니다.", state)
-            "empty" -> MDiveNotice("아직 책갈피가 없어요", "다시 읽고 싶은 위치를 저장해보세요.", state)
-            "error" -> MDiveNotice("문서를 열지 못했어요", "기존 목록은 유지됩니다. 다시 선택해주세요.", state)
+            "loading" -> MDiveStatePanel("문서를 준비하고 있어요", "본문을 읽을 준비가 되면 표시합니다.", MDiveStateKind.Loading)
+            "empty" -> MDiveStatePanel("첫 문서를 열어보세요", "Markdown 파일을 선택하면 읽기 편한 모습으로 보여드려요.", MDiveStateKind.Empty, actions = {
+                MDiveButton("파일 열기 · 시연", {}, Modifier.fillMaxWidth())
+            })
+            "error" -> MDiveStatePanel("문서를 열지 못했어요", "파일이 이동되었거나 접근 권한이 바뀌었을 수 있어요.", MDiveStateKind.Failure, context = {
+                MDiveDocumentRow(CatalogSamples.filename, "기존 문서 정보는 유지됩니다.", {})
+            }, actions = {
+                MDiveButton("다시 선택 · 시연", {}, Modifier.fillMaxWidth())
+                MDiveButton("다시 시도 · 시연", {}, Modifier.fillMaxWidth(), variant = MDiveButtonVariant.Quiet)
+            })
+            "inline" -> MDiveInlineNotice("이미지를 불러오지 못했어요", "본문은 계속 읽을 수 있어요.", error = true, action = {
+                MDiveButton("폴더 연결 · 시연", {}, variant = MDiveButtonVariant.Quiet)
+            })
+        }
+        "textfield" -> {
+            var value by remember(state) { mutableStateOf(if (state == "error") "" else "하나의 작은 함수부터") }
+            MDiveTextField(value, { value = it }, "책갈피 이름", supportingText = "직접 수정하는 이름의 시연입니다.", errorMessage = if (state == "error") "이름을 입력해 주세요 · 검증 문구 예시" else null, enabled = state != "disabled")
+        }
+        "slider" -> {
+            var value by remember(state) { mutableFloatStateOf(18f) }
+            MDiveSlider(value, { value = it }, 14f..26f, "본문 크기", "${value.toInt()}sp · 시연", enabled = state != "disabled", steps = 11)
+            Text("범위·단위는 조작 시연 값입니다. 제품 설정 범위를 확정하지 않습니다.", style = mdiveTextStyle("caption"), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        "dialog" -> ConfirmationExample(state)
+        "bottomsheet" -> BottomSheetExample(state)
+        "toast" -> ToastExample(state)
+        "banner" -> {
+            var dismissed by remember(state) { mutableStateOf(false) }
+            if (dismissed) MDiveButton("배너 다시 보기", { dismissed = false }, variant = MDiveButtonVariant.Secondary)
+            else if (state == "retry") MDiveRecoveryBanner(CatalogSamples.bannerRetryTitle, action = {
+                MDiveButton("다시 시도", { dismissed = true }, variant = MDiveButtonVariant.Quiet)
+            })
+            else MDiveRecoveryBanner(CatalogSamples.bannerPersistentTitle, CatalogSamples.bannerPersistentDetail, onDismiss = { dismissed = true })
         }
         "topbar" -> {
             val title = when (state) {
@@ -284,6 +319,55 @@ private fun CatalogExample(entry: CatalogEntry, state: String, darkTheme: Boolea
         "content" -> when (state) { "code" -> MDiveCodeSample(); "table" -> MDiveTableSample() }
         else -> error("Missing catalog renderer: ${entry.id}")
     }
+}
+
+@Composable
+private fun ConfirmationExample(state: String) {
+    var visible by remember(state) { mutableStateOf(false) }
+    var result by remember(state) { mutableStateOf("샘플 동작만 수행하며 실제 목록·원본 파일은 변경하지 않습니다.") }
+    MDiveButton("확인 다이얼로그 열기", { visible = true }, Modifier.testTag("open-dialog-$state"), variant = MDiveButtonVariant.Secondary)
+    Text(result, style = mdiveTextStyle("caption"), color = MaterialTheme.colorScheme.onSurfaceVariant)
+    if (visible) MDiveConfirmationDialog(
+        title = if (state == "longText") "이 문서를 목록에서 제거할까요?" else CatalogSamples.removeDialogTitle,
+        detail = if (state == "longText") "목록의 바로가기만 제거합니다. Markdown 원본 파일은 삭제하지 않습니다. 긴 파일명과 설명, 큰 시스템 글자에서도 내용을 읽고 취소하거나 확인할 수 있어야 합니다. ".repeat(5) else CatalogSamples.removeDialogDetail,
+        confirmLabel = if (state == "busy") "처리 중" else "목록에서 제거",
+        onConfirm = { result = "목록 제거 확인 · 실제 변경 없음"; visible = false },
+        onDismissRequest = { result = "취소 · 기존 목록 유지"; visible = false },
+        busy = state == "busy",
+        content = { Text(if (state == "longText") CatalogSamples.longFilename else CatalogSamples.filename, style = mdiveTextStyle("uiTitle"), color = MaterialTheme.colorScheme.onSurface) },
+    )
+    if (visible && state == "busy") LaunchedEffect(Unit) {
+        delay(2500)
+        visible = false
+        result = "처리 중 시연 완료 · 실제 변경 없음"
+    }
+}
+
+@Composable
+private fun BottomSheetExample(state: String) {
+    var visible by remember(state) { mutableStateOf(false) }
+    MDiveButton("바텀시트 열기", { visible = true }, Modifier.testTag("open-bottomsheet-$state"), variant = MDiveButtonVariant.Secondary)
+    Text("제목·닫기 버튼은 유지하고 내용만 스크롤합니다. 아래에서 나타나고 닫힐 때 내려갑니다. 뒤로·바깥 탭·아래 드래그로 닫을 수 있으며 중간 높이는 사용하지 않습니다.", style = mdiveTextStyle("caption"), color = MaterialTheme.colorScheme.onSurfaceVariant)
+    if (visible) MDiveBottomSheet("목차 · 시연", { visible = false }) { requestDismiss ->
+        repeat(if (state == "scrolling") 24 else 3) { index ->
+            MDiveDocumentRow("${index + 1}. 생각을 작은 단위로 나누기", "선택하면 시연 패널을 닫습니다.", requestDismiss)
+        }
+    }
+}
+
+@Composable
+private fun ToastExample(state: String) {
+    var visible by remember(state) { mutableStateOf(false) }
+    val accessibility = LocalAccessibilityManager.current
+    MDiveButton("토스트 보기", { visible = true }, Modifier.testTag("show-toast-$state"), variant = MDiveButtonVariant.Secondary)
+    if (visible) {
+        MDiveToast(if (state == "success") CatalogSamples.toastSuccess else CatalogSamples.toastInformation, Modifier.testTag("toast-$state"), icon = if (state == "success") "check" else "file")
+        LaunchedEffect(state) {
+            delay(accessibility?.calculateRecommendedTimeoutMillis(3000L, containsIcons = true, containsText = true, containsControls = false) ?: 3000L)
+            visible = false
+        }
+    }
+    Text("완료·정보 안내만 사용합니다. 표시 시간은 카탈로그 시연 값이며 제품 정책이 아닙니다. 실패 복구에는 배너를 사용합니다.", style = mdiveTextStyle("caption"), color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 @Preview(name = "카탈로그 목록 · 라이트", showBackground = true)

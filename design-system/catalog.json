@@ -295,14 +295,15 @@
     },
     {
       "id": "feedback",
-      "title": "안내·상태",
+      "title": "빈 상태·실패·로딩",
       "states": [
         "loading",
         "empty",
-        "error"
+        "error",
+        "inline"
       ],
       "category": "components",
-      "purpose": "로딩·정상 빈 상태·오류를 구분하고 다음 행동을 안내합니다.",
+      "purpose": "정상 빈 상태, 전체 실패와 부분 실패를 구분하고 문맥에 맞는 복구 행동을 제공합니다.",
       "anatomy": [
         "상태 아이콘",
         "제목",
@@ -310,9 +311,8 @@
         "필요한 경우 복구 동작"
       ],
       "variants": [
-        "loading",
-        "empty",
-        "error"
+        "page",
+        "inline"
       ],
       "behavior": [
         "읽을 수 있는 기존 내용을 불필요하게 가리지 않습니다.",
@@ -323,8 +323,17 @@
         "처리 중 상태를 텍스트와 의미 정보로 전달합니다."
       ],
       "usage": [
-        "빈 상태를 실패로 표현하지 않습니다.",
-        "시연 버튼은 실제 파일이나 저장소를 변경하지 않습니다."
+        "빈 상태는 오류가 아니므로 실패 문구·경고색을 쓰지 않습니다.",
+        "문서를 아예 열 수 없을 때 전체 상태, 일부 콘텐츠 실패에는 인라인 안내를 사용합니다.",
+        "개별 실패를 모두 다이얼로그로 띄우지 않습니다."
+      ],
+      "measurements": [
+        "sizes.stateSymbol",
+        "spacing.page",
+        "spacing.xl",
+        "spacing.md",
+        "typography.section",
+        "typography.ui"
       ]
     },
     {
@@ -357,6 +366,222 @@
       "usage": [
         "본문과 코드의 글꼴 역할을 구분합니다.",
         "컴포넌트 검토 후 제품 화면에 조합합니다."
+      ]
+    },
+    {
+      "id": "dialog",
+      "title": "확인 다이얼로그",
+      "states": [
+        "confirmation",
+        "longText",
+        "busy"
+      ],
+      "category": "components",
+      "purpose": "사용자의 결정이 필요한 동작을 현재 문맥 위에서 확인합니다.",
+      "anatomy": [
+        "제목",
+        "설명",
+        "선택적 대상 정보",
+        "주 동작",
+        "취소"
+      ],
+      "variants": [],
+      "behavior": [
+        "목록 제거는 원본 파일 삭제와 구분합니다.",
+        "뒤로·바깥 탭은 취소와 같으며 확인 동작을 실행하지 않습니다.",
+        "처리 중에는 중복 입력을 막습니다. 카탈로그 busy는 2.5초 뒤 종료하는 시연입니다."
+      ],
+      "usage": [
+        "모든 오류를 확인 다이얼로그로 바꾸지 않습니다."
+      ],
+      "accessibility": [
+        "다이얼로그 제목·포커스 범위와 뒤로 동작을 제공하고 닫힌 뒤 시작 버튼으로 돌아갑니다."
+      ],
+      "measurements": [
+        "sizes.dialogMaxWidth",
+        "spacing.lg",
+        "spacing.md",
+        "spacing.sm",
+        "radii.lg",
+        "sizes.touch",
+        "typography.section",
+        "typography.ui"
+      ]
+    },
+    {
+      "id": "bottomsheet",
+      "title": "바텀시트",
+      "states": [
+        "default",
+        "scrolling"
+      ],
+      "category": "components",
+      "purpose": "현재 화면의 문맥을 유지하면서 연관된 도구나 선택을 제공합니다.",
+      "anatomy": [
+        "스크림",
+        "드래그 핸들",
+        "고정 제목",
+        "닫기",
+        "스크롤 본문"
+      ],
+      "variants": [],
+      "behavior": [
+        "Material3 ModalBottomSheet를 기반으로 열기·닫기 전환과 드래그를 제공합니다.",
+        "닫기·뒤로·바깥 탭·아래로 드래그는 내려가는 전환을 마친 뒤 패널을 제거합니다.",
+        "제목·닫기를 고정하고 본문만 스크롤합니다.",
+        "기본은 중간 높이를 생략하고 펼친 상태로 엽니다.",
+        "본문 안 선택 동작도 컴포넌트가 제공하는 닫기 요청 콜백을 사용합니다."
+      ],
+      "usage": [
+        "제품의 목차·설정 연결은 화면 디자인 검토 후 결정합니다.",
+        "색상·모서리·간격·타이포그래피는 MDive 토큰을 사용합니다. HTML은 전환·핸들 드래그 시연이며 Android의 정확한 제스처·모션은 Compose 카탈로그에서 확인합니다."
+      ],
+      "accessibility": [
+        "모달 포커스 범위, 제목, 닫기 레이블과 큰 글자의 내용 접근을 확인합니다."
+      ],
+      "measurements": [
+        "sizes.sheetMaxWidth",
+        "spacing.page",
+        "spacing.sm",
+        "radii.lg",
+        "sizes.touch",
+        "typography.uiTitle"
+      ]
+    },
+    {
+      "id": "toast",
+      "title": "토스트형 완료 안내",
+      "states": [
+        "success",
+        "information"
+      ],
+      "category": "components",
+      "purpose": "복구 동작이 필요 없는 짧은 완료·정보를 읽기를 가리지 않고 알립니다.",
+      "anatomy": [
+        "선택적 아이콘",
+        "짧은 문구"
+      ],
+      "variants": [],
+      "behavior": [
+        "표시 시간·대기열·중복 처리는 호스트가 소유합니다.",
+        "카탈로그는 정적 표현과 표시 버튼을 제공하며 실제 클립보드·저장소는 바꾸지 않습니다."
+      ],
+      "usage": [],
+      "accessibility": [
+        "내용은 polite live region으로 전달합니다. 사용자가 읽을 시간은 호스트에서 보장합니다."
+      ],
+      "measurements": [
+        "spacing.md",
+        "spacing.control",
+        "spacing.sm",
+        "radii.control",
+        "typography.ui"
+      ]
+    },
+    {
+      "id": "banner",
+      "title": "복구 배너",
+      "states": [
+        "retry",
+        "persistent"
+      ],
+      "category": "components",
+      "purpose": "본문을 유지하면서 사용자가 확인하거나 복구해야 하는 상태를 알립니다.",
+      "anatomy": [
+        "상태 아이콘",
+        "짧은 메시지",
+        "선택적 보조설명",
+        "오른쪽 복구 동작 또는 닫기"
+      ],
+      "variants": [],
+      "behavior": [
+        "읽을 수 있는 내용을 모달로 가리지 않습니다.",
+        "복구 동작이 필요한 실패를 자동으로 사라지는 토스트로 처리하지 않습니다.",
+        "표시·닫기·재시도 정책은 기능이 소유합니다.",
+        "일반 폭에서는 메시지 오른쪽에 복구 동작을 정렬하고, 좁은 폭·큰 글자는 아래 오른쪽으로 전환합니다. 동작이 없으면 빈 동작 영역을 만들지 않습니다."
+      ],
+      "usage": [],
+      "accessibility": [
+        "polite live region, 레이블 있는 닫기 및 키보드 복구 동작을 제공합니다."
+      ],
+      "measurements": [
+        "spacing.md",
+        "spacing.control",
+        "radii.control",
+        "sizes.touch",
+        "typography.label",
+        "typography.caption",
+        "sizes.bannerActionBreakpoint",
+        "sizes.bannerDismissActionBreakpoint"
+      ]
+    },
+    {
+      "id": "textfield",
+      "title": "텍스트 입력",
+      "states": [
+        "default",
+        "error",
+        "disabled"
+      ],
+      "category": "components",
+      "purpose": "짧은 이름 입력을 레이블·보조설명·오류와 함께 제공합니다.",
+      "anatomy": [
+        "레이블",
+        "입력 영역",
+        "보조설명 또는 오류"
+      ],
+      "variants": [],
+      "behavior": [
+        "입력 값과 오류는 호출자가 소유합니다.",
+        "비활성에서는 입력을 바꾸지 않습니다."
+      ],
+      "usage": [],
+      "accessibility": [
+        "레이블 연결, 오류 의미, 비활성 상태와 키보드 입력을 확인합니다."
+      ],
+      "measurements": [
+        "spacing.control",
+        "spacing.sm",
+        "radii.input",
+        "sizes.touch",
+        "typography.uiTitle",
+        "typography.ui",
+        "typography.caption"
+      ]
+    },
+    {
+      "id": "slider",
+      "title": "값 조절 슬라이더",
+      "states": [
+        "default",
+        "disabled"
+      ],
+      "category": "components",
+      "purpose": "본문 크기처럼 범위가 있는 값을 레이블·현재 값과 함께 조절합니다.",
+      "anatomy": [
+        "레이블",
+        "현재 값",
+        "트랙",
+        "손잡이"
+      ],
+      "variants": [],
+      "behavior": [
+        "범위·단계·현재 값은 호출자가 소유합니다.",
+        "탭·드래그·방향키·접근성 값 조절을 제공하고 RTL에 대응합니다.",
+        "카탈로그 범위는 예시이며 제품 글자 크기 정책을 확정하지 않습니다."
+      ],
+      "usage": [],
+      "accessibility": [
+        "progress range와 setProgress 의미, 포커스·방향키 및 비활성 입력 차단을 제공합니다."
+      ],
+      "measurements": [
+        "sizes.touch",
+        "sizes.sliderTrack",
+        "sizes.sliderThumb",
+        "sizes.sliderThumbCore",
+        "sizes.sliderInset",
+        "typography.uiTitle",
+        "typography.ui"
       ]
     }
   ],
@@ -406,6 +631,13 @@
         "읽으며 남긴 기록"
       ]
     ],
-    "longFilename": "매우 긴 이름의 Markdown 문서를 다시 읽으며 남긴 기록과 참고 자료.md"
+    "longFilename": "매우 긴 이름의 Markdown 문서를 다시 읽으며 남긴 기록과 참고 자료.md",
+    "removeDialogTitle": "목록에서 제거할까요?",
+    "removeDialogDetail": "목록에서만 제거하며 원본 파일은 삭제하지 않습니다.",
+    "toastSuccess": "코드를 복사했어요",
+    "toastInformation": "읽기 설정을 적용했어요",
+    "bannerRetryTitle": "책갈피 저장에 실패했어요",
+    "bannerPersistentTitle": "저장하지 못한 책갈피가 있어요",
+    "bannerPersistentDetail": "본문은 계속 읽을 수 있어요."
   }
 }

@@ -21,5 +21,6 @@ object CatalogIcons {
         "moon" to "M20 15C17 21 8 22 4.5 15.5C1 9 6 3 11 3C8 8 13 17 20 15Z",
         "check" to "M5 12L10 17L20 7",
         "chevron" to "M9 6L15 12L9 18",
+        "warning" to "M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01",
     )
 }
