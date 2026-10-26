@@ -9,6 +9,9 @@
 - [홈과 문서 바로가기](product/home.md): 첫 버전의 파일 열기·즐겨찾기·최근 문서 기준.
 - [홈 화면 시안 S-02](product/screens/home.html#s-02): 문서가 있는 홈과 첫 실행 상태의 HTML 초안.
 - [제품 기획과 화면 설계서](product/planning.md): Markdown과 로컬 HTML의 역할, 화면 ID, 작성·검증 절차.
+- [디자인 시스템](product/design-system.md): 두 모듈 구조, 공통 원본과 생성, Compose 카탈로그 실행·검증.
+- [타이포그래피](product/typography.md): 글꼴 역할, 공식 라이선스와 배포 관리.
+- [디자인 시스템 공식 사례 조사](product/design-system-references.md): 당근·토스의 공개 설계·관리 방식과 MDive 적용 판단.
 
 ## 개발 규칙
 

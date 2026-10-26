@@ -24,3 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "MDive"
 include(":app")
+
+include(":designsystem")
