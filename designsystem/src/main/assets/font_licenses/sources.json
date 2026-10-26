@@ -1,0 +1,23 @@
+[
+  {
+    "file": "pretendard_regular.otf",
+    "source": "https://raw.githubusercontent.com/orioncactus/pretendard/7aeb0698819be2b4097dae8ec8fe6a795e5cf3ae/packages/pretendard/dist/public/static/Pretendard-Regular.otf",
+    "revision": "7aeb0698819be2b4097dae8ec8fe6a795e5cf3ae",
+    "sha256": "3ffbacde6ab8411f1d2db54bb9b1f0b3ee2a738932033722cf0388c06aed1c93",
+    "bytes": 1574352
+  },
+  {
+    "file": "pretendard_semibold.otf",
+    "source": "https://raw.githubusercontent.com/orioncactus/pretendard/7aeb0698819be2b4097dae8ec8fe6a795e5cf3ae/packages/pretendard/dist/public/static/Pretendard-SemiBold.otf",
+    "revision": "7aeb0698819be2b4097dae8ec8fe6a795e5cf3ae",
+    "sha256": "c89bc43027dc7cde5726e96223376f8eec09302b2fc1f8147fd5b57cfc376118",
+    "bytes": 1583704
+  },
+  {
+    "file": "jetbrains_mono_regular.ttf",
+    "source": "https://raw.githubusercontent.com/JetBrains/JetBrainsMono/19371302b95d218af43299bce79ddbddd0bc364d/fonts/ttf/JetBrainsMono-Regular.ttf",
+    "revision": "19371302b95d218af43299bce79ddbddd0bc364d",
+    "sha256": "e6fd0d7e91550b3ed2b735d4312474362c4716edc4fc0577a0f61ed782d5aed1",
+    "bytes": 270224
+  }
+]

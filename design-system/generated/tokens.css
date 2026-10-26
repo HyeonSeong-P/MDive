@@ -1,0 +1,160 @@
+/* Generated. Do not edit. */
+[data-palette="deepsea"][data-theme="light"] {
+  --background: #F7F8F5;
+  --surface: #FFFFFF;
+  --surfaceVariant: #E9F0EF;
+  --onBackground: #192F39;
+  --onSurface: #192F39;
+  --muted: #526972;
+  --primary: #176B78;
+  --onPrimary: #FFFFFF;
+  --outline: #A9BDBF;
+  --codeBackground: #132C38;
+  --codeText: #E0EBEE;
+  --codeKeyword: #82CADA;
+  --codeString: #B8D9AD;
+  --error: #AD343E;
+  --buttonTop: #2A7783;
+}
+[data-palette="deepsea"][data-theme="dark"] {
+  --background: #0D1D27;
+  --surface: #142A35;
+  --surfaceVariant: #1D3641;
+  --onBackground: #DCE8EA;
+  --onSurface: #DCE8EA;
+  --muted: #A4BBC3;
+  --primary: #80CAD4;
+  --onPrimary: #07353E;
+  --outline: #506C78;
+  --codeBackground: #091820;
+  --codeText: #DAE8EC;
+  --codeKeyword: #83D0E1;
+  --codeString: #BDDDAF;
+  --error: #FFB3B8;
+  --buttonTop: #8ACED7;
+}
+[data-palette="blue"][data-theme="light"] {
+  --background: #F3F9FF;
+  --surface: #FFFFFF;
+  --surfaceVariant: #E2F0FC;
+  --onBackground: #18334B;
+  --onSurface: #18334B;
+  --muted: #4E697F;
+  --primary: #1763AC;
+  --onPrimary: #FFFFFF;
+  --outline: #A2BDD3;
+  --codeBackground: #132D46;
+  --codeText: #E3EFFA;
+  --codeKeyword: #8BCBFF;
+  --codeString: #C0DEB5;
+  --error: #B12F40;
+  --buttonTop: #2A6FB3;
+}
+[data-palette="blue"][data-theme="dark"] {
+  --background: #12283B;
+  --surface: #19344B;
+  --surfaceVariant: #23435D;
+  --onBackground: #DFEDFA;
+  --onSurface: #DFEDFA;
+  --muted: #ADC5DC;
+  --primary: #9DCEFF;
+  --onPrimary: #0A355A;
+  --outline: #577B9B;
+  --codeBackground: #0C2032;
+  --codeText: #DFEDFA;
+  --codeKeyword: #91CCFF;
+  --codeString: #BEDFAF;
+  --error: #FFB4BE;
+  --buttonTop: #A5D2FF;
+}
+[data-palette="green"][data-theme="light"] {
+  --background: #F8F9F2;
+  --surface: #FFFEF9;
+  --surfaceVariant: #EAF0DF;
+  --onBackground: #29382D;
+  --onSurface: #29382D;
+  --muted: #5E6D58;
+  --primary: #3C684D;
+  --onPrimary: #FFFFFF;
+  --outline: #AFBFA4;
+  --codeBackground: #20382C;
+  --codeText: #E7EFE3;
+  --codeKeyword: #A3D2C3;
+  --codeString: #D0DCA5;
+  --error: #AD343E;
+  --buttonTop: #4C745B;
+}
+[data-palette="green"][data-theme="dark"] {
+  --background: #18261E;
+  --surface: #22352A;
+  --surfaceVariant: #2D4233;
+  --onBackground: #E2EBDA;
+  --onSurface: #E2EBDA;
+  --muted: #B0C2A7;
+  --primary: #A6D1AC;
+  --onPrimary: #173D26;
+  --outline: #657C60;
+  --codeBackground: #112219;
+  --codeText: #E1EDDA;
+  --codeKeyword: #A2D2C1;
+  --codeString: #D3DDAA;
+  --error: #FFB3B8;
+  --buttonTop: #ADD5B3;
+}
+:root {
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-control: 12px;
+  --space-page: 20px;
+  --space-section: 28px;
+  --space-searchInset: 4px;
+  --space-buttonX: 20px;
+  --font-body: 18px;
+  --font-title: 28px;
+  --font-ui: 14px;
+  --font-code: 14px;
+  --font-uiTitle: 16px;
+  --font-bodySmall: 16px;
+  --font-caption: 12px;
+  --family-body: "Pretendard";
+  --family-ui: "Pretendard";
+  --family-code: "JetBrains Mono";
+}
+:root {
+  --leading-body: 1.8;
+  --leading-title: 1.45;
+  --leading-ui: 1.5;
+  --leading-code: 1.65;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-control: 12px;
+  --radius-panel: 14px;
+  --radius-code: 10px;
+  --radius-input: 14px;
+  --radius-primaryButton: 16px;
+}
+:root {
+  --size-touch: 48px;
+  --size-topBar: 56px;
+  --size-icon: 24px;
+}
+:root { --icon-stroke: 1.7; }
+:root {
+  --opacity-divider: 0.3;
+  --opacity-pressed: 0.08;
+  --opacity-disabledIcon: 0.38;
+  --opacity-buttonEdge: 0.14;
+}
+.type-title { font-family: var(--family-body); font-size: var(--font-title); line-height: var(--leading-title); font-weight: 600; }
+.type-section { font-family: var(--family-ui); font-size: var(--font-body); line-height: var(--leading-ui); font-weight: 600; }
+.type-uiTitle { font-family: var(--family-ui); font-size: var(--font-uiTitle); line-height: var(--leading-ui); font-weight: 600; }
+.type-body { font-family: var(--family-body); font-size: var(--font-body); line-height: var(--leading-body); font-weight: 400; }
+.type-bodySmall { font-family: var(--family-body); font-size: var(--font-bodySmall); line-height: var(--leading-body); font-weight: 400; }
+.type-ui { font-family: var(--family-ui); font-size: var(--font-ui); line-height: var(--leading-ui); font-weight: 400; }
+.type-label { font-family: var(--family-ui); font-size: var(--font-ui); line-height: var(--leading-ui); font-weight: 600; }
+.type-caption { font-family: var(--family-ui); font-size: var(--font-caption); line-height: var(--leading-ui); font-weight: 400; }
+.type-code { font-family: var(--family-code); font-size: var(--font-code); line-height: var(--leading-code); font-weight: 400; }

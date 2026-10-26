@@ -16,7 +16,9 @@ app의 Hilt 구성: data 구현을 domain 계약에 바인딩해 ui에 제공
 
 `domain`에서는 `ui`, `data`, Android 프레임워크, Compose를 import하지 않는다. `ui`에서도 `data` 구현을 import하지 않는다. 앱 진입점 또는 DI 구성 코드만 도메인 계약과 데이터 구현을 함께 알고 연결한다.
 
-현재는 단일 Gradle 모듈에서 `ui`, `domain`, `data` 패키지 경계로 시작한다. 패키지가 물리적 의존성을 강제하지 않으므로 리뷰와 테스트에서 import 방향을 확인한다. 독립 빌드나 팀 경계가 필요해지면 모듈 분리를 검토한다. 의존성 주입은 Hilt를 사용하며, Hilt 모듈과 저장소 구현 바인딩은 앱의 DI 구성 코드에 둔다. `domain` 모델·인터페이스·유즈케이스에는 Hilt 또는 Android 어노테이션을 붙이지 않는다. 실제 의존성이 생기는 기능 구현 때 Hilt 빌드 설정을 추가한다.
+Gradle 모듈은 `app`과 `designsystem` 두 개다. 사용자 합의에 따라 디자인 시스템만 Android 라이브러리로 분리한다. 제품의 `ui`, `domain`, `data`는 `app` 내부 패키지 경계로 유지하며, 아직 제품 기능은 템플릿 단계다. 패키지가 물리적 의존성을 강제하지 않으므로 리뷰와 테스트에서 import 방향을 확인한다. 의존성 주입은 Hilt를 사용하며, Hilt 모듈과 저장소 구현 바인딩은 앱의 DI 구성 코드에 둔다. `domain` 모델·인터페이스·유즈케이스에는 Hilt 또는 Android 어노테이션을 붙이지 않는다. 실제 의존성이 생기는 기능 구현 때 Hilt 빌드 설정을 추가한다.
+
+`designsystem`은 테마·글꼴·stateless Compose 컴포넌트와 카탈로그 표현을 소유하며 `app`에 의존하지 않는다. 현재 `app`의 debug 카탈로그만 `designsystem`에 의존하고 카탈로그 화면 MVI는 `app/src/debug/`에 둔다. release 제품 화면은 변경하지 않는다. 공통 값·카탈로그 원본과 생성 과정은 [디자인 시스템](../product/design-system.md)에서 관리한다. 별도 카탈로그 앱 모듈은 만들지 않는다.
 
 ## 계층 책임
 
@@ -39,6 +41,8 @@ app의 Hilt 구성: data 구현을 domain 계약에 바인딩해 ui에 제공
 모든 화면은 `State`, `Intent`, `Effect`, 제네릭 `BaseViewModel`을 사용한다. 화면은 Intent를 ViewModel에 전달하고, ViewModel이 노출한 State를 Compose가 렌더링하며 Effect를 UI에서 처리한다. 세부 기준은 [MVI 화면 계약](mvi.md)을 따른다. 여러 화면의 이동은 [Navigation 3 계약](navigation.md)을 따른다. ViewModel은 `Context`, `Activity`, Compose 타입을 보관하지 않는다.
 
 ## Compose 컴포넌트 계약
+
+공통 외형과 상태는 `designsystem`의 MDive 컴포넌트가 소유한다. 버튼·아이콘·문서 목록·검색·탭은 Foundation 기반 컨트롤로 입력·포커스·접근성 의미를 제공하며 Material 기본 외형을 그대로 제품 스타일로 사용하지 않는다. 테마·텍스트 렌더링 기반의 재사용은 허용한다. 생성 토큰·아이콘·상태 목록과 카탈로그의 원본 책임은 [디자인 시스템](../product/design-system.md)을 따른다.
 
 - 화면 진입 Composable만 ViewModel을 가져온다. 그 아래의 화면 콘텐츠는 화면 State와 이벤트 콜백을 인자로 받아 Preview와 테스트에서 독립적으로 그릴 수 있게 한다.
 - 재사용 컴포넌트는 가능한 한 stateless로 만들고 `Modifier`를 제공한다. UI 내부에서만 쓰는 펼침·스크롤·애니메이션 상태는 가장 가까운 소유자에 둔다. 외부 제어가 필요하면 상태를 끌어올린다.

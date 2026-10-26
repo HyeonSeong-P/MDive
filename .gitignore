@@ -32,3 +32,13 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Local Python tooling caches
+__pycache__/
+
+# Local design explorations; the approved v10 artwork is versioned below.
+design-system/review/
+design-system/brand/mdive-icon-concept-v*.png
+design-system/brand/mdive-icon-concept-v*.md
+!design-system/brand/mdive-icon-concept-v10.png
+!design-system/brand/mdive-icon-concept-v10.md

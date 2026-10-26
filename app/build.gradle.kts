@@ -36,6 +36,8 @@ android {
 }
 
 dependencies {
+    debugImplementation(project(":designsystem"))
+    debugImplementation(libs.androidx.lifecycle.runtime.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
