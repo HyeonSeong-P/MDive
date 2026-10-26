@@ -1,12 +1,14 @@
 package com.parka.mdive.designsystem
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,9 +40,13 @@ fun MDiveTopBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (navigationIcon != null) MDiveIconButton(navigationIcon, requireNotNull(navigationLabel), onNavigationClick)
-        else leading?.invoke()
+        else if (leading != null) {
+            Box(Modifier.size(DesignTokens.Sizes.getValue("touch")), contentAlignment = Alignment.Center) {
+                leading()
+            }
+        }
         Column(
-            Modifier.weight(1f).widthIn(min = 0.dp).padding(start = if (navigationIcon == null) 12.dp else 4.dp, end = 8.dp),
+            Modifier.weight(1f).widthIn(min = 0.dp).padding(start = if (navigationIcon == null && leading == null) 12.dp else 4.dp, end = 8.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             // Ellipsis affects drawing only: Text semantics retain the complete original title.
