@@ -103,6 +103,7 @@ fun MDiveRecoveryBanner(
     onDismiss: (() -> Unit)? = null,
     icon: String = "warning",
     action: (@Composable () -> Unit)? = null,
+    loading: Boolean = false,
 ) {
     val colors = MaterialTheme.colorScheme
     val fontScale = LocalDensity.current.fontScale
@@ -119,7 +120,8 @@ fun MDiveRecoveryBanner(
             verticalArrangement = Arrangement.spacedBy(DesignTokens.Spacing.getValue("sm")),
         ) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(DesignTokens.Spacing.getValue("control")), verticalAlignment = Alignment.CenterVertically) {
-                MDiveIcon(icon, tint = if (icon == "warning") colors.error else colors.primary, size = 20.dp)
+                if (loading) MDiveLoadingMark()
+                else MDiveIcon(icon, tint = if (icon == "warning") colors.error else colors.primary, size = 20.dp)
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(DesignTokens.Spacing.getValue("xs"))) {
                     Text(title, style = mdiveTextStyle("label"), color = colors.onSurface)
                     if (!detail.isNullOrBlank()) Text(detail, style = mdiveTextStyle("caption"), color = colors.onSurfaceVariant)

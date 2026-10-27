@@ -120,38 +120,17 @@ fun MDiveNotice(title: String, detail: String, kind: String, modifier: Modifier 
     MDiveInlineNotice(title, detail, modifier, error = kind == "error", loading = kind == "loading")
 }
 
-/** Presentation only: callers own highlighting and clipboard behavior. */
+/** Catalog examples of the data-driven APIs. */
 @Composable
-fun MDiveCodeSample(modifier: Modifier = Modifier) {
-    val colors = LocalOceanColors.current
-    Column(modifier.fillMaxWidth().background(colors.getValue("codeBackground"), RoundedCornerShape(DesignTokens.Radii.getValue("code")))) {
-        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text("KOTLIN", color = colors.getValue("codeText").copy(alpha = .7f), style = MaterialTheme.typography.labelSmall)
-            MDiveIconButton("copy", "코드 복사 · 시안", {}, tint = colors.getValue("codeText"))
-        }
-        val code = buildAnnotatedString {
-            CatalogSamples.code.lines().forEachIndexed { index, line ->
-                if (index > 0) append("\n")
-                val color = when {
-                    line.trimStart().startsWith("//") -> colors.getValue("codeString")
-                    line.trimStart().startsWith("fun ") || line.trimStart().startsWith("return ") || line.startsWith("val ") -> colors.getValue("codeKeyword")
-                    else -> colors.getValue("codeText")
-                }
-                withStyle(SpanStyle(color = color)) { append(line) }
-            }
-        }
-        Text(code, modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 20.dp).horizontalScroll(rememberScrollState()).semantics { contentDescription = "코드 블록, 가로 스크롤" }, color = colors.getValue("codeText"), style = mdiveTextStyle("code"), softWrap = false)
-    }
+fun MDiveCodeSample(modifier: Modifier = Modifier, onCopy: ((String) -> Unit)? = null) {
+    MDiveCodeBlock(CatalogSamples.code, modifier, language = "KOTLIN", onCopy = onCopy)
 }
 
 @Composable
 fun MDiveTableSample(modifier: Modifier = Modifier) {
-    Column(modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).semantics { contentDescription = "문서 표, 가로 스크롤" }) {
-        CatalogSamples.table.forEachIndexed { index, cells ->
-            Row(Modifier.background(if (index == 0) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.background)) {
-                cells.forEach { cell -> Text(cell, modifier = Modifier.width(150.dp).padding(12.dp), style = mdiveTextStyle(if (index == 0) "label" else "ui")) }
-            }
-            MDiveDivider()
-        }
-    }
+    MDiveMarkdownTable(
+        CatalogSamples.table.first().map { MDiveTableColumn(listOf(MDiveTextRun(it))) },
+        CatalogSamples.table.drop(1).map { row -> row.map { listOf(MDiveTextRun(it)) } },
+        modifier,
+    )
 }

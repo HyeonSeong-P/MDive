@@ -17,4 +17,19 @@ object CatalogSamples {
     const val bannerRetryTitle = "책갈피 저장에 실패했어요"
     const val bannerPersistentTitle = "저장하지 못한 책갈피가 있어요"
     const val bannerPersistentDetail = "본문은 계속 읽을 수 있어요."
+    const val markdownTitle = "문장을 따라 깊이 읽는 시간 · 긴 제목과 한글 English 0123456789"
+    const val markdownBody = "한글과 English, 이모지 🌊를 함께 읽습니다. 긴 문단에서도 생각의 흐름과 줄바꿈을 유지합니다."
+    const val markdownLink = "https://example.com/notes"
+    const val markdownAlt = "세 개의 파도가 차례로 이어지는 그림"
+    const val markdownFormula = "E = mc²"
+    const val markdownReason = "이 블록의 표시를 준비하지 못했어요. 주변 본문은 계속 읽을 수 있어요."
+    const val extensionTerm = "Markdown"
+    const val extensionDefinition = "구조와 의미를 함께 읽는 문서 형식입니다."
+    const val extensionNote = "본문을 방해하지 않는 보조 설명입니다."
+    const val extensionReference = "차분한 문서 읽기 연구 · 2026"
+    const val extensionTarget = "#note-1"
+    val extensionMetadata = listOf(listOf("title", "깊이 읽는 시간"), listOf("author", "MDive"))
+    val extensionReferenceLinks = listOf(listOf("각주 1", "#note-1"), listOf("[연구 2026]", "#bibliography-1"), listOf("본문으로 돌아가기", "#reference-1"), listOf("인용 위치로", "#citation-1"))
+    val extensionTocTargets = listOf(listOf("문서 시작", "#start", "1"), listOf("문장을 따라 깊이 읽는 시간 · 긴 제목과 한글 English 0123456789", "#section", "2"), listOf("세부 설명", "#detail", "3"))
+    val extensionResolvedLinks = listOf(listOf("wiki link", "wiki:Resolved Note"), listOf("자동 링크", "https://example.com/notes"), listOf("@author", "github:user:author"), listOf("#42", "github:issue:owner/repo:42"), listOf("a1b2c3", "github:commit:owner/repo:a1b2c3"))
 }

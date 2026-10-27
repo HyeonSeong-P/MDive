@@ -1,8 +1,8 @@
 # Markdown 콘텐츠 디자인 시스템 확장 목록
 
-상태: **분석·구현 준비 초안 / 2026-10-27**. 이번 변경은 문서화만 한다. 다음 세션에서 이 목록을 바탕으로 공통 토큰·컴포넌트·HTML/Compose 카탈로그를 확장한다. 아래 API 이름은 신규 제안이며 현재 존재하는 API와 구분한다.
+상태: **DS 확장 계획·문법 범위 갱신 / 2026-10-27**. M-01~10의 시각 컴포넌트와 HTML/Compose 카탈로그는 구현됐으며 파서·제품 화면 통합은 별도다. 아래 제안·검증 목록 전체의 완료나 시각 승인을 뜻하지 않는다. 확장 문법의 기능 채택은 제품 명세를 따르고 정확한 호환 범위는 미정으로 유지한다.
 
-기능 원본은 [제품 방향](../product/overview.md), [문서 표시와 읽기 설정](../product/document-viewing.md), [읽기 도구](../product/reading-tools.md)다. 기존 기획은 수정하지 않는다. [제품 화면 디자인](screens/index.html#reader)은 조합 예시이며, 이 문서의 컴포넌트나 문법 호환 범위가 승인되었다는 뜻은 아니다.
+기능 원본은 [제품 방향](../product/overview.md), [문서 표시와 읽기 설정](../product/document-viewing.md), [읽기 도구](../product/reading-tools.md)다. 기능 채택 변경은 해당 제품 명세에 먼저 반영한다. [제품 화면 디자인](screens/index.html#reader)은 조합 예시이며, 이 문서의 컴포넌트나 문법 호환 범위가 승인되었다는 뜻은 아니다.
 
 ## 분석 범위와 근거
 
@@ -15,7 +15,9 @@ Markdown에는 모든 구현이 공유하는 단일 확장 목록이 없다. 이
 
 표의 문법명은 조사용 분류이고 이후의 상태·API·접근성·검증은 MDive를 위한 설계 제안이다. CommonMark와 GFM의 버전은 서로 다르므로 하나의 혼합된 호환성 기준으로 취급하지 않는다.
 
-## 현재 자산과 부족한 부분
+## 최초 분석 시점의 자산과 부족한 부분
+
+아래 표는 M-01~10 확장 전의 분석 기록이다. 현재는 데이터 기반 콘텐츠 API와 공통 체크박스, 복구 배너를 사용하는 HTML/Compose 카탈로그가 추가됐으며, 세부 구현은 실제 코드가 기준이다.
 
 | 자산 | 실제 상태 | 후속 작업 |
 | --- | --- | --- |
@@ -27,7 +29,7 @@ Markdown에는 모든 구현이 공유하는 단일 확장 목록이 없다. 이
 | `MDiveButton`, `MDiveIconButton`, `MDiveToast`, `MDiveRecoveryBanner` | 공용 행동·피드백 | 복사·연결·재시도 이벤트와 호스트에서 연결 |
 | 제목·본문·인라인·목록·인용·이미지·수식·Mermaid | 전용 데이터 기반 콘텐츠 API 없음 | 아래 목록의 핵심 확장 |
 
-근거: [Components.kt](../../designsystem/src/main/java/com/parka/mdive/designsystem/Components.kt), [Controls.kt](../../designsystem/src/main/java/com/parka/mdive/designsystem/Controls.kt), [Feedback.kt](../../designsystem/src/main/java/com/parka/mdive/designsystem/Feedback.kt), [MDiveTheme.kt](../../designsystem/src/main/java/com/parka/mdive/designsystem/MDiveTheme.kt), [토큰 원본](../../design-system/tokens.json). 현재 샘플을 이름만 바꾸어 제품 렌더러로 연결하지 않는다.
+근거: [Components.kt](../../designsystem/src/main/java/com/parka/mdive/designsystem/Components.kt), [Controls.kt](../../designsystem/src/main/java/com/parka/mdive/designsystem/Controls.kt), [Feedback.kt](../../designsystem/src/main/java/com/parka/mdive/designsystem/Feedback.kt), [MDiveTheme.kt](../../designsystem/src/main/java/com/parka/mdive/designsystem/MDiveTheme.kt), [토큰 원본](../../design-system/tokens.json). 샘플을 이름만 바꾸어 제품 렌더러로 연결하지 않는다.
 
 ## 문법 → 표현 목록
 
@@ -49,20 +51,39 @@ Markdown에는 모든 구현이 공유하는 단일 확장 목록이 없다. 이
 | task list checked/unchecked | 합의 확장 | 읽기 전용 상태 marker `M-05` |
 | indented/fenced code, info string | 기본 | 동일 코드 블록, 언어 라벨 선택 `M-06` |
 | inline/reference link, autolink | 기본 | 동일 링크 span `M-02`, 이벤트 `M-11` |
-| GFM 확장 autolink | 미정 | 인식 후 같은 링크 span; 별도 외형 없음 |
+| GFM 확장 autolink | 채택·인식 범위 미정 | 인식 후 같은 링크 span; 별도 외형 없음 |
 | inline/reference image, alt/title | 기본·이미지 기능 합의 | 이미지 표시·부분 상태 `M-08` |
 | GFM table, header/body, column alignment | 합의 확장 | 가로 스크롤 표 `M-07` |
 | backslash escape, entity/numeric reference | 기본 | 해석된 텍스트 `M-02`; 새 시각 컴포넌트 없음 |
 | tabs/공백/빈 줄, 구문 우선순위 | 기본 | 블록 구조·공백 해석; 새 UI 없음 |
 | link reference definition | 기본 | 참조 해석 입력; 정의 자체의 UI 없음 |
-| HTML block, raw inline HTML | 미정 | 허용/비허용 정책부터 결정; 필요시 `M-10` fallback |
+| HTML block, raw inline HTML | 채택·허용 정책 미정 | 허용/비허용 정책부터 결정; 필요시 `M-10` fallback |
 | GFM disallowed raw HTML | 미정 | HTML 처리 정책과 함께 검토; 새 문서 UI 아님 |
 | inline/display math | 합의 확장 | 수식 본문·블록 `M-09` |
 | Mermaid 코드 fence | 합의 확장 | 다이어그램 `M-09`; 일반 코드와 분기 규칙 미정 |
 
-### 별도 방언 후보 — 첫 구현에 자동 추가하지 않음
+### 추가 채택한 확장 — 시각 구현과 미정 방언
 
-각주·각주 목록, 정의 목록, highlight, subscript/superscript, emoji shortcode, YAML/TOML front matter, heading ID/attribute list, wiki link, GitHub alerts/admonition, collapsible details, embedded HTML/media, 자동 목차, citation/bibliography, 주석, 삽입/밑줄, 텍스트 typography 치환은 **모두 채택 미정**이다. GitHub mention·issue/commit 참조 같은 서비스 문맥도 로컬 Markdown의 기본 기능으로 가정하지 않는다. 채택할 때 해당 방언의 공식 정의·기능 원본을 먼저 정하고, 필요하면 각주·callout·정의 목록·메타데이터 표현을 추가한다. 다른 방언의 모든 확장을 이번 MVP에 포함한다고 해석하지 않는다.
+2026-10-27 사용자 합의로 각주·각주 목록, 정의 목록, highlight, subscript/superscript, emoji shortcode, YAML/TOML front matter, heading ID/attribute list, wiki link, 일반 callout/admonition·GitHub alerts, collapsible details, embedded HTML/media, 문법 기반 자동 목차, citation/bibliography, 주석, 삽입/밑줄, typography 치환, 확장 자동 링크 및 GitHub mention·issue·commit 참조를 **기능으로 채택**했다. 상세 범위의 원본은 [문서 표시 명세](../product/document-viewing.md#채택한-확장-문법)다.
+
+GitHub alerts와 mention·issue·commit 참조도 이번 채택 범위다. GitHub 제품 전체 기능 지원을 뜻하지 않으며, 서비스 참조의 owner/repository 문맥·해석과 인증·네트워크·실제 연동은 별도 결정이다. 기존 GFM 표·task·취소선은 유지한다. HTML·미디어 채택은 임의 실행·접근 허용을 뜻하지 않으며, 방언·호환 버전·구분자·허용 정책은 구현 전에 정한다.
+
+추가 채택 기능의 시각 단위는 `MarkdownExtensions.kt`와 `MarkdownContent.kt`에 데이터·slot·콜백 기반으로 추가했다. `markdown-extended`의 HTML/Compose 카탈로그에서 같은 공유 샘플과 상태를 비교한다. 이는 문법 파싱·호환성 또는 제품 이동 정책의 구현 완료를 뜻하지 않는다.
+
+| 추가 시각 단위 | 구현 API / 카탈로그 상태 |
+| --- | --- |
+| highlight·sub/sup·insert·underline | `MDiveTextRun.mark/baseline/inserted/underline` / `inline`; 기존 `highlighted`는 검색 장식 입력으로 구별 |
+| 각주 참조·목록·되돌아가기, citation/bibliography | `MDiveDocumentReference`, `MDiveMarkdownReference`, `MDiveReferenceList` / `references`; 해석된 대상과 역참조를 호스트가 제공 |
+| 정의 목록 | `MDiveDefinitionList` / `definitions` |
+| 일반 callout·GitHub alerts | `MDiveMarkdownCallout`, `MDiveCalloutKind` / `callouts`; 제목·아이콘·공통 색상 토큰과 자식 slot |
+| 접고 펼침 | `MDiveMarkdownDetails` / `details`; controlled 상태·summary slot·변경 콜백, 숨긴 자식은 구성하지 않음 |
+| front matter 표시용 메타데이터 | `MDiveMarkdownMetadata` / `metadata`; 필드 선택·YAML/TOML 해석은 호스트 이전 단계 |
+| 문법 기반 목차 | `MDiveMarkdownToc` / `toc`; 제목·단계·해석된 대상과 이동 이벤트 |
+| HTML·미디어 | `MDiveEmbeddedContent` / `embedded`; 준비된 비실행 content slot과 정상·로딩·실패, 복구 배너 내부 원문·확대 행동 |
+| heading ID/attributes·wiki·확장 자동 링크·GitHub 참조 | 기존 heading/text/link API 조합 / `resolved`; ID·속성 허용·목적지 해석은 처리하지 않음 |
+| emoji·typography 치환·주석 | 해석된 문자열 예시 / `resolved`; 치환과 주석 비노출은 비시각 단계이며 파서를 추가하지 않음 |
+
+모든 추가 표현의 수치·색상은 카탈로그 검토 초안이다. 정확한 방언·허용 정책·초기 펼침 상태·네트워크·HTML 실행은 결정하지 않았다.
 
 ## 제안 컴포넌트와 최소 계약
 
@@ -140,7 +161,7 @@ HTML 카탈로그용 정적 수식·다이어그램은 시각 검토 샘플이�
 
 ## 구현 전에 남은 결정
 
-- CommonMark/GFM 정확한 적합성 목표와 기본 문법 중 지원 예외. raw HTML을 허용·제한·원문 표시 중 어떻게 처리할지.
+- CommonMark/GFM 정확한 적합성 목표와 기본 문법 중 지원 예외. 채택한 확장의 방언·구분자·우선순위와 GitHub 서비스 참조의 문맥·해석 정책. HTML·미디어의 허용 태그·속성·실행·접근 정책.
 - 수식 delimiter·inline/블록 범위·매크로·오류 대체, Mermaid 종류·버전·렌더 정책.
 - 코드 강조 언어·강조 토큰·줄번호 여부(현재 합의 없음), 본문 선택/복사 범위와 코드 합자.
 - H1–H6 구체 값, 목록 깊이의 극단 처리, 표 셀 줄바꿈·열 너비, 본문 크기 조절이 코드/표/수식에 미치는 범위.

@@ -34,6 +34,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -221,7 +223,7 @@ private fun CatalogExample(entry: CatalogEntry, state: String, darkTheme: Boolea
                 "label" -> "파일 열기"
                 "caption" -> "최근에 읽은 문서 · 보조 정보"
                 "code" -> "val reading = \"MDive\" // 0 O 1 l I"
-                else -> error("Unknown typography role: $state")
+                else -> CatalogSamples.body
             }
             Column(Modifier.fillMaxWidth().testTag("typography-$state"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("$state · ${DesignTokens.FontRoles.getValue(token.familyRole)} · ${token.fontSize.value}sp · ${token.weight} · 행간 ${token.lineHeight.value}sp", style = mdiveTextStyle("caption"), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -316,7 +318,27 @@ private fun CatalogExample(entry: CatalogEntry, state: String, darkTheme: Boolea
             )
             MDiveDivider()
         }
-        "content" -> when (state) { "code" -> MDiveCodeSample(); "table" -> MDiveTableSample() }
+        "content" -> when (state) {
+            "code" -> {
+                var copied by remember { mutableStateOf("") }
+                MDiveCodeSample(onCopy = { copied = it })
+                Text(if (copied.isEmpty()) "복사 이벤트 대기" else "복사 원문: $copied", Modifier.testTag("code-copy-result"), style = mdiveTextStyle("caption"))
+                MDiveCodeBlock("  미지원 언어도 원문 유지\n\n" + CatalogSamples.code, language = "unknown", highlights = listOf(MDiveCodeHighlight(-1, 5000, MDiveCodeTone.Keyword)))
+            }
+            "table" -> {
+                MDiveTableSample()
+                MDiveMarkdownTable(listOf(MDiveTableColumn(listOf(MDiveTextRun("왼쪽"))), MDiveTableColumn(listOf(MDiveTextRun("중앙")), androidx.compose.ui.text.style.TextAlign.Center), MDiveTableColumn(listOf(MDiveTextRun("오른쪽")), androidx.compose.ui.text.style.TextAlign.End)), listOf(listOf(listOf(MDiveTextRun("긴 내용 한글 English ".repeat(5))), listOf(MDiveTextRun("강조", strong = true)), listOf(MDiveTextRun("123")))))
+            }
+        }
+        "markdown-extended" -> MarkdownExtensionCatalog(state)
+        "checkbox" -> {
+            var checked by remember(state) { mutableStateOf(state == "checked" || state == "readonly") }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                MDiveCheckbox(checked, if (state == "readonly") null else { value -> checked = value }, Modifier.semantics { contentDescription = "선택 예시" }, enabled = state != "disabled")
+                Text(if (state == "readonly") "읽기 전용 완료 상태" else if (state == "disabled") "비활성 체크박스" else if (checked) "선택됨 · 눌러 변경" else "선택 안 됨 · 눌러 변경", style = mdiveTextStyle("ui"))
+            }
+        }
+        "markdown-text", "markdown-containers", "markdown-resources" -> MarkdownCatalog(entry.id, state)
         else -> error("Missing catalog renderer: ${entry.id}")
     }
 }
