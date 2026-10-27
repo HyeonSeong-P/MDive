@@ -15,6 +15,9 @@
 
 ## 개발 규칙
 
+- [파일 선택·읽기 세션별 구현 계획](implementation/open-markdown.md): 단계별 범위·완료 기준·결정 게이트와 현재 인계.
+- [다음 구현 세션 지시문](implementation/session-prompts.md): S01용 실행 지시문과 후속 세션 템플릿.
+
 - [아키텍처](engineering/architecture.md): 계층 책임, Clean Architecture 의존성 방향, Hilt, Compose 컴포넌트.
 - [MVI](engineering/mvi.md): 화면 상태·액션·비동기 처리 규칙.
 - [내비게이션](engineering/navigation.md): Navigation 3 경계와 백스택 소유 규칙.

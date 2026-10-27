@@ -250,6 +250,23 @@ class FeedbackControlsTest {
     }
 
     @Test
+    fun recoveryBannerStacksTwoActionsInTheTrailingSlot() {
+        compose.setContent {
+            MDiveDesignTheme {
+                MDiveRecoveryBanner("콘텐츠 상태", modifier = Modifier.width(360.dp), action = {
+                    MDiveButton("원문 보기", {}, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S)
+                    MDiveButton("콘텐츠 확대", {}, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S)
+                })
+            }
+        }
+        val first = compose.onNodeWithText("원문 보기").getUnclippedBoundsInRoot()
+        val second = compose.onNodeWithText("콘텐츠 확대").getUnclippedBoundsInRoot()
+        val message = compose.onNodeWithText("콘텐츠 상태").getUnclippedBoundsInRoot()
+        assertTrue("Actions stack vertically", second.top >= first.bottom)
+        assertTrue("Normal-width actions remain beside the message", first.left >= message.right && second.left >= message.right)
+    }
+
+    @Test
     fun recoveryBannerWrapsActionAtLargeFontWithoutOverlappingText() {
         compose.setContent {
             val density = LocalDensity.current.density

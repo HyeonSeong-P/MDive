@@ -32,6 +32,28 @@ class GeneratorTest(unittest.TestCase):
         transform(data)
         path.write_text(json.dumps(data))
 
+    def test_catalog_loads_shared_component_renderer(self):
+        self.assertEqual(0, self.run_generator().returncode)
+        page = (self.root / 'design-system/generated/catalog.html').read_text()
+        self.assertIn('href="../components.css"', page)
+        self.assertIn('href="../feedback.css"', page)
+        self.assertIn('src="../components.js"', page)
+        self.assertNotIn('const layoutBanner = () =>', page)
+        self.assertIn('class="ds-state-failure"', page)
+        self.assertIn('class="ds-sheet-handle"', page)
+
+    def test_button_size_matrix_and_shared_size_propagation(self):
+        self.change('tokens.json', lambda t: t['sizes'].update(buttonS=38))
+        self.assertEqual(0, self.run_generator().returncode)
+        page = (self.root / 'design-system/generated/catalog.html').read_text()
+        css = (self.root / 'design-system/generated/tokens.css').read_text()
+        kotlin = (self.root / 'designsystem/src/main/java/com/parka/mdive/designsystem/generated/DesignTokens.kt').read_text()
+        self.assertIn('--size-buttonS: 38px', css)
+        self.assertIn('"buttonS" to 38.dp', kotlin)
+        for size in ['s', 'm', 'l']:
+            self.assertEqual(6 * 4 * 4, page.count(f'data-size="{size}"'))
+        self.assertIn('outlined size-s', page)
+
     def test_stale_output_fails_until_regenerated(self):
         self.assertEqual(0, self.run_generator().returncode)
         self.assertEqual(0, self.run_generator('--check').returncode)

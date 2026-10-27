@@ -41,6 +41,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
@@ -137,7 +140,10 @@ fun MDiveBottomSheet(
         scrimColor = colors.scrim.copy(alpha = DesignTokens.Opacities.getValue("scrim")),
         tonalElevation = 0.dp,
         dragHandle = {
-            Box(Modifier.fillMaxWidth().height(DesignTokens.Sizes.getValue("touch")), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxWidth()
+                .semantics { contentDescription = "패널 닫기" }
+                .clickable(enabled = !closing, role = Role.Button, onClick = requestClose)
+                .padding(vertical = DesignTokens.Spacing.getValue("sheetHandleY")), contentAlignment = Alignment.Center) {
                 Box(Modifier.size(width = DesignTokens.Spacing.getValue("xl"), height = DesignTokens.Spacing.getValue("xs"))
                     .background(colors.outline, RoundedCornerShape(DesignTokens.Radii.getValue("sm"))))
             }
@@ -145,11 +151,8 @@ fun MDiveBottomSheet(
     ) {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             Column(Modifier.fillMaxWidth().heightIn(max = maxHeight * .9f)) {
-                Row(Modifier.fillMaxWidth().padding(start = DesignTokens.Spacing.getValue("page"), end = DesignTokens.Spacing.getValue("sm"), top = DesignTokens.Spacing.getValue("sm")), verticalAlignment = Alignment.CenterVertically) {
-                    Text(title, Modifier.weight(1f).semantics { heading() }, style = mdiveTextStyle("uiTitle"), color = colors.onSurface)
-                    MDiveIconButton("close", "패널 닫기", requestClose, enabled = !closing)
-                }
-                MDiveDivider()
+                Text(title, Modifier.fillMaxWidth().padding(horizontal = DesignTokens.Spacing.getValue("page"), vertical = DesignTokens.Spacing.getValue("sm")).semantics { heading() },
+                    style = mdiveTextStyle("uiTitle"), color = colors.onSurface, textAlign = TextAlign.Center)
                 Column(
                     Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(DesignTokens.Spacing.getValue("page")),
                     verticalArrangement = Arrangement.spacedBy(DesignTokens.Spacing.getValue("md")),

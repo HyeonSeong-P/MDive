@@ -9,6 +9,8 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,7 +35,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -44,7 +45,8 @@ import androidx.compose.ui.unit.dp
 import com.parka.mdive.designsystem.generated.CatalogIcons
 import com.parka.mdive.designsystem.generated.DesignTokens
 
-enum class MDiveButtonVariant { Primary, Secondary, Quiet }
+enum class MDiveButtonVariant { Primary, Secondary, Outlined, Quiet }
+enum class MDiveButtonSize { S, M, L }
 enum class MDiveButtonState { Normal, Pressed, Disabled, Loading }
 
 @Composable
@@ -73,6 +75,7 @@ fun MDiveButton(
     variant: MDiveButtonVariant = MDiveButtonVariant.Primary,
     state: MDiveButtonState = MDiveButtonState.Normal,
     icon: String? = null,
+    size: MDiveButtonSize = MDiveButtonSize.M,
 ) {
     val colors = MaterialTheme.colorScheme
     val source = remember { MutableInteractionSource() }
@@ -86,31 +89,43 @@ fun MDiveButton(
     val base = when (variant) {
         MDiveButtonVariant.Primary -> if (showPrimary) colors.primary else colors.surfaceVariant
         MDiveButtonVariant.Secondary -> colors.surfaceVariant
-        MDiveButtonVariant.Quiet -> Color.Transparent
+        MDiveButtonVariant.Outlined, MDiveButtonVariant.Quiet -> Color.Transparent
     }
-    val background = if (pressed && enabled) lerp(base, colors.onSurface, DesignTokens.Opacities.getValue("pressed")) else base
+    val stateColors = LocalOceanColors.current
+    val background = if (pressed && enabled) stateColors.getValue(if (primary) "buttonPressedPrimary" else "buttonPressedSurface") else base
     val foreground = when {
+        pressed && enabled && !primary -> stateColors.getValue("buttonPressedText")
         showPrimary -> colors.onPrimary
         !enabled -> colors.onSurfaceVariant
         variant == MDiveButtonVariant.Primary -> colors.onPrimary
         else -> colors.primary
     }
     val top = LocalOceanColors.current.getValue("buttonTop")
-    val topColor = if (pressed && enabled) lerp(top, colors.onSurface, DesignTokens.Opacities.getValue("pressed")) else top
+    val topColor = if (pressed && enabled) background else top
     val fill = if (showPrimary) Modifier.background(Brush.verticalGradient(listOf(topColor, background)))
         .border(1.dp, Color.White.copy(alpha = DesignTokens.Opacities.getValue("buttonEdge")), shape) else Modifier.background(background)
-    Row(
-        modifier.defaultMinSize(minHeight = DesignTokens.Sizes.getValue("touch")).clip(shape).then(fill)
-            .then(if (focused) Modifier.border(2.dp, if (variant == MDiveButtonVariant.Primary) colors.onPrimary else colors.primary, shape) else Modifier)
+        .then(if (variant == MDiveButtonVariant.Outlined) Modifier.border(1.dp, if (enabled) colors.outline else colors.outline.copy(alpha = .38f), shape) else Modifier)
+    // The outer host owns input and semantics; the inner surface owns visual size.
+    BoxWithConstraints(
+        modifier.defaultMinSize(minWidth = DesignTokens.Sizes.getValue("touch"), minHeight = DesignTokens.Sizes.getValue("touch"))
+            .clip(shape)
             .clickable(interactionSource = source, indication = null, enabled = enabled, role = Role.Button, onClick = onClick)
-            .semantics { if (state == MDiveButtonState.Loading) stateDescription = "처리 중" }
-            .padding(horizontal = DesignTokens.Spacing.getValue(if (primary) "buttonX" else "md"), vertical = DesignTokens.Spacing.getValue("control")),
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,
+            .semantics { if (state == MDiveButtonState.Loading) stateDescription = "처리 중" },
+        contentAlignment = Alignment.Center,
     ) {
-        if (state == MDiveButtonState.Loading) MDiveLoadingMark(tint = foreground)
-        else if (icon != null) MDiveIcon(icon, tint = foreground, size = 20.dp)
-        Text(text, color = foreground, style = MaterialTheme.typography.labelLarge)
+        Row(
+            Modifier.widthIn(min = minWidth)
+                .defaultMinSize(minHeight = DesignTokens.Sizes.getValue("button${size.name}"))
+                .clip(shape).then(fill)
+                .then(if (focused) Modifier.border(2.dp, if (showPrimary) colors.onPrimary else colors.primary, shape) else Modifier)
+                .padding(horizontal = DesignTokens.Spacing.getValue("button${size.name}X"), vertical = DesignTokens.Spacing.getValue("button${size.name}Y")),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (state == MDiveButtonState.Loading) MDiveLoadingMark(tint = foreground)
+            else if (icon != null) MDiveIcon(icon, tint = foreground, size = 20.dp)
+            Text(text, color = foreground, style = MaterialTheme.typography.labelLarge)
+        }
     }
 }
 
@@ -122,6 +137,8 @@ fun MDiveIconButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     tint: Color = MaterialTheme.colorScheme.onSurface,
+    pressedBackground: Color = LocalOceanColors.current.getValue("buttonPressedSurface"),
+    pressedTint: Color = LocalOceanColors.current.getValue("buttonPressedText"),
 ) {
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
@@ -129,13 +146,13 @@ fun MDiveIconButton(
     val shape = RoundedCornerShape(DesignTokens.Radii.getValue("control"))
     Box(
         modifier.size(DesignTokens.Sizes.getValue("touch")).clip(shape)
-            .background(if (pressed) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
+            .background(if (pressed && enabled) pressedBackground else Color.Transparent)
             .then(if (focused) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
             .clickable(interactionSource = source, indication = null, enabled = enabled, role = Role.Button, onClick = onClick)
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
     ) {
-        MDiveIcon(icon, tint = tint.copy(alpha = if (enabled) 1f else DesignTokens.Opacities.getValue("disabledIcon")))
+        MDiveIcon(icon, tint = (if (pressed && enabled) pressedTint else tint).copy(alpha = if (enabled) 1f else DesignTokens.Opacities.getValue("disabledIcon")))
     }
 }
 

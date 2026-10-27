@@ -11,7 +11,7 @@
     "id": "home-empty",
     "title": "홈 · 첫 실행",
     "group": "홈",
-    "openq": "파일 선택 취소·복귀 세부 동작 미정.",
+    "openq": "파일 선택 취소 시 홈 유지 확정. 안내 문구·세부 배치는 시각 초안.",
     "source": "home.md",
     "note": "시각 초안 · 예시 데이터"
   },
@@ -51,7 +51,7 @@
     "id": "remove",
     "title": "목록 제거 확인",
     "group": "홈",
-    "openq": "확인 다이얼로그 사용은 제안. 제거 시 관련 데이터 보관·처리 실패 정책 미정.",
+    "openq": "목록 제거 전 확인과 원본 파일 비삭제는 합의. 관련 데이터 보관·처리 실패 정책은 미정.",
     "source": "home.md",
     "note": "시각 초안 · 예시 데이터"
   },
@@ -59,7 +59,7 @@
     "id": "reader",
     "title": "문서 읽기 · 전체 콘텐츠",
     "group": "읽기",
-    "openq": "상단 도구 배치·홈 복귀·지원 문법 범위 미정. 체크리스트는 읽기 전용.",
+    "openq": "상단·시스템 뒤로의 홈 복귀는 합의. 도구 배치·채택 문법의 정확한 방언/호환 정책은 미정. 체크리스트는 읽기 전용.",
     "source": "document-viewing.md",
     "note": "시각 초안 · 예시 데이터"
   },
@@ -67,7 +67,7 @@
     "id": "reader-loading",
     "title": "읽기 · 로딩",
     "group": "읽기",
-    "openq": "원인별 문구·재시도/취소·돌아가기 정책 미정.",
+    "openq": "로딩 표시 시점·취소 제공 여부·원인별 문구는 미정. 파일 선택 취소는 홈 유지.",
     "source": "document-viewing.md",
     "note": "시각 초안 · 예시 데이터"
   },
@@ -75,7 +75,7 @@
     "id": "reader-error",
     "title": "읽기 · 전체 실패",
     "group": "읽기",
-    "openq": "원인별 문구·재시도/취소·돌아가기 정책 미정.",
+    "openq": "열기 실패 시 읽기 화면에서 재시도·다시 선택·홈 복귀 제공 합의. 원인별 문구·복구 동작의 배치는 시각 초안.",
     "source": "document-viewing.md",
     "note": "시각 초안 · 예시 데이터"
   },
@@ -83,7 +83,7 @@
     "id": "local-image",
     "title": "로컬 이미지 · 접근 불가",
     "group": "읽기",
-    "openq": "웹 이미지 재시도·권한/경로 대응·오류 문구·원문 표시 형태 미정.",
+    "openq": "선택 폴더를 문서 기준으로 하위 경로 해석·재실행 연결 유지 합의. 범위 밖 경로·권한 상실·잘못된 폴더의 세부 복구는 미정.",
     "source": "document-viewing.md",
     "note": "시각 초안 · 예시 데이터"
   },
@@ -91,7 +91,7 @@
     "id": "web-image",
     "title": "웹 이미지 · 불러오기 실패",
     "group": "읽기",
-    "openq": "웹 이미지 재시도·권한/경로 대응·오류 문구·원문 표시 형태 미정.",
+    "openq": "온라인 이미지와 실패 시 본문 유지·재시도는 합의. 오프라인 세부 안내·대체 설명 정책은 미정.",
     "source": "document-viewing.md",
     "note": "시각 초안 · 예시 데이터"
   },
@@ -99,7 +99,7 @@
     "id": "resource-error",
     "title": "수식·Mermaid · 렌더 실패",
     "group": "읽기",
-    "openq": "웹 이미지 재시도·권한/경로 대응·오류 문구·원문 표시 형태 미정.",
+    "openq": "수식은 $…$·$$…$$, Mermaid는 mermaid 코드 블록으로 표시 합의. 세부 기능·지원 종류·오류 문구·원문 보기 형태는 미정.",
     "source": "document-viewing.md",
     "note": "시각 초안 · 예시 데이터"
   },
@@ -107,7 +107,7 @@
     "id": "source",
     "title": "수식·Mermaid · 원문 보기",
     "group": "읽기",
-    "openq": "수식 실패도 같은 패턴 제안. 원문 표시 방식·닫기 동작은 미정.",
+    "openq": "수식·Mermaid 실패 시 원문 보기 제공 합의. 원문 표시 방식·닫기 동작은 미정.",
     "source": "document-viewing.md",
     "note": "시각 초안 · 예시 데이터"
   },
@@ -259,7 +259,7 @@
     "id": "math-error",
     "title": "수식 · 렌더 실패",
     "group": "읽기",
-    "openq": "지원 수식 표기법·오류 문구·원문 보기 형태는 미정.",
+    "openq": "수식 구분자 $…$·$$…$$는 합의. 세부 수식 기능·오류 문구·원문 보기 형태는 미정.",
     "source": "document-viewing.md",
     "note": "시각 초안 · 예시 데이터"
   },
@@ -267,8 +267,56 @@
     "id": "math-source",
     "title": "수식 · 원문 보기",
     "group": "읽기",
-    "openq": "표시 구문은 예시이며 수식 문법 지원을 확정하지 않음. 원문 닫기 동작 미정.",
+    "openq": "합의한 $…$·$$…$$ 구분자의 원문 예시. 지원 명령·매크로·원문 닫기 동작은 미정.",
     "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "reader-extensions",
+    "title": "읽기 · callout과 접기",
+    "group": "읽기",
+    "openq": "callout 방언·종류별 호환, details 초기 상태·상태 저장·숨김 본문 검색/목차 포함 정책. 예시는 문법 계약이 아님.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 준비된 예시 콘텐츠"
+  },
+  {
+    "id": "reader-references",
+    "title": "읽기 · 각주와 참고문헌",
+    "group": "읽기",
+    "openq": "각주/인용 키·순서·중복·역참조·이동/복귀 방식과 참고문헌 데이터 형식. 해석된 가상 대상만 연결.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 준비된 예시 콘텐츠"
+  },
+  {
+    "id": "resource-loading",
+    "title": "읽기 · 리소스 준비 중",
+    "group": "읽기",
+    "openq": "로딩 표시 시점·대체 크기·취소는 미정. 웹 이미지 실패 재시도는 합의. 자동 완료나 네트워크 요청은 시연하지 않음.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 준비된 예시 콘텐츠"
+  },
+  {
+    "id": "reader-stress",
+    "title": "읽기 · 긴 콘텐츠와 부분 실패",
+    "group": "읽기",
+    "openq": "본문 크기 조절이 코드·표·수식에 미치는 범위, 표 열 크기·줄바꿈, 극단 중첩·태블릿 정책. 현재 배율은 시각 스트레스 검토 도구.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 준비된 예시 콘텐츠"
+  },
+  {
+    "id": "embedded-preview",
+    "title": "읽기 · 메타데이터와 임베드 상태",
+    "group": "읽기",
+    "openq": "YAML/TOML 인식·노출 필드, HTML·미디어 허용/실행/URL/접근 정책, 주석 비노출. 비실행 준비 슬롯 예시는 정책 승인이 아님.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 준비된 예시 콘텐츠"
+  },
+  {
+    "id": "home-partial",
+    "title": "홈 · 최근 목록 부분 실패",
+    "group": "홈",
+    "openq": "부분 로딩·독립 실패 노출과 재시도 단위 미정. 성공한 목록 유지 배치 제안.",
+    "source": "home.md",
     "note": "시각 초안 · 예시 데이터"
   }
 ]
