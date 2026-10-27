@@ -124,7 +124,106 @@ def generate():
         actions = f'<button type="button" class="icon-button" aria-label="검색">{icon("search")}</button><button type="button" class="icon-button" aria-label="즐겨찾기">{icon("star")}</button>' if state in ['actions','longTitle'] else ''
         return f'<div class="topbar">{nav}<strong title="{e(title)}">{e(title)}</strong>{actions}</div>'
 
-    table = '<table>' + ''.join('<tr>' + ''.join(f'<td>{e(cell)}</td>' for cell in row) + '</tr>' for row in sample['table']) + '</table>'
+    table = '<div class="md-table-scroll" tabindex="0" aria-label="문서 표, 가로 스크롤"><table class="md-table type-documentTable"><thead><tr>' + ''.join(f'<th scope="col">{e(cell)}</th>' for cell in sample['table'][0]) + '</tr></thead><tbody>' + ''.join('<tr>' + ''.join(f'<td style="text-align:{["start", "center", "end"][index % 3]}">{e(cell)}</td>' for index, cell in enumerate(row)) + '</tr>' for row in sample['table'][1:]) + '</tbody></table></div>'
+    def content_event(label, event):
+        return f'<button type="button" class="button {"quiet" if event == "copy" else "secondary"}" data-content-event="{e(event)}">{e(label)}</button>'
+
+    def code_block(source, language='KOTLIN'):
+        return f'<div class="md-code"><div class="md-code-bar"><span>{e(language)}</span>{content_event("코드 복사 · 시연", "copy")}</div><pre><code>{e(source)}</code></pre><output class="md-result" aria-live="polite"></output></div>'
+
+    def markdown_text(state):
+        body = e(sample['markdownBody'])
+        if state == 'headings':
+            return '<div class="md-flow">' + ''.join(f'<h{level} class="type-documentH{level}">H{level} · {e(sample["markdownTitle"])}</h{level}>' for level in range(1, 7)) + f'<p class="type-body">{body}</p></div>'
+        if state == 'divider':
+            return f'<div class="md-flow"><p>{body}</p><hr class="md-divider"><p>{body}</p></div>'
+        return f'<div class="md-flow"><p><em>기울임 <strong>굵게 <s>취소선</s></strong></em> · <code>val wave = 1</code> · <a href="{e(sample["markdownLink"])}" data-content-event="link">문서 링크</a><br>{body}</p><output class="md-result" aria-live="polite"></output></div>'
+
+    def markdown_containers(state):
+        body = e(sample['markdownBody'])
+        if state == 'quote':
+            return f'<div class="md-flow"><blockquote class="type-documentQuote"><p>{body}</p><blockquote><p>중첩 인용</p><ul><li>인용 안의 목록</li></ul></blockquote>{code_block(sample["code"])}</blockquote></div>'
+        return f'<div class="md-flow"><ol start="98"><li>{body}<ul><li>혼합된 자식 목록</li></ul><p>같은 항목의 두 번째 문단</p></li><li>여러 자리 번호도 내어쓰기 유지</li></ol><ul class="md-tasks"><li>{checkbox(readonly=True, label="읽기 전용 작업")}</li><li>{checkbox(checked=True, readonly=True, label="완료한 작업")}</li></ul></div>'
+
+    def content_banner(title, detail='', action='', symbol='file', loading=False):
+        visual = '<span class="loading-dot" aria-hidden="true"></span>' if loading else icon(symbol)
+        return f'<div class="ds-banner md-content-banner" role="status">{visual}<div class="ds-banner-content"><strong>{e(title)}</strong>{f"<p>{e(detail)}</p>" if detail else ""}</div><div class="ds-banner-action">{action}</div></div>'
+
+    def checkbox(checked=False, disabled=False, readonly=False, label='항목 선택'):
+        box = f'<span class="ds-checkbox-box" aria-hidden="true">{icon("check")}</span>'
+        if readonly:
+            return f'<span class="ds-checkbox is-readonly" role="checkbox" aria-checked="{str(checked).lower()}" aria-readonly="true" aria-label="{e(label)}">{box}<span aria-hidden="true">{e(label)}</span></span>'
+        return f'<label class="ds-checkbox"><input type="checkbox"{" checked" if checked else ""}{" disabled" if disabled else ""}>{box}<span>{e(label)}</span></label>'
+
+    def markdown_resource(state):
+        alt = e(sample['markdownAlt'])
+        if state == 'ready':
+            inner = f'<div class="md-image" role="img" aria-label="{alt}"><span aria-hidden="true">∿ ∿ ∿</span></div>' + content_banner('이미지', sample['markdownAlt'], content_event('이미지 확대 · 시연', 'expand'))
+        elif state == 'rendered':
+            source = content_event('원문 보기 · 시연', 'source')
+            inner = f'<p>인라인 수식 <span class="md-math" role="img" aria-label="에너지와 질량 관계">{e(sample["markdownFormula"])}</span> 이후에도 같은 문장입니다.</p><div class="md-rendered" role="img" aria-label="준비된 수식 예시">{e(sample["markdownFormula"])}</div>'
+            inner += content_banner('수식', '정적 slot 예시', source)
+            inner += content_banner('콘텐츠 렌더링 중', sample['markdownFormula'], source, loading=True)
+            inner += content_banner('콘텐츠를 표시하지 못했어요', sample['markdownReason'], source, symbol='warning')
+            inner += '<div class="md-rendered" role="img" aria-label="시작에서 읽기로 이어지는 다이어그램">시작 → 읽기</div>'
+            inner += content_banner('다이어그램', '정적 slot 예시 · 렌더 엔진 검증이 아닙니다.', content_event('원문 보기 · 시연', 'source') + content_event('확대 · 시연', 'expand'))
+        else:
+            title = {'loading':'이미지 준비 중','accessRequired':'이미지 접근 권한이 필요해요','failure':'이미지를 불러오지 못했어요','fallback':'콘텐츠 표시 실패 · 예시'}[state]
+            action = '' if state == 'loading' else content_event('폴더 연결 · 시연' if state == 'accessRequired' else '원문 보기 · 시연' if state == 'fallback' else '다시 시도 · 시연', 'connect' if state == 'accessRequired' else 'source' if state == 'fallback' else 'retry')
+            inner = content_banner(title, sample['markdownAlt'] + ' · ' + sample['markdownReason'], action, symbol='warning', loading=state == 'loading')
+        return f'<div class="md-flow"><p>{e(sample["markdownBody"])}</p>{inner}<output class="md-result" aria-live="polite"></output><p>{e(sample["markdownBody"])}</p></div>'
+
+    def extension_link(label, target, event='link'):
+        return f'<a href="{e(target)}" data-content-event="{e(event)}" data-content-target="{e(target)}">{e(label)}</a>'
+
+    def markdown_extended(state):
+        term = e(sample['extensionTerm'])
+        note = e(sample['extensionNote'])
+        target = sample['extensionTarget']
+        if state == 'inline':
+            inner = f'<p><mark>문서 highlight</mark> · H<sub>2</sub>O · x<sup>2</sup> · <ins>삽입한 문장</ins> · <u>밑줄 문장</u></p><p><span class="md-search-mark" aria-label="검색 결과">검색 결과</span> · <span class="md-search-mark is-current" aria-label="현재 검색 결과">현재 검색 결과</span></p>'
+        elif state == 'references':
+            footnote, citation, backlink, citation_backlink = sample['extensionReferenceLinks']
+            inner = '<p>각주가 있는 문장<sup>' + extension_link(*footnote, event='footnote') + '</sup> · 인용 ' + extension_link(*citation, event='citation') + '</p>'
+            inner += '<section aria-label="각주"><ol class="md-footnotes"><li><span>' + note + '</span> ' + extension_link(*backlink, event='backlink') + '</li></ol></section>'
+            inner += '<section aria-label="참고문헌"><h3 class="type-uiTitle">참고문헌</h3><ol><li><cite>' + e(sample['extensionReference']) + '</cite> ' + extension_link(*citation_backlink, event='backlink') + '</li></ol></section>'
+        elif state == 'definitions':
+            inner = f'<dl class="md-definitions"><dt>{term}</dt><dd>{e(sample["extensionDefinition"])}</dd><dt>읽기</dt><dd>{note}</dd><dd>하나의 용어에 여러 설명을 둘 수 있습니다.</dd></dl>'
+        elif state == 'callouts':
+            kinds = [('info', '일반 안내'), ('info', 'NOTE'), ('success', 'TIP'), ('important', 'IMPORTANT'), ('warning', 'WARNING'), ('danger', 'CAUTION')]
+            inner = ''.join(f'<aside class="md-callout md-callout-{kind}" aria-label="{label}"><div>{icon("warning" if kind in ["warning", "danger"] else "file")}<strong>{label}</strong></div><p>{note}</p></aside>' for kind, label in kinds)
+        elif state == 'details':
+            inner = f'<details class="md-details"><summary>{term} · 자세히 보기</summary><div><p>{note}</p><dl class="md-definitions"><dt>{term}</dt><dd>{e(sample["extensionDefinition"])}</dd></dl></div></details><details class="md-details" open><summary>처음부터 펼친 예시</summary><div><p>{note}</p></div></details>'
+        elif state == 'metadata':
+            inner = '<dl class="md-metadata">' + ''.join(f'<div><dt>{e(key)}</dt><dd>{e(value)}</dd></div>' for key, value in sample['extensionMetadata']) + '</dl>'
+        elif state == 'toc':
+            rows = sample['extensionTocTargets']
+            def toc_rows(index, level):
+                result = '<ol>'
+                while index < len(rows) and int(rows[index][2]) == level:
+                    label, target, _ = rows[index]
+                    result += '<li>' + extension_link(label, target, 'toc')
+                    index += 1
+                    if index < len(rows) and int(rows[index][2]) > level:
+                        nested, index = toc_rows(index, int(rows[index][2]))
+                        result += nested
+                    result += '</li>'
+                return result + '</ol>', index
+            tree = toc_rows(0, int(rows[0][2]))[0] if rows else '<ol></ol>'
+            inner = '<nav class="md-toc" aria-label="문서 목차">' + tree + '</nav>'
+        elif state == 'embedded':
+            raw_html = '<section><strong>준비된 HTML 원문</strong></section>'
+            source = content_event('원문 보기 · 시연', 'source')
+            inner = '<div data-embed-kind="html" data-embed-state="ready"><pre class="md-embedded-source"><code>' + e(raw_html) + '</code></pre>' + content_banner('HTML 원문 · 비실행 예시', '문자열을 실행하지 않고 보여주는 시각 slot입니다.', source) + '</div>'
+            inner += '<div data-embed-kind="html" data-embed-state="loading">' + content_banner('HTML 표시 준비 중', sample['extensionNote'], source, loading=True) + '</div>'
+            inner += '<div data-embed-kind="html" data-embed-state="failure">' + content_banner('HTML을 표시하지 못했어요', sample['markdownReason'], source, symbol='warning') + '</div>'
+            inner += '<div data-embed-kind="media" data-embed-state="ready"><div class="md-embedded-media" role="img" aria-label="준비된 미디어 재생 화면 예시">' + icon('file') + '<span>미디어 content slot</span></div>' + content_banner('미디어', note, source + content_event('확대 · 시연', 'expand')) + '</div>'
+            inner += '<div data-embed-kind="media" data-embed-state="loading">' + content_banner('미디어 준비 중', sample['extensionNote'], source, loading=True) + '</div>'
+            inner += '<div data-embed-kind="media" data-embed-state="failure">' + content_banner('미디어를 표시하지 못했어요', sample['markdownReason'], source, symbol='warning') + '</div>'
+        else:
+            inner = '<p>' + ' · '.join(extension_link(label, target, 'reference') for label, target in sample['extensionResolvedLinks']) + '</p><p>해석된 emoji: 🌊 · typography: “차분한 읽기” … —</p><small>해석된 표시 데이터 예시 · 서비스 연결과 자동 치환을 실행하지 않습니다.</small>'
+        return f'<div class="md-flow">{inner}<output class="md-result" aria-live="polite"></output></div>'
+
     swatches = ''.join(f'<span class="swatch" style="background:var(--{key})">{key}</span>' for key in themes['deepsea']['colors']['light'])
 
     def search_bar(empty):
@@ -179,6 +278,8 @@ def generate():
         return f'<label class="ds-slider"><span>본문 크기 <output>18</output></span><input type="range" min="14" max="28" value="18" step="1" aria-label="본문 크기 예시"{ " disabled" if state == "disabled" else ""}><small>14~28은 조작 예시이며 제품 범위는 미정입니다.</small></label>'
 
     renders = {
+        'markdown-extended': {state: markdown_extended(state) for state in ['inline', 'references', 'definitions', 'callouts', 'details', 'metadata', 'toc', 'embedded', 'resolved']},
+        'checkbox': {state: checkbox(checked=state != 'unchecked', disabled=state == 'disabled', readonly=state == 'readonly', label='읽기 전용 작업' if state == 'readonly' else '항목 선택') for state in ['unchecked', 'checked', 'disabled', 'readonly']},
         'colors': {'light': swatches, 'dark': swatches},
         'typography': {name: f'<p class="type-spec">{e(tokens["fontRoles"][role["family"]])} · {tokens["fontSizes"][role["size"]]}px · {role["weight"]} · 행간 {round(tokens["fontSizes"][role["size"]] * tokens["lineHeights"][role["leading"]], 2)}px</p><p class="type-{e(name)}">{e(sample["body"] if name in ["body","bodySmall"] else "깊이 읽는 시간 · Markdown 0123456789" if name != "code" else "fun dive(depth: Int) / 0 O 1 l I")}</p>' for name, role in tokens['typography'].items()},
         'buttons': {
@@ -200,7 +301,10 @@ def generate():
         },
         'topbar': {state: topbar(state) for state in ['default','back','actions','longTitle']},
         'search': {'idle': search_bar('idle'), 'results': search_bar(False), 'empty': search_bar(True)},
-        'content': {'code': f'<pre>{e(sample["code"])}</pre>', 'table': table},
+        'content': {'code': code_block(sample['code']), 'table': table},
+        'markdown-text': {state: markdown_text(state) for state in ['headings', 'inline', 'divider']},
+        'markdown-containers': {state: markdown_containers(state) for state in ['quote', 'lists']},
+        'markdown-resources': {state: markdown_resource(state) for state in ['ready', 'loading', 'accessRequired', 'failure', 'rendered', 'fallback']},
         'icons': {'brand': '<p>MDive · 대표 심볼</p><div class="brand-original" data-palette="deepsea" data-theme="dark">' + brand_svg + '</div><p>대표 심볼은 앱 정체성에, 동작 아이콘은 조작에 사용합니다.</p>', 'normal': '<div class="icon-grid">' + ''.join(f'<div>{icon(key)}<small>{e(key)}</small></div>' for key in icons['paths']) + '</div>'},
         'navigation': {'normal': '<div class="tabs"><span class="selected">목차</span><span>책갈피</span></div><p class="muted">한 패널의 두 탭 · 배치 초안</p>'},
         'feedback': {**{state: state_panel(state) for state in ['loading', 'empty', 'error']}, 'inline': inline_notice()},
@@ -263,7 +367,7 @@ for (const theme of document.querySelectorAll('.theme')) {
 function update() {
   document.querySelectorAll('.theme').forEach(theme => {
     theme.hidden = theme.dataset.palette !== palette.value || theme.dataset.theme !== mode.value;
-    theme.querySelectorAll('section').forEach(section => section.hidden = section.dataset.entry !== entry);
+    theme.querySelectorAll(':scope > section[data-entry]').forEach(section => section.hidden = section.dataset.entry !== entry);
   });
   document.querySelectorAll('nav a[data-entry]').forEach(link => {
     link.href = '#' + palette.value + '-' + mode.value + '-' + link.dataset.entry;
@@ -272,6 +376,13 @@ function update() {
 }
 document.querySelectorAll('nav a[data-entry]').forEach(link => link.addEventListener('click', () => { entry = link.dataset.entry; update(); }));
 palette.addEventListener('change', update); mode.addEventListener('change', update); update();
+for (const action of document.querySelectorAll('[data-content-event]')) action.addEventListener('click', event => {
+  event.preventDefault();
+  const example = action.closest('.example');
+  const output = example.querySelector('.md-result');
+  const kind = action.dataset.contentEvent;
+  output.textContent = kind === 'copy' ? '복사 이벤트 원문: ' + action.closest('.md-code').querySelector('code').textContent : kind + ' 이벤트 · ' + (action.dataset.contentTarget || '호스트 동작 시연');
+});
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 function openDemo(modal) {
   modal.style.transform = ''; delete modal.dataset.closing;
@@ -362,7 +473,8 @@ for (const banner of document.querySelectorAll('.ds-banner')) {
     const hasBoth = banner.querySelector('[data-banner-retry]') && banner.querySelector('[data-banner-dismiss]');
     const breakpoint = parseFloat(style.getPropertyValue(hasBoth ? '--size-bannerDismissActionBreakpoint' : '--size-bannerActionBreakpoint'));
     const fontScale = parseFloat(getComputedStyle(banner.querySelector('strong')).fontSize) / parseFloat(style.getPropertyValue('--font-ui'));
-    banner.dataset.stacked = String(banner.clientWidth / fontScale < breakpoint);
+    const actionWidth = banner.querySelector('.ds-banner-action')?.scrollWidth || 0;
+    banner.dataset.stacked = String(banner.clientWidth / fontScale < breakpoint || actionWidth > banner.clientWidth * .5);
   };
   new ResizeObserver(layoutBanner).observe(banner); layoutBanner();
 }
