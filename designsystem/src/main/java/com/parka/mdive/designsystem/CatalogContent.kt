@@ -207,6 +207,28 @@ private fun Eyebrow(text: String, modifier: Modifier = Modifier) {
 @Composable
 private fun CatalogExample(entry: CatalogEntry, state: String, darkTheme: Boolean) {
     when (entry.id) {
+        "dropdown-menu" -> {
+            var expanded by remember(state) { mutableStateOf(false) }
+            Box {
+                MDiveIconButton("more", "더보기 메뉴 열기 · 시연", { expanded = true })
+                MDiveDropdownMenu(expanded, { expanded = false }) {
+                    MDiveDropdownMenuItem(
+                        if (state == "longText") "매우 긴 문서의 목차와 여러 위치 책갈피 확인" else "목차 · 책갈피",
+                        { expanded = false }, icon = "toc", enabled = state != "disabled",
+                    )
+                    MDiveDropdownMenuItem("읽기 설정", { expanded = false }, icon = "settings")
+                }
+            }
+        }
+        "floating-action" -> MDiveFloatingActionButton(
+            onClick = {},
+            label = if (state == "label") "파일 열기" else null,
+            state = when (state) {
+                "pressed" -> MDiveButtonState.Pressed
+                "disabled" -> MDiveButtonState.Disabled
+                else -> MDiveButtonState.Normal
+            },
+        )
         "colors" -> if (state == if (darkTheme) "dark" else "light") LocalOceanColors.current.forEach { (name, color) ->
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Box(Modifier.size(24.dp).background(color))
@@ -266,15 +288,19 @@ private fun CatalogExample(entry: CatalogEntry, state: String, darkTheme: Boolea
             Row { MDiveTextTab("목차", tab == 0, { tab = 0 }, Modifier.testTag("sample-tab-toc")); MDiveTextTab("책갈피", tab == 1, { tab = 1 }, Modifier.testTag("sample-tab-bookmarks")) }
         }
         "feedback" -> when (state) {
-            "loading" -> MDiveStatePanel("문서를 준비하고 있어요", "본문을 읽을 준비가 되면 표시합니다.", MDiveStateKind.Loading)
-            "empty" -> MDiveStatePanel("첫 문서를 열어보세요", "Markdown 파일을 선택하면 읽기 편한 모습으로 보여드려요.", MDiveStateKind.Empty, actions = {
-                MDiveButton("파일 열기 · 시연", {}, Modifier.fillMaxWidth())
+            "loading" -> CatalogLoadingSkeleton(home = false)
+            "homeLoading" -> CatalogLoadingSkeleton(home = true)
+            "empty" -> MDiveStatePanel("첫 문서를 열어보세요", "Markdown 파일을 선택하면 읽기 편한 모습으로 보여드려요.", MDiveStateKind.Empty, showSymbol = false, actionWidth = MDiveStateActionWidth.Compact, decoration = { MDiveWelcomeMark() }, actions = {
+                MDiveButton("파일 열기 · 시연", {}, size = MDiveButtonSize.L)
             })
-            "error" -> MDiveStatePanel("문서를 열지 못했어요", "파일이 이동되었거나 접근 권한이 바뀌었을 수 있어요.", MDiveStateKind.Failure, context = {
+            "singleError" -> MDiveStatePanel("문서를 열지 못했어요", "접근 권한을 확인한 뒤 다시 시도하세요.", MDiveStateKind.Failure, showSymbol = false, actionWidth = MDiveStateActionWidth.Compact, actions = {
+                MDiveButton("다시 시도 · 단일 시연", {})
+            })
+            "error" -> MDiveStatePanel("문서를 열지 못했어요", "파일이 이동되었거나 접근 권한이 바뀌었을 수 있어요.", MDiveStateKind.Failure, showSymbol = false, actionWidth = MDiveStateActionWidth.Compact, context = {
                 MDiveDocumentRow(CatalogSamples.filename, "기존 문서 정보는 유지됩니다.", {})
             }, actions = {
-                MDiveButton("다시 선택 · 시연", {}, Modifier.fillMaxWidth())
-                MDiveButton("다시 시도 · 시연", {}, Modifier.fillMaxWidth(), variant = MDiveButtonVariant.Quiet)
+                MDiveButton("다시 시도 · 시연", {})
+                MDiveButton("홈으로 · 시연", {}, variant = MDiveButtonVariant.Quiet)
             })
             "inline" -> MDiveInlineNotice("이미지를 불러오지 못했어요", "본문은 계속 읽을 수 있어요.", error = true, action = {
                 MDiveButton("폴더 연결 · 시연", {}, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S)
@@ -295,21 +321,23 @@ private fun CatalogExample(entry: CatalogEntry, state: String, darkTheme: Boolea
         "banner" -> {
             var dismissed by remember(state) { mutableStateOf(false) }
             if (dismissed) MDiveButton("배너 다시 보기", { dismissed = false }, variant = MDiveButtonVariant.Secondary)
-            else if (state == "retry") MDiveRecoveryBanner(CatalogSamples.bannerRetryTitle, action = {
+            else if (state == "retry") MDiveRecoveryBanner(CatalogSamples.bannerRetryTitle, error = true, action = {
                 MDiveButton("다시 시도", { dismissed = true }, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S)
             })
             else MDiveRecoveryBanner(CatalogSamples.bannerPersistentTitle, CatalogSamples.bannerPersistentDetail, onDismiss = { dismissed = true })
         }
         "topbar" -> {
             val title = when (state) {
+                "brandOnly" -> null
                 "default" -> "MDive"
                 "longTitle" -> CatalogSamples.longFilename
                 else -> CatalogSamples.filename
             }
             MDiveTopBar(
                 title = title,
-                navigationIcon = if (state == "default") null else "back",
-                navigationDescription = if (state == "default") null else "뒤로 가기 · 시안",
+                leading = if (state == "brandOnly") ({ MDiveBrandMark() }) else null,
+                navigationIcon = if (state in listOf("default", "brandOnly")) null else "back",
+                navigationDescription = if (state in listOf("default", "brandOnly")) null else "뒤로 가기 · 시안",
                 actions = {
                     if (state == "actions" || state == "longTitle") {
                         MDiveIconButton("search", "문서 검색 · 시안", {})

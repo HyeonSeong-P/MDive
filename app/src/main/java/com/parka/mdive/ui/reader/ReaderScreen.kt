@@ -1,0 +1,101 @@
+package com.parka.mdive.ui.reader
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.parka.mdive.designsystem.MDiveButton
+import com.parka.mdive.designsystem.MDiveButtonVariant
+import com.parka.mdive.designsystem.MDiveDesignTheme
+import com.parka.mdive.designsystem.MDiveStateActionWidth
+import com.parka.mdive.designsystem.MDiveStateKind
+import com.parka.mdive.designsystem.MDiveStatePanel
+import com.parka.mdive.designsystem.MDiveTopBar
+import com.parka.mdive.ui.base.CenteredScrollableState
+import com.parka.mdive.ui.base.CollectEffects
+
+@Composable
+fun ReaderRoute(
+    onNavigateHome: () -> Unit,
+    onRetry: () -> Unit,
+    viewModel: ReaderViewModel = hiltViewModel(),
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    CollectEffects(viewModel.effects) { effect ->
+        when (effect) {
+            ReaderEffect.NavigateHome -> onNavigateHome()
+            ReaderEffect.RetryRequested -> onRetry()
+        }
+    }
+    ReaderScreen(
+        state = state,
+        onBack = { viewModel.onIntent(ReaderIntent.Back) },
+        onRetry = { viewModel.onIntent(ReaderIntent.Retry) },
+    )
+}
+
+@Composable
+fun ReaderScreen(
+    state: ReaderState,
+    onBack: () -> Unit,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+            MDiveTopBar(
+                title = state.title ?: "문서",
+                navigationIcon = "back",
+                navigationDescription = "홈으로 돌아가기",
+                onNavigationClick = onBack,
+            )
+            if (state.content == ReaderContent.Loading) ReaderLoadingContent(Modifier.weight(1f))
+            else CenteredScrollableState(Modifier.weight(1f)) {
+                when (state.content) {
+                    ReaderContent.Loading -> Unit
+                    ReaderContent.Empty -> MDiveStatePanel(
+                        title = "빈 문서예요",
+                        detail = "표시할 내용이 없습니다.",
+                        kind = MDiveStateKind.Empty,
+                        showSymbol = false,
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        titleSpacing = 8.dp,
+                    )
+                    ReaderContent.Failure -> MDiveStatePanel(
+                        title = "문서를 열지 못했어요",
+                        detail = "문서를 읽을 수 없어요. 다시 시도하거나 홈으로 돌아가세요.",
+                        kind = MDiveStateKind.Failure,
+                        showSymbol = false,
+                        actionWidth = MDiveStateActionWidth.Compact,
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        titleSpacing = 8.dp,
+                        actions = {
+                            MDiveButton("다시 시도", onRetry)
+                            MDiveButton("홈으로", onBack, variant = MDiveButtonVariant.Quiet)
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ReaderLoadingPreview() = MDiveDesignTheme { ReaderScreen(ReaderState(title = "예시.md"), {}, {}) }
+
+@Preview(showBackground = true)
+@Composable
+private fun ReaderEmptyPreview() = MDiveDesignTheme { ReaderScreen(ReaderState("예시.md", ReaderContent.Empty), {}, {}) }
+
+@Preview(showBackground = true)
+@Composable
+private fun ReaderFailurePreview() = MDiveDesignTheme { ReaderScreen(ReaderState("예시.md", ReaderContent.Failure), {}, {}) }

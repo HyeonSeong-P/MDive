@@ -75,10 +75,24 @@ fun MDiveMarkdownHeading(level: Int, runs: List<MDiveTextRun>, modifier: Modifie
     MDiveMarkdownText(runs, modifier.semantics { heading() }, onLink, mdiveTextStyle("documentH$level"))
 }
 
-/** The host owns spacing between sibling blocks; children have no exterior margins. */
+/** The host owns spacing between sibling blocks; the existing ColumnScope behavior is preserved. */
 @Composable
 fun MDiveMarkdownFlow(modifier: Modifier = Modifier, spacing: Dp = DesignTokens.Spacing.getValue("documentBlock"), content: @Composable ColumnScope.() -> Unit) {
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing), content = content)
+}
+
+/** Explicit section composition: a heading stays near its body, with extra space before the section. */
+@Composable
+fun MDiveMarkdownSection(
+    heading: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    spaceBefore: Dp = DesignTokens.Spacing.getValue("documentBlock"),
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(modifier.fillMaxWidth().padding(top = spaceBefore), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        heading()
+        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(DesignTokens.Spacing.getValue("documentBlock")), content = content)
+    }
 }
 
 @Composable
@@ -179,7 +193,7 @@ fun MDiveMarkdownImage(
             }
             MDiveResourceState.Loading -> MDiveRecoveryBanner("이미지 준비 중", alt, icon = "file", loading = true)
             MDiveResourceState.AccessRequired -> MDiveRecoveryBanner("이미지 접근 연결 필요", alt, icon = "file", action = { if (onConnect != null) MDiveButton("폴더 연결", onConnect, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S) })
-            MDiveResourceState.Failure -> MDiveRecoveryBanner("이미지를 불러오지 못했어요", alt, action = { if (onRetry != null) MDiveButton("다시 시도", onRetry, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S) })
+            MDiveResourceState.Failure -> MDiveRecoveryBanner("이미지를 불러오지 못했어요", alt, error = true, action = { if (onRetry != null) MDiveButton("다시 시도", onRetry, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S) })
         }
         if (title != null) Text(title, style = mdiveTextStyle("caption"))
     }
@@ -200,6 +214,7 @@ fun MDiveRenderedBlock(
             detail = description,
             icon = if (state == MDiveResourceState.Failure) "warning" else "file",
             loading = state == MDiveResourceState.Loading,
+            error = state == MDiveResourceState.Failure,
             action = if (onViewSource == null && (onExpand == null || state != MDiveResourceState.Ready)) null else {
                 {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -214,7 +229,7 @@ fun MDiveRenderedBlock(
 
 @Composable
 fun MDiveContentFallback(kind: String, reason: String, modifier: Modifier = Modifier, onViewSource: (() -> Unit)? = null) {
-    MDiveRecoveryBanner(kind, reason, modifier, action = { if (onViewSource != null) MDiveButton("원문 보기", onViewSource, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S) })
+    MDiveRecoveryBanner(kind, reason, modifier, error = true, action = { if (onViewSource != null) MDiveButton("원문 보기", onViewSource, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S) })
 }
 
 /** Prepared inline rendering placed in the same text flow; no math syntax is interpreted. */

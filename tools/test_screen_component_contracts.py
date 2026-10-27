@@ -54,7 +54,7 @@ class ScreenComponentContractsTest(unittest.TestCase):
         self.tree = Tree(self.source)
 
     def test_product_loads_shared_renderer_and_keeps_navigation_intact(self):
-        resources = [node.attrs.get('href', node.attrs.get('src', '')) for node in self.tree.nodes if node.tag in {'link', 'script'}]
+        resources = [node.attrs.get('href', node.attrs.get('src', '')).split('?', 1)[0] for node in self.tree.nodes if node.tag in {'link', 'script'}]
         self.assertIn('../../../design-system/components.css', resources)
         self.assertIn('../../../design-system/components.js', resources)
         self.assertNotIn('../../../design-system/catalog.css', resources)

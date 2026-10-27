@@ -11,6 +11,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 .muted,.md-caption{color:var(--muted)}
 .md-caption{font:var(--font-caption)/var(--leading-ui) var(--family-ui),sans-serif}
 .icon{display:inline-block;flex:none;width:var(--size-icon);height:var(--size-icon);vertical-align:middle;fill:none;stroke:currentColor;stroke-width:var(--icon-stroke);stroke-linecap:round;stroke-linejoin:round}
+.icon.is-filled{fill:currentColor;stroke:none}
 .brand-mark{display:block;flex:none;width:48px;height:36px;background:var(--primary);mask:url("brand/mdive-mark.svg") center/contain no-repeat;-webkit-mask:url("brand/mdive-mark.svg") center/contain no-repeat}
 
 /* MDiveButton: appearance and S/M/L visual sizes are independent of the hit host. */
@@ -35,11 +36,20 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 .button.loading::before,.loading-dot{content:"";display:inline-block;flex:none;width:18px;height:18px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%}
 .button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 .icon-button{width:var(--size-touch);padding:0;border-radius:var(--radius-control);background:transparent;color:var(--primary)}
+.icon-button[aria-pressed=true]{background:var(--surfaceVariant);color:var(--primary)}
+.icon-button[aria-pressed=true]>.icon{fill:currentColor}
 .icon-button:disabled{cursor:default;opacity:var(--opacity-disabledIcon)}
 .icon-button:not(:disabled):is(:active,.pressed){background:var(--buttonPressedSurface);color:var(--buttonPressedText)}
 
+/* Floating action reuses the primary button surface, states and >=48px hit host. Placement is screen-owned. */
+.floating-action-button{box-shadow:0 4px 12px color-mix(in srgb,var(--onSurface) 18%,transparent);max-width:100%}
+.floating-action-button.is-icon-only{width:var(--size-touch);height:var(--size-touch);min-height:var(--size-touch);padding:0;border-radius:50%}
+.floating-action-button.is-icon-only>.icon{width:var(--size-icon);height:var(--size-icon)}
+
 /* MDiveTopBar, MDiveDocumentRow, MDiveSearchBar, MDiveTextTab. */
 .topbar{display:flex;align-items:center;flex:none;width:100%;min-height:var(--size-topBar);gap:var(--space-xs);padding:var(--space-xs) var(--space-sm)}
+.topbar:has(>.brand-mark){padding-inline:var(--space-page)}
+.topbar>.brand-mark{margin-inline-end:auto}
 .topbar>strong{flex:1;min-width:0;padding-inline:var(--space-xs) var(--space-sm);font:600 var(--font-uiTitle)/var(--leading-ui) var(--family-ui),sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .topbar>strong:first-child{padding-inline-start:var(--space-control)}
 .document-row{display:flex;align-items:center;gap:14px;width:100%;padding:var(--space-md) 0;border:0;border-bottom:1px solid color-mix(in srgb,var(--outline) calc(var(--opacity-divider)*100%),transparent);border-radius:var(--radius-panel) var(--radius-panel) 0 0;background:var(--background);color:var(--onSurface);font:var(--font-ui)/var(--leading-ui) var(--family-ui),sans-serif;text-align:start;cursor:pointer}
@@ -51,9 +61,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 .document-row[data-favorite=true]>.icon:last-child{color:var(--primary)}
 .document-row:is(:active,:focus-visible){background:var(--surfaceVariant)}
 .search{display:flex;align-items:center;flex:none;width:100%;min-height:var(--size-topBar);gap:0;padding:0;border-bottom:1px solid color-mix(in srgb,var(--outline) calc(var(--opacity-divider)*100%),transparent);background:transparent}
-.search input{width:0;min-width:0;flex:1;min-height:calc(var(--size-touch) - 2*var(--space-searchInset));margin-block:var(--space-searchInset);padding:calc(var(--space-control) - var(--space-searchInset)) var(--space-control);border:1px solid var(--outline);border-radius:var(--radius-input);background:var(--surfaceVariant);color:var(--onSurface);font:var(--font-ui)/var(--leading-ui) var(--family-ui),sans-serif;outline:none}
+.search input{width:0;min-width:0;flex:1;min-height:calc(var(--size-touch) - 2*var(--space-searchInset));margin-block:var(--space-searchInset);padding:calc(var(--space-control) - var(--space-searchInset)) var(--space-sm);border:1px solid var(--outline);border-radius:var(--radius-input);background:var(--surfaceVariant);color:var(--onSurface);font:var(--font-ui)/var(--leading-ui) var(--family-ui),sans-serif;outline:none}
 .search input:focus{border-color:var(--primary);box-shadow:inset 0 0 0 .5px var(--primary)}
-.search>span{margin-inline:var(--space-sm);font:var(--font-caption)/var(--leading-ui) var(--family-ui),sans-serif;color:var(--muted);white-space:nowrap}
+.search>span{margin-inline:var(--space-xs);font:var(--font-caption)/var(--leading-ui) var(--family-ui),sans-serif;color:var(--muted);white-space:nowrap}
 .tabs{display:flex;gap:0;border-bottom:1px solid color-mix(in srgb,var(--outline) calc(var(--opacity-divider)*100%),transparent)}
 .tabs>:is(button,span){display:inline-flex;align-items:center;justify-content:center;flex:1;min-height:var(--size-touch);padding:0 var(--space-control);border:0;border-bottom:2px solid transparent;border-radius:var(--radius-control) var(--radius-control) 0 0;background:transparent;color:var(--muted);font:600 var(--font-ui)/var(--leading-ui) var(--family-ui),sans-serif;text-align:center;cursor:pointer}
 .tabs>.selected,.tabs>[aria-selected=true]{color:var(--primary);border-bottom-color:var(--primary)}
@@ -64,6 +74,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 .md-flow>*{margin-block:0 var(--space-documentBlock)}
 .md-flow>:last-child{margin-block-end:0}
 .md-flow :is(h1,h2,h3,h4,h5,h6){font-family:var(--family-body),sans-serif;line-height:var(--leading-title);font-weight:600;letter-spacing:normal;margin-block:0 var(--space-documentBlock)}
+.md-flow>:is(h1,h2,h3,h4,h5,h6){margin-block:var(--space-xl) var(--space-sm)}
+.md-flow>:is(h1,h2,h3,h4,h5,h6):first-child{margin-block-start:0}
 .md-flow h1{font-size:var(--font-documentH1)}.md-flow h2{font-size:var(--font-documentH2)}.md-flow h3{font-size:var(--font-documentH3)}.md-flow h4{font-size:var(--font-documentH4)}.md-flow h5{font-size:var(--font-documentH5)}.md-flow h6{font-size:var(--font-documentH6)}
 .md-flow p{margin-block:0 var(--space-documentBlock)}
 .md-flow code{font-family:var(--family-code),monospace;background:var(--surfaceVariant);padding-inline:3px}
@@ -145,3 +157,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
   .md-details:not([open])>div{display:block}
   .md-details::details-content{content-visibility:visible;height:auto}
 }
+
+/* Anchored overflow surface; the screen owns placement relative to its trigger. */
+.ds-popup-menu{width:max-content;min-width:180px;max-width:calc(100vw - 32px);padding:var(--space-sm) 0;border:1px solid var(--outline);border-radius:var(--radius-control);background:var(--surface);box-shadow:0 4px 12px color-mix(in srgb,var(--onSurface) 18%,transparent)}
+.ds-popup-menu-item{display:flex;align-items:center;gap:var(--space-control);width:100%;min-height:var(--size-touch);padding:var(--space-sm) var(--space-md);border:0;background:transparent;color:var(--onSurface);font:var(--font-ui)/var(--leading-ui) var(--family-ui),sans-serif;text-align:start;cursor:pointer}
+.ds-popup-menu-item>span{min-width:0;overflow-wrap:anywhere}
+.ds-popup-menu-item>.icon{width:20px;height:20px;color:var(--primary)}
+.ds-popup-menu-item:not(:disabled):is(:hover,:active,:focus-visible){background:var(--buttonPressedSurface);color:var(--buttonPressedText)}
+.ds-popup-menu-item:disabled{color:var(--muted);cursor:default;opacity:var(--opacity-disabledIcon)}

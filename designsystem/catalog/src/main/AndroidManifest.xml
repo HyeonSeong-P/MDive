@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:label="MDive 디자인 시스템" android:theme="@style/Theme.MDive.Catalog" android:allowBackup="false" android:supportsRtl="true">
+        <activity android:name="com.parka.mdive.catalog.CatalogActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

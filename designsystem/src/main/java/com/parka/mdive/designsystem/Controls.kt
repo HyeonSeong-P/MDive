@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -61,7 +62,8 @@ fun MDiveIcon(
     val path = remember(data) { PathParser().parsePathString(data).toPath() }
     Canvas(modifier.size(size).then(if (description == null) Modifier else Modifier.semantics { contentDescription = description })) {
         withTransform({ scale(this@Canvas.size.width / CatalogIcons.viewport, this@Canvas.size.height / CatalogIcons.viewport, pivot = Offset.Zero) }) {
-            drawPath(path, tint, style = Stroke(width = CatalogIcons.strokeWidth, cap = StrokeCap.Round, join = StrokeJoin.Round))
+            if (name in CatalogIcons.filled) drawPath(path, tint)
+            else drawPath(path, tint, style = Stroke(width = CatalogIcons.strokeWidth, cap = StrokeCap.Round, join = StrokeJoin.Round))
         }
     }
 }
@@ -118,15 +120,39 @@ fun MDiveButton(
                 .defaultMinSize(minHeight = DesignTokens.Sizes.getValue("button${size.name}"))
                 .clip(shape).then(fill)
                 .then(if (focused) Modifier.border(2.dp, if (showPrimary) colors.onPrimary else colors.primary, shape) else Modifier)
-                .padding(horizontal = DesignTokens.Spacing.getValue("button${size.name}X"), vertical = DesignTokens.Spacing.getValue("button${size.name}Y")),
+                .padding(horizontal = DesignTokens.Spacing.getValue(if (text.isEmpty()) "control" else "button${size.name}X"), vertical = DesignTokens.Spacing.getValue("button${size.name}Y")),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (state == MDiveButtonState.Loading) MDiveLoadingMark(tint = foreground)
-            else if (icon != null) MDiveIcon(icon, tint = foreground, size = 20.dp)
-            Text(text, color = foreground, style = MaterialTheme.typography.labelLarge)
+            else if (icon != null) MDiveIcon(icon, tint = foreground, size = if (text.isEmpty()) 24.dp else 20.dp)
+            if (text.isNotEmpty()) Text(text, color = foreground, style = MaterialTheme.typography.labelLarge)
         }
     }
+}
+
+/** Floating placement and the content clearance belong to the screen, not this control. */
+@Composable
+fun MDiveFloatingActionButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    label: String? = null,
+    description: String = "파일 열기",
+    state: MDiveButtonState = MDiveButtonState.Normal,
+) {
+    require(label == null || label.isNotBlank()) { "A visible floating action label must not be blank." }
+    require(description.isNotBlank()) { "A floating action requires an accessible name." }
+    val shape = if (label == null) androidx.compose.foundation.shape.CircleShape else RoundedCornerShape(DesignTokens.Radii.getValue("primaryButton"))
+    MDiveButton(
+        text = label.orEmpty(),
+        onClick = onClick,
+        modifier = modifier
+            .then(if (label == null) Modifier.size(DesignTokens.Sizes.getValue("touch")).semantics { contentDescription = description } else Modifier)
+            .shadow(6.dp, shape).clip(shape),
+        icon = "file-add",
+        size = MDiveButtonSize.L,
+        state = state,
+    )
 }
 
 @Composable

@@ -6,7 +6,7 @@
 
 - MDive는 Android용 Markdown 뷰어 앱이다.
 - 사용자 시나리오와 첫 버전의 기능 방향은 `docs/product/overview.md` 및 연결된 기능 명세에서 관리한다. 홈·읽기 기본 시안은 승인됐으며 세부 디자인과 일부 동작은 미정이다. 열린 질문을 임의로 확정하지 않는다.
-- Gradle 모듈은 `app`과 `designsystem` 두 개다. 제품 기능은 Compose 템플릿 단계이며 기존 디자인 시스템을 제품에서 재사용하고 debug 카탈로그는 별도로 유지한다. 필요가 확인되기 전에는 추가 모듈, 라이브러리, 추상화를 선행 추가하지 않는다.
+- Gradle 모듈은 제품 앱 `app`, 공통 Android 라이브러리 `designsystem`, 별도 카탈로그 앱 `designsystem/catalog`(`:designsystem:catalog`)이다. 제품은 S01의 홈·읽기 호스트와 Hilt·Navigation 3 기반이며 기존 디자인 시스템을 main/release에서 재사용한다. 카탈로그는 독립 앱으로 설치·실행한다. 파일 선택과 문서 읽기는 후속 단계다. 필요가 확인되기 전에는 추가 모듈, 라이브러리, 추상화를 선행 추가하지 않는다.
 
 ## 구현 원칙
 
@@ -38,6 +38,7 @@
 | --- | --- | --- |
 | 사용자 시나리오와 수용 기준 | `product_planner` | `feature-spec` |
 | 확정된 Android 기능 구현 | `feature_builder` | `android-feature` |
+| 앱 화면·DS 시각 구성 검토 | `app_designer` | `app-design-review` |
 | 변경 사항 독립 검토 | `change_reviewer` | `change-review` |
 | Android API·의존성 확인 | `android_api_researcher` | `android-api-check` |
 | 요청받은 변경 커밋·푸시 | `git_committer` | `git-commit-push` |
@@ -66,6 +67,8 @@
 
 - `./gradlew :app:assembleDebug`
 - `./gradlew :app:testDebugUnitTest`
+- 카탈로그: `./gradlew :designsystem:catalog:assembleDebug`
+- 카탈로그 기기 검증: `./gradlew :designsystem:catalog:connectedDebugAndroidTest`
 - 기기 또는 에뮬레이터가 준비된 경우: `./gradlew :app:connectedDebugAndroidTest`
 
 ## 참고

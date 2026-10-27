@@ -251,7 +251,7 @@ internal object DesignTokens {
         "lg" to 24.dp,
         "xl" to 32.dp,
         "control" to 12.dp,
-        "page" to 20.dp,
+        "page" to 16.dp,
         "section" to 28.dp,
         "searchInset" to 4.dp,
         "buttonX" to 20.dp,
