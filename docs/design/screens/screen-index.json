@@ -1,0 +1,274 @@
+[
+  {
+    "id": "home",
+    "title": "홈 · 문서 있음",
+    "group": "홈",
+    "openq": "목록 보조정보·정렬·기록 시점은 미정. 표시된 개수·날짜는 예시.",
+    "source": "home.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "home-empty",
+    "title": "홈 · 첫 실행",
+    "group": "홈",
+    "openq": "파일 선택 취소·복귀 세부 동작 미정.",
+    "source": "home.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "home-no-favorites",
+    "title": "홈 · 즐겨찾기 없음",
+    "group": "홈",
+    "openq": "빈 즐겨찾기 영역의 크기·노출 여부 제안. 최근 문서는 유지.",
+    "source": "home.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "home-loading",
+    "title": "홈 · 로딩",
+    "group": "홈",
+    "openq": "로딩 표시 시점·파일 열기 사용 가능 여부·부분 실패/재시도 정책 미정.",
+    "source": "home.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "home-error",
+    "title": "홈 · 목록 실패",
+    "group": "홈",
+    "openq": "로딩 표시 시점·파일 열기 사용 가능 여부·부분 실패/재시도 정책 미정.",
+    "source": "home.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "access-error",
+    "title": "홈 · 문서 접근 실패",
+    "group": "홈",
+    "openq": "재연결 시 동일 문서 판별·책갈피 승계와 안내 위치 미정.",
+    "source": "home.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "remove",
+    "title": "목록 제거 확인",
+    "group": "홈",
+    "openq": "확인 다이얼로그 사용은 제안. 제거 시 관련 데이터 보관·처리 실패 정책 미정.",
+    "source": "home.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "reader",
+    "title": "문서 읽기 · 전체 콘텐츠",
+    "group": "읽기",
+    "openq": "상단 도구 배치·홈 복귀·지원 문법 범위 미정. 체크리스트는 읽기 전용.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "reader-loading",
+    "title": "읽기 · 로딩",
+    "group": "읽기",
+    "openq": "원인별 문구·재시도/취소·돌아가기 정책 미정.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "reader-error",
+    "title": "읽기 · 전체 실패",
+    "group": "읽기",
+    "openq": "원인별 문구·재시도/취소·돌아가기 정책 미정.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "local-image",
+    "title": "로컬 이미지 · 접근 불가",
+    "group": "읽기",
+    "openq": "웹 이미지 재시도·권한/경로 대응·오류 문구·원문 표시 형태 미정.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "web-image",
+    "title": "웹 이미지 · 불러오기 실패",
+    "group": "읽기",
+    "openq": "웹 이미지 재시도·권한/경로 대응·오류 문구·원문 표시 형태 미정.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "resource-error",
+    "title": "수식·Mermaid · 렌더 실패",
+    "group": "읽기",
+    "openq": "웹 이미지 재시도·권한/경로 대응·오류 문구·원문 표시 형태 미정.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "source",
+    "title": "수식·Mermaid · 원문 보기",
+    "group": "읽기",
+    "openq": "수식 실패도 같은 패턴 제안. 원문 표시 방식·닫기 동작은 미정.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "search",
+    "title": "검색 · 결과 있음",
+    "group": "읽기 도구",
+    "openq": "일치 규칙·대상·강조·끝 이동·포커스/IME와 뒤로 정책 미정.",
+    "source": "reading-tools.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "search-empty",
+    "title": "검색 · 입력 전",
+    "group": "읽기 도구",
+    "openq": "일치 규칙·대상·강조·끝 이동·포커스/IME와 뒤로 정책 미정.",
+    "source": "reading-tools.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "search-none",
+    "title": "검색 · 결과 없음",
+    "group": "읽기 도구",
+    "openq": "일치 규칙·대상·강조·끝 이동·포커스/IME와 뒤로 정책 미정.",
+    "source": "reading-tools.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "toc",
+    "title": "읽기 도구 · 목차",
+    "group": "읽기 도구",
+    "openq": "패널 형태·높이·선택 후 닫기 동작은 제안. 제목 없는 문서는 미정.",
+    "source": "reading-tools.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "bookmarks",
+    "title": "읽기 도구 · 책갈피",
+    "group": "읽기 도구",
+    "openq": "추가 버튼 위치·중복 위치·편집/삭제 흐름 미정.",
+    "source": "reading-tools.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "toc-empty",
+    "title": "목차 · 제목 없음",
+    "group": "읽기 도구",
+    "openq": "빈 목차/책갈피 문구와 표시 방식은 제안.",
+    "source": "reading-tools.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "bookmarks-empty",
+    "title": "책갈피 · 없음",
+    "group": "읽기 도구",
+    "openq": "빈 목차/책갈피 문구와 표시 방식은 제안.",
+    "source": "reading-tools.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "bookmark-lost",
+    "title": "책갈피 · 위치 복원 불가",
+    "group": "읽기 도구",
+    "openq": "재지정·삭제 등 복구 흐름 미정. 임의 위치로 이동하지 않음.",
+    "source": "reading-tools.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "rename",
+    "title": "책갈피 · 이름 편집",
+    "group": "읽기 도구",
+    "openq": "이름 길이·검증·저장 시점·취소·삭제 동선 미정.",
+    "source": "reading-tools.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "settings",
+    "title": "읽기 설정 · 본문 크기",
+    "group": "읽기 도구",
+    "openq": "설정 진입 위치·조절 범위·단위·저장 범위 미정.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "expand-image",
+    "title": "이미지 확대",
+    "group": "확대",
+    "openq": "현재 도식·이미지는 문서 샘플. 확대 조작·닫기 세부 정책 미정.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "expand-diagram",
+    "title": "Mermaid 확대",
+    "group": "확대",
+    "openq": "현재 도식·이미지는 문서 샘플. 확대 조작·닫기 세부 정책 미정.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "copied",
+    "title": "피드백 · 코드 복사 완료",
+    "group": "피드백",
+    "openq": "문구·지속 시간·대기열·책갈피 피드백 위치 미정.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "saved",
+    "title": "피드백 · 책갈피 추가 완료",
+    "group": "피드백",
+    "openq": "문구·지속 시간·대기열·책갈피 피드백 위치 미정.",
+    "source": "reading-tools.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "save-error",
+    "title": "저장 실패 · 복구 배너",
+    "group": "피드백",
+    "openq": "재시도·유지/닫기·롤백·실패 원인별 안내는 시각 제안이며 정책 미정.",
+    "source": "reading-tools.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "link-error",
+    "title": "상대 문서 링크 · 접근 실패",
+    "group": "피드백",
+    "openq": "재시도·유지/닫기·롤백·실패 원인별 안내는 시각 제안이며 정책 미정.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "copy-error",
+    "title": "코드 복사 · 실패",
+    "group": "피드백",
+    "openq": "재시도·유지/닫기·롤백·실패 원인별 안내는 시각 제안이며 정책 미정.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "favorite-error",
+    "title": "즐겨찾기 · 저장 실패",
+    "group": "피드백",
+    "openq": "재시도·유지/닫기·롤백·실패 원인별 안내는 시각 제안이며 정책 미정.",
+    "source": "home.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "math-error",
+    "title": "수식 · 렌더 실패",
+    "group": "읽기",
+    "openq": "지원 수식 표기법·오류 문구·원문 보기 형태는 미정.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  },
+  {
+    "id": "math-source",
+    "title": "수식 · 원문 보기",
+    "group": "읽기",
+    "openq": "표시 구문은 예시이며 수식 문법 지원을 확정하지 않음. 원문 닫기 동작 미정.",
+    "source": "document-viewing.md",
+    "note": "시각 초안 · 예시 데이터"
+  }
+]
