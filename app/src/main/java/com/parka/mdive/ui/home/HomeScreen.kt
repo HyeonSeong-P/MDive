@@ -5,6 +5,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Surface
+import android.content.ActivityNotFoundException
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.parka.mdive.domain.document.DocumentReference
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -27,9 +31,18 @@ import com.parka.mdive.ui.base.CollectEffects
 import com.parka.mdive.ui.base.CenteredScrollableState
 
 @Composable
-fun HomeRoute(viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeRoute(onDocumentSelected: (DocumentReference) -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        viewModel.onIntent(HomeIntent.Selected(uri?.let { DocumentReference(it.toString()) }))
+    }
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    CollectEffects(viewModel.effects) { /* No home effects exist in S01. */ }
+    CollectEffects(viewModel.effects) { effect ->
+        when (effect) {
+            HomeEffect.SelectDocument -> try { picker.launch(arrayOf("*/*")) }
+                catch (_: ActivityNotFoundException) { viewModel.onIntent(HomeIntent.PickerUnavailable) }
+            is HomeEffect.OpenDocument -> onDocumentSelected(effect.reference)
+        }
+    }
     HomeScreen(state = state, onOpenFile = { viewModel.onIntent(HomeIntent.OpenFile) })
 }
 
@@ -41,8 +54,8 @@ fun HomeScreen(state: HomeState, onOpenFile: () -> Unit, modifier: Modifier = Mo
             CenteredScrollableState(Modifier.weight(1f)) {
                 MDiveStatePanel(
                     title = "반가워요.",
-                    detail = if (state.fileOpeningAvailable) "Markdown 문서를 열고 편안하게 읽어보세요."
-                    else "Markdown 문서를 열고 편안하게 읽어보세요.\n아직 파일 열기는 사용할 수 없어요.",
+                    detail = if (state.selectionFailure) "파일 선택기를 열 수 없어요. 다시 시도해주세요."
+                    else "Markdown 문서를 열고 편안하게 읽어보세요.",
                     kind = MDiveStateKind.Empty,
                     showSymbol = false,
                     actionWidth = MDiveStateActionWidth.Compact,

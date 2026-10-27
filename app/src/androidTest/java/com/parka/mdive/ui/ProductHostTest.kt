@@ -2,7 +2,7 @@ package com.parka.mdive.ui
 
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -37,12 +37,12 @@ class ProductHostTest {
     fun hiltHomeStartsWithoutPreparedDocuments() {
         compose.setContent { MDiveDesignTheme { MDiveApp() } }
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
-        compose.onNodeWithText("파일 열기").assertIsNotEnabled()
+        compose.onNodeWithText("파일 열기").assertIsEnabled()
         compose.onNodeWithContentDescription("MDive").assertIsDisplayed()
         compose.onNodeWithText("MDive").assertDoesNotExist()
         val image = compose.onNodeWithTag("welcome-illustration").fetchSemanticsNode().boundsInRoot
         val title = compose.onNodeWithText("반가워요.").fetchSemanticsNode().boundsInRoot
-        val detail = compose.onNodeWithText("Markdown 문서를 열고 편안하게 읽어보세요.\n아직 파일 열기는 사용할 수 없어요.").fetchSemanticsNode().boundsInRoot
+        val detail = compose.onNodeWithText("Markdown 문서를 열고 편안하게 읽어보세요.").fetchSemanticsNode().boundsInRoot
         assertEquals(28 * compose.density.density, title.top - image.bottom, 1f)
         assertEquals(8 * compose.density.density, detail.top - title.bottom, 1f)
     }
@@ -72,14 +72,28 @@ class ProductHostTest {
     }
 
     @Test
+    fun debugHostDisplaysUnmodifiedSourceWithoutParsing() {
+        val source = "# 원문\r\n  **그대로**\t\n"
+        compose.setContent {
+            MDiveDesignTheme {
+                com.parka.mdive.testing.SourceDocumentTestHost(
+                    ReaderState("source.md", ReaderContent.SourceReady,
+                        com.parka.mdive.domain.document.SourceDocument("source.md", source)), {}, {},
+                )
+            }
+        }
+        compose.onNodeWithText(source).assertIsDisplayed()
+    }
+
+    @Test
     fun navigationTopBackAndSystemBackReturnToHome() {
-        val stack = NavBackStack<NavKey>(Destination.Home, Destination.Reader)
+        val stack = NavBackStack<NavKey>(Destination.Home, Destination.Reader("content://test/pending.md"))
         compose.setContent { MDiveDesignTheme { MDiveApp(backStack = stack) } }
-        compose.onNodeWithContentDescription("문서를 준비하고 있어요").assertIsDisplayed()
+        compose.onNodeWithText("문서를 열지 못했어요").assertIsDisplayed()
         compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
-        compose.runOnIdle { stack.add(Destination.Reader) }
-        compose.onNodeWithContentDescription("문서를 준비하고 있어요").assertIsDisplayed()
+        compose.runOnIdle { stack.add(Destination.Reader("content://test/pending.md")) }
+        compose.onNodeWithText("문서를 열지 못했어요").assertIsDisplayed()
         Espresso.pressBack()
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
         compose.runOnIdle {
@@ -97,10 +111,10 @@ class ProductHostTest {
             currentStack = stack
             MDiveDesignTheme { MDiveApp(backStack = stack) }
         }
-        compose.runOnIdle { currentStack!!.add(Destination.Reader) }
-        compose.onNodeWithContentDescription("문서를 준비하고 있어요").assertIsDisplayed()
+        compose.runOnIdle { currentStack!!.add(Destination.Reader("content://test/pending.md")) }
+        compose.onNodeWithText("문서를 열지 못했어요").assertIsDisplayed()
         restoration.emulateSavedInstanceStateRestore()
-        compose.onNodeWithContentDescription("문서를 준비하고 있어요").assertIsDisplayed()
+        compose.onNodeWithText("문서를 열지 못했어요").assertIsDisplayed()
         compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
     }

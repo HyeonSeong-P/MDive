@@ -1,6 +1,6 @@
 # 파일 선택부터 문서 읽기 · 세션별 구현 계획
 
-상태: **S01 최신 디자인 반영 완료 / 기존 카탈로그 기기 회귀 1건 별도 잔여 / 2026-10-27**. 제품 홈·읽기 호스트와 앱 조립 기반을 구현했다. 파일 선택·로더·파서·렌더 엔진은 미구현이며 stash 원본은 보존한다.
+상태: **S02 완료 / 기존 카탈로그 기기 회귀 1건 별도 잔여 / 2026-10-27**. S01 제품 호스트에 파일 선택·원문 로더를 연결한다. 파서·렌더 엔진은 미구현이며 stash 원본은 보존한다.
 
 ## 운영 방법
 
@@ -16,7 +16,7 @@
 
 시각 조합은 [40개 화면 보드](../design/screens/index.html)와 [DS 사용 대응표](../design/screens/component-usage.md)를 참고한다. 실제 구현은 기존 `designsystem` Compose API를 사용한다. HTML/CSS를 Android 화면으로 복사하거나 버튼·배너·시트의 공통 외형을 화면에서 재작성하지 않는다. [DS 가이드](../product/design-system.md)의 4버튼 타입·S/M/L·라이트/다크 pressed·공통 배너 행동 영역·시트 기준을 따른다. 화면 전용 목차·책갈피 행과 배치는 UI가 소유한다.
 
-현재 코드는 `app`의 제품 홈·읽기 호스트와 공통 MVI 베이스, 공통 `designsystem` 라이브러리 및 별도 `designsystem/catalog` 카탈로그 앱이다. S01에서 DS·lifecycle Compose를 main/release에 연결하고 Hilt·Navigation 3를 설정했다. 파일 열기는 비활성 안내만 제공하며 제품 홈에서 읽기 화면으로 이동하지 않는다. 필요가 없는 새 모듈·렌더러 프레임워크·저장소 추상화·유즈케이스는 만들지 않는다.
+현재 코드는 `app`의 제품 홈·읽기 호스트와 공통 MVI 베이스, 공통 `designsystem` 라이브러리 및 별도 `designsystem/catalog` 카탈로그 앱이다. S01에서 DS·lifecycle Compose를 main/release에 연결하고 Hilt·Navigation 3를 설정했다. S02는 홈에서 실제 시스템 파일 선택을 시작하고 읽기 화면에 제목·로더 상태를 연결한다. 성공 시 중간 안내만 표시하고 원문은 개발 테스트 호스트에서 검증한다. 필요가 없는 새 모듈·렌더러 프레임워크·저장소 추상화·유즈케이스는 만들지 않는다.
 
 공통 기준은 [아키텍처](../engineering/architecture.md), [MVI](../engineering/mvi.md), [Navigation 3](../engineering/navigation.md)다. 사용자 후속 요청에 따라 `app`·`designsystem`·`:designsystem:catalog` 구조와 `minSdk 24`를 사용한다. 카탈로그 앱은 제품 앱에 의존하지 않고 DS 라이브러리를 참조한다. UI → domain ← data 경계를 지키고 Android URI·파일/권한 구현·특정 라이브러리의 파서 AST가 domain 계약을 침범하지 않도록 해당 기능을 도입할 때 경계를 정한다.
 
@@ -47,7 +47,7 @@
 | ID | 한 세션의 범위 | 완료 기준과 검증 | 상태 |
 | --- | --- | --- | --- |
 | S01 | 제품 홈·읽기 호스트, 화면별 네 계약, Hilt·Navigation 3·제품 DS 연결 | 앱이 실제 DS의 첫 실행 홈을 표시. 읽기 로딩/빈/실패 상태는 Preview/테스트 호스트에서 렌더링. UI 소유 백스택·뒤로 전달 및 생명주기 수집 확인. debug·release 빌드와 관련 테스트 통과. 파서·선택기·영속 저장은 제외 | 완료. 관련 빌드·단위·제품 기기 테스트 통과, 기존 카탈로그 회귀 1건 실패 잔여(아래 인계) |
-| S02 | 시스템 파일 선택과 파일 읽기 경계 | G-문서 중 로더 경계를 먼저 결정. 실제 파일 선택/취소, 제목·원문 읽기, 로딩·빈 파일·일반 열기 실패·재시도·홈 복귀를 테스트 호스트와 에뮬레이터에서 확인. 필요한 domain 계약·data 구현·DI만 추가. 아직 Markdown 렌더 완료로 표시하지 않음 | 미착수 |
+| S02 | 시스템 파일 선택과 파일 읽기 경계 | G-문서 중 로더 경계를 먼저 결정. 실제 파일 선택/취소, 제목·원문 읽기, 로딩·빈 파일·일반 열기 실패·재시도·홈 복귀를 테스트 호스트와 에뮬레이터에서 확인. 필요한 domain 계약·data 구현·DI만 추가. 아직 Markdown 렌더 완료로 표시하지 않음 | 완료. 확정 로더 경계·단위·실제 시스템 선택/취소·개발 원문 호스트·복구 검증 및 독립 검토 완료. 상세는 아래 인계 |
 | S03 | 기본 Markdown 파싱과 DS 어댑터의 첫 세로 흐름 | G-문서의 지원 프로필 확정. 실제 선택 파일의 제목·문단·인라인·인용·목록·구분선을 DS로 표시. 정상/잘못된/미지원 입력 fixture와 S02 실패 경로 회귀, 긴 제목·좁은 폭·큰 글자 확인. 홈→실제 파일→기본 본문→홈 동작 | 미착수 |
 | S04 | GFM 표·읽기 전용 task·취소선 | 선택한 프로필의 행/열·정렬·긴 셀, 중첩 목록·task 두 상태 fixture와 주변 본문 유지. 코드와 표 이외 전체 문서의 가로 넘침이 없고 task가 편집 UI로 노출되지 않음 | 미착수 |
 | S05 | 코드 원문·강조·복사 | G-코드 확정 후 긴 줄/공백 보존·블록 가로 스크롤·원문 복사·완료/실패 피드백. 미지원 언어/강조 실패도 읽기 유지. 라이트/다크 코드 복사 정상·pressed 대비 확인 | 미착수 |
@@ -90,7 +90,7 @@ S04–S15의 세부 완료 범위는 게이트에서 합의한 프로필로 제�
 
 | 항목 | 현황 |
 | --- | --- |
-| 완료 단계 | S01. PR #10 병합 커밋 `989743d`가 포함된 최신 `develop`에서 `feat/s01-product-host` 생성. 커밋·푸시·PR 없음 |
+| 완료 단계 | S01·S02 완료. PR #11 병합 커밋 `0d22e61`이 포함된 최신 `origin/develop`에서 `feat/s02-document-loading` 생성. S02 게시 요청에 따라 커밋·푸시 후 develop 대상 PR 진행 |
 | 수정 요약 | DS 첫 실행 홈·읽기 로딩/빈/실패 호스트, 화면별 MVI, Hilt, UI 소유 Nav3 백스택·entry별 ViewModel, 생명주기 상태/Effect 수집, main/release DS 연결. 파일 선택·로더·파서·저장·읽기 도구 제외. 준비된 데이터는 Preview/테스트에만 사용 |
 | 통과한 검증 | `:app:assembleDebug`, `:app:assembleRelease`, `:app:testDebugUnitTest`(5개), instrumentation APK 컴파일. API 37 `emulator-5554`에서 제품 테스트 5개를 두 전체 실행에서 모두 통과: Hilt 홈, 읽기 상태·복구 콜백, 상단/시스템 뒤로, STARTED Effect 단일 수집, key 저장·복원 후 홈 복귀. APK 설치·콜드 실행과 UIAutomator 첫 홈 확인. `git diff --check` 통과 |
 | 이전 전체 기기 회귀 | 최신 디자인 반영 전 실행에서 27개 중 26개 통과. 기존 `CatalogSmokeTest`의 코드 예제 중복 matcher를 수정. 기존 `CatalogControlsTest.searchInputAcceptsFocusAndTextInNarrowBar`가 입력 후 `1/3` 표시 확인에서 실패하고 단독 실행에서도 재현됨. 첫 전체 실행에서는 통과했으며 원인은 미확정. 전체 suite 통과로 표시하지 않음 |
@@ -102,7 +102,13 @@ S04–S15의 세부 완료 범위는 게이트에서 합의한 프로필로 제�
 | 최신 디자인 검증 | `:app:assembleDebug`, `:app:assembleRelease`, `:app:testDebugUnitTest` 5개 및 기기 테스트 APK 빌드 통과. API37 `emulator-5554` ProductHostTest 5개 통과: 홈 브랜드·일러스트·비활성 CTA·28/8 간격, 읽기 상태와 복구, 상단/시스템 뒤로, key 저장 복원, 생명주기 Effect 수집. 제품 APK 재설치·MainActivity 실행. 직접 시각 확인·스크린샷·UIAutomator 검사는 사용자 요청에 따라 생략. 독립 코드 검토 결함 없음 |
 | 명세와 디자인 분리 | `docs/product/screens/home.html`·`reader.html`은 요소별 동작·상태·미정 설명 및 기존 앵커를 유지. 와이어프레임 영역만 `docs/design/screens/index.html?embed=<board>`로 원본 디자인을 재사용. 정책·수용 기준은 제품 Markdown, 화면 동작 설명은 HTML 명세, 시각 구성은 디자인 보드가 계속 담당. Python 회귀26개·JS 구문·iframe 대상/링크/앵커·diff 검사 통과 |
 | 아직 앱에 연결하지 않은 디자인 | 문서가 있는 홈의 원형 FAB·목록, 즐겨찾기·검색·더보기 드롭다운·읽기 도구, 기존 문서 접근 실패 재연결 다이얼로그. DS/디자인 준비와 제품 기능 구현을 구분하며 해당 후속 단계에서 연결 |
-| 다음 시작점 | S02 요청 대기. 시작 시 기존 검색 카탈로그 실패와 작업 트리 상태를 확인하고, G-문서의 로더 경계를 먼저 결정. S02 자동 시작 안 함 |
+| S02 확정 경계 | UTF-8(선두 BOM 허용)·BOM UTF-16 LE/BE, strict decode, 실제 바이트 5 MiB, 전체 MIME 선택 후 md/markdown/txt 확장자 검사, 이름 없음 실패. 중복 무시·취소 홈·뒤로 읽기 취소·같은 URI 재시도·세션 권한. 회전 상태 유지, 재생성 시 재읽기/권한 없으면 실패. 상세는 제품 명세가 소유 |
+| S02 구현 | OpenDocument 시스템 선택기, UI 소유 문서 참조 key, domain 저장소 계약·원문 모델·실패 유형, ContentResolver bounded IO·BOM decode와 DI. 제품 성공은 파일명·중간 안내, debug 전용 원문 호스트와 SAF fixture 공급자. 파서·영속 목록·읽기 도구 제외 |
+| S02 Android 검증 | 최종 `:app:assembleDebug`·`:app:testDebugUnitTest` 10개 통과. API37 `emulator-5554`에서 최종 ProductHost 6개·SystemPicker 2개 통과, DocumentLoader 2개와 기존 3개도 앞선 실행에서 통과. 최초 전체 13개 중 선택기 2개가 뒤로 이동 대기 경쟁으로 실패해 대기 보완 후 재검증했으며 최종 단일 전체 실행 13/13으로 표기하지 않음. 실제 선택·취소·파일명·debug 원문·빈 파일·실패/같은 URI 재시도·홈 복귀·실제 MainActivity 재생성 후 상태 유지 확인. release·카탈로그는 미재빌드 |
+| S02 정적 검증 | Python 문서·DS 회귀 26개, 명세 HTML 로컬 링크·embed 대상·anchor 검사 및 diff 검사 통과. 사용자 요청에 따라 직접 디자인·스크린샷·HTML 렌더 반복 확인 생략 |
+| S02 독립 검토 | change_reviewer 최초·후속 검토에서 제품 결함 없음. UTF-32 차단이 유효 UTF-16 선두 NUL도 거부하는 경계를 제거하고 fixture로 보존 확인. 시스템 뒤로 취소 경로·문서와 선택기 테스트 동기화 보완 |
+| S02 미검증 | 실제 프로세스 강제 종료 뒤 권한 소실·재읽기 복구, 선택기가 열린 동안의 실제 회전, OEM/클라우드 provider, 큰 글자·TalkBack·전체 디자인. provider의 blocking IO가 코루틴 취소 즉시 끝남을 보장하지 않으며 늦은 상태 반영을 차단. 기존 카탈로그 검색 회귀 1건은 이번 S02 변경 범위 밖으로 미재실행 |
+| 다음 시작점 | S03 요청 대기. G-문서 기본 Markdown/GFM 지원 프로필을 먼저 결정하고 S02 로더 실패 경로를 회귀한다. S03 자동 시작 안 함 |
 | 아직 선택하지 않은 기술 | 파서·수식/Mermaid 엔진·이미지 로더·영속 저장 기술. 해당 단계에서 조사 후 선택 |
 | 아직 남은 제품 결정 | 위 게이트 및 원본 기능 명세의 열린 결정. 일반 열기 실패와 기존 문서 재연결의 구분, 원형 FAB·도구 배치 등 이번 사용자 디자인 결정을 관련 제품 문서에 반영했으나 파일/파서/저장 정책은 확정하지 않음 |
 | 공통 UI 준비 | 기존 Compose DS·별도 카탈로그 앱(`:designsystem:catalog`)과 HTML 시각 초안 제공. 디자인 전체 시각 승인/실제 문서 통합 검증과 구분 |

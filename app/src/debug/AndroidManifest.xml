@@ -1,5 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
         <activity android:name="com.parka.mdive.testing.ProductTestActivity" android:exported="false" android:theme="@style/Theme.MDive" />
+        <provider android:name=".testing.FixtureDocumentsProvider"
+            android:authorities="com.parka.mdive.s02.fixtures"
+            android:exported="true" android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <intent-filter><action android:name="android.content.action.DOCUMENTS_PROVIDER" /></intent-filter>
+        </provider>
     </application>
 </manifest>
