@@ -82,8 +82,11 @@ def generate():
             rows = ', '.join('listOf(' + ', '.join(map(quote, row)) + ')' for row in value)
             samples += f'    val {key} = listOf({rows})\n'
     samples += '}\n'
+    filled_icons = ', '.join(quote(name) for name in icons.get('filled', []))
+    if not set(icons.get('filled', [])).issubset(icons['paths']):
+        raise ValueError('Filled icons must refer to a registered path')
     icon_pairs = ',\n'.join(f'        {quote(key)} to {quote(path)}' for key, path in icons['paths'].items())
-    icon_kotlin = header + f'object CatalogIcons {{\n    const val viewport = {icons["viewport"]}f\n    const val strokeWidth = {icons["strokeWidth"]}f\n    val paths = mapOf(\n{icon_pairs},\n    )\n}}\n'
+    icon_kotlin = header + f'object CatalogIcons {{\n    const val viewport = {icons["viewport"]}f\n    const val strokeWidth = {icons["strokeWidth"]}f\n    val filled = setOf({filled_icons})\n    val paths = mapOf(\n{icon_pairs},\n    )\n}}\n'
     css = '/* Generated. Do not edit. */\n'
     for theme_id, theme in themes.items():
         for mode in ['light', 'dark']:
@@ -109,16 +112,27 @@ def generate():
     brand.set('height', '72')
     brand_svg = ET.tostring(brand, encoding='unicode')
     def icon(name):
-        return f'<svg class="icon" viewBox="0 0 {icons["viewport"]} {icons["viewport"]}" aria-hidden="true"><path d="{e(icons["paths"][name])}"/></svg>'
+        return f'<svg class="icon{" is-filled" if name in icons.get("filled", []) else ""}" viewBox="0 0 {icons["viewport"]} {icons["viewport"]}" aria-hidden="true"><path d="{e(icons["paths"][name])}"/></svg>'
 
     def button(label, variant='', leading=None, disabled=False):
         disabled_attr = ' disabled' if disabled else ''
         return f'<button type="button" class="button {variant}"{disabled_attr}>{icon(leading) if leading else ""}{e(label)}</button>'
 
+    def dropdown_menu(state):
+        label = '매우 긴 문서의 목차와 여러 위치 책갈피 확인' if state == 'longText' else '목차 · 책갈피'
+        disabled = ' disabled' if state == 'disabled' else ''
+        return f'<div class="ds-popup-menu" role="menu" aria-label="더보기 시연">' + f'<button type="button" class="ds-popup-menu-item" role="menuitem"{disabled}>' + icon('toc') + f'<span>{e(label)}</span></button>' + '<button type="button" class="ds-popup-menu-item" role="menuitem">' + icon('settings') + '<span>읽기 설정</span></button></div>'
+
+    def floating_action(state):
+        label = '<span class="floating-action-label">파일 열기</span>' if state == 'label' else ''
+        return f'<button type="button" class="button size-l floating-action-button{" is-icon-only" if not label else ""}{" pressed" if state == "pressed" else ""}" aria-label="파일 열기"{" disabled" if state == "disabled" else ""}>{icon("file-add")}{label}</button>'
+
     def document_rows(rows):
         return ''.join(f'<div class="document-row">{icon("file")}<div><strong>{e(row[0])}</strong><small>{e(row[1])}</small></div>{icon("chevron")}</div>' for row in rows)
 
     def topbar(state):
+        if state == 'brandOnly':
+            return '<div class="topbar"><span class="brand-mark" role="img" aria-label="MDive"></span></div>'
         title = sample['longFilename'] if state == 'longTitle' else sample['filename'] if state == 'back' else 'MDive'
         nav = f'<button type="button" class="icon-button" aria-label="뒤로">{icon("back")}</button>' if state != 'default' else ''
         actions = f'<button type="button" class="icon-button" aria-label="검색">{icon("search")}</button><button type="button" class="icon-button" aria-label="즐겨찾기">{icon("star")}</button>' if state in ['actions','longTitle'] else ''
@@ -134,7 +148,7 @@ def generate():
     def markdown_text(state):
         body = e(sample['markdownBody'])
         if state == 'headings':
-            return '<div class="md-flow">' + ''.join(f'<h{level} class="type-documentH{level}">H{level} · {e(sample["markdownTitle"])}</h{level}>' for level in range(1, 7)) + f'<p class="type-body">{body}</p></div>'
+            return '<div class="md-flow">' + ''.join(f'<h{level} class="type-documentH{level}">H{level} · {e(sample["markdownTitle"])}</h{level}><p class="type-body">{body}</p>' for level in range(1, 7)) + '</div>'
         if state == 'divider':
             return f'<div class="md-flow"><p>{body}</p><hr class="md-divider"><p>{body}</p></div>'
         return f'<div class="md-flow"><p><em>기울임 <strong>굵게 <s>취소선</s></strong></em> · <code>val wave = 1</code> · <a href="{e(sample["markdownLink"])}" data-content-event="link">문서 링크</a><br>{body}</p><output class="md-result" aria-live="polite"></output></div>'
@@ -145,9 +159,9 @@ def generate():
             return f'<div class="md-flow"><blockquote class="type-documentQuote"><p>{body}</p><blockquote><p>중첩 인용</p><ul><li>인용 안의 목록</li></ul></blockquote>{code_block(sample["code"])}</blockquote></div>'
         return f'<div class="md-flow"><ol start="98"><li>{body}<ul><li>혼합된 자식 목록</li></ul><p>같은 항목의 두 번째 문단</p></li><li>여러 자리 번호도 내어쓰기 유지</li></ol><ul class="md-tasks"><li>{checkbox(readonly=True, label="읽기 전용 작업")}</li><li>{checkbox(checked=True, readonly=True, label="완료한 작업")}</li></ul></div>'
 
-    def content_banner(title, detail='', action='', symbol='file', loading=False):
+    def content_banner(title, detail='', action='', symbol='file', loading=False, error=False):
         visual = '<span class="loading-dot" aria-hidden="true"></span>' if loading else icon(symbol)
-        return f'<div class="ds-banner md-content-banner" role="status">{visual}<div class="ds-banner-content"><strong>{e(title)}</strong>{f"<p>{e(detail)}</p>" if detail else ""}</div><div class="ds-banner-action">{action}</div></div>'
+        return f'<div class="{"ds-render-status" if not error and not loading else "ds-banner"}{" is-error" if error else ""} md-content-banner" role="status">{visual}<div class="ds-banner-content"><strong>{e(title)}</strong>{f"<p>{e(detail)}</p>" if detail else ""}</div><div class="ds-banner-action">{action}</div></div>'
 
     def checkbox(checked=False, disabled=False, readonly=False, label='항목 선택'):
         box = f'<span class="ds-checkbox-box" aria-hidden="true">{icon("check")}</span>'
@@ -164,13 +178,13 @@ def generate():
             inner = f'<p>인라인 수식 <span class="md-math" role="img" aria-label="에너지와 질량 관계">{e(sample["markdownFormula"])}</span> 이후에도 같은 문장입니다.</p><div class="md-rendered" role="img" aria-label="준비된 수식 예시">{e(sample["markdownFormula"])}</div>'
             inner += content_banner('수식', '정적 slot 예시', source)
             inner += content_banner('콘텐츠 렌더링 중', sample['markdownFormula'], source, loading=True)
-            inner += content_banner('콘텐츠를 표시하지 못했어요', sample['markdownReason'], source, symbol='warning')
+            inner += content_banner('콘텐츠를 표시하지 못했어요', sample['markdownReason'], source, symbol='warning', error=True)
             inner += '<div class="md-rendered" role="img" aria-label="시작에서 읽기로 이어지는 다이어그램">시작 → 읽기</div>'
             inner += content_banner('다이어그램', '정적 slot 예시 · 렌더 엔진 검증이 아닙니다.', content_event('원문 보기 · 시연', 'source') + content_event('확대 · 시연', 'expand'))
         else:
             title = {'loading':'이미지 준비 중','accessRequired':'이미지 접근 권한이 필요해요','failure':'이미지를 불러오지 못했어요','fallback':'콘텐츠 표시 실패 · 예시'}[state]
             action = '' if state == 'loading' else content_event('폴더 연결 · 시연' if state == 'accessRequired' else '원문 보기 · 시연' if state == 'fallback' else '다시 시도 · 시연', 'connect' if state == 'accessRequired' else 'source' if state == 'fallback' else 'retry')
-            inner = content_banner(title, sample['markdownAlt'] + ' · ' + sample['markdownReason'], action, symbol='warning', loading=state == 'loading')
+            inner = content_banner(title, sample['markdownAlt'] + ' · ' + sample['markdownReason'], action, symbol='warning', loading=state == 'loading', error=state == 'failure')
         return f'<div class="md-flow"><p>{e(sample["markdownBody"])}</p>{inner}<output class="md-result" aria-live="polite"></output><p>{e(sample["markdownBody"])}</p></div>'
 
     def extension_link(label, target, event='link'):
@@ -216,10 +230,10 @@ def generate():
             source = content_event('원문 보기 · 시연', 'source')
             inner = '<div data-embed-kind="html" data-embed-state="ready"><pre class="md-embedded-source"><code>' + e(raw_html) + '</code></pre>' + content_banner('HTML 원문 · 비실행 예시', '문자열을 실행하지 않고 보여주는 시각 slot입니다.', source) + '</div>'
             inner += '<div data-embed-kind="html" data-embed-state="loading">' + content_banner('HTML 표시 준비 중', sample['extensionNote'], source, loading=True) + '</div>'
-            inner += '<div data-embed-kind="html" data-embed-state="failure">' + content_banner('HTML을 표시하지 못했어요', sample['markdownReason'], source, symbol='warning') + '</div>'
+            inner += '<div data-embed-kind="html" data-embed-state="failure">' + content_banner('HTML을 표시하지 못했어요', sample['markdownReason'], source, symbol='warning', error=True) + '</div>'
             inner += '<div data-embed-kind="media" data-embed-state="ready"><div class="md-embedded-media" role="img" aria-label="준비된 미디어 재생 화면 예시">' + icon('file') + '<span>미디어 content slot</span></div>' + content_banner('미디어', note, source + content_event('확대 · 시연', 'expand')) + '</div>'
             inner += '<div data-embed-kind="media" data-embed-state="loading">' + content_banner('미디어 준비 중', sample['extensionNote'], source, loading=True) + '</div>'
-            inner += '<div data-embed-kind="media" data-embed-state="failure">' + content_banner('미디어를 표시하지 못했어요', sample['markdownReason'], source, symbol='warning') + '</div>'
+            inner += '<div data-embed-kind="media" data-embed-state="failure">' + content_banner('미디어를 표시하지 못했어요', sample['markdownReason'], source, symbol='warning', error=True) + '</div>'
         else:
             inner = '<p>' + ' · '.join(extension_link(label, target, 'reference') for label, target in sample['extensionResolvedLinks']) + '</p><p>해석된 emoji: 🌊 · typography: “차분한 읽기” … —</p><small>해석된 표시 데이터 예시 · 서비스 연결과 자동 치환을 실행하지 않습니다.</small>'
         return f'<div class="md-flow">{inner}<output class="md-result" aria-live="polite"></output></div>'
@@ -233,16 +247,27 @@ def generate():
         return bar + ('<p>일치하는 내용을 찾지 못했어요.</p>' if empty is True else '')
 
     def state_panel(kind):
+        if kind in ['loading', 'homeLoading']:
+            home = kind == 'homeLoading'
+            label = '홈 목록 로딩 예시' if home else '읽기 본문 로딩 예시'
+            line = lambda width, height=14: f'<span class="ds-skeleton-line" style="width:{width}%;height:{height}px"></span>'
+            inner = line(60, 24 if home else 28) + (line(100, 48) if home else '')
+            inner += ''.join('<div style="display:grid;gap:16px;margin-top:24px">' + (line(30, 18) if home else '') + line(100) + line(100) + line(65) + '</div>' for _ in range(2))
+            return f'<div class="ds-skeleton" role="status" aria-label="{label}"><div aria-hidden="true" style="display:grid;gap:16px">{inner}</div></div>'
         title, detail = {
-            'loading': ('문서를 준비하고 있어요', '본문을 읽을 준비가 되면 표시합니다.'),
+            'singleError': ('문서를 열 수 없어요', '접근 권한을 확인한 뒤 다시 시도하세요.'),
             'empty': ('아직 문서가 없어요', '첫 Markdown 문서를 열어보세요.'),
             'error': ('문서를 열 수 없어요', '파일이 이동되었거나 접근 권한이 바뀌었을 수 있어요.'),
         }[kind]
-        symbol = '<span class="loading-dot" role="status" aria-label="불러오는 중"></span>' if kind == 'loading' else icon('file')
-        if kind == 'error':
-            symbol += '<span class="ds-state-failure">' + icon('close') + '</span>'
-        actions = '' if kind == 'loading' else '<div class="ds-state-actions">' + button('파일 열기' if kind == 'empty' else '다시 선택', leading='plus' if kind == 'empty' else None) + (button('다시 시도', 'quiet') if kind == 'error' else '') + '</div>'
-        return f'<div class="ds-state"><div class="ds-state-visual">{symbol}</div><h3>{e(title)}</h3><p>{e(detail)}</p>{actions}</div>'
+        accent = '<span class="ds-welcome-illustration" aria-hidden="true"></span>' if kind == 'empty' else ''
+        if kind == 'empty':
+            actions = '<div class="ds-state-actions is-compact">' + button('파일 열기', 'size-l', leading='plus') + '</div>'
+        elif kind == 'singleError':
+            actions = '<div class="ds-state-actions is-compact">' + button('다시 시도') + '</div>'
+        else:
+            actions = '<div class="ds-state-actions is-compact">' + button('다시 시도') + button('홈으로', 'quiet') + '</div>'
+        return f'<div class="ds-state">{accent}<h3>{e(title)}</h3><p>{e(detail)}</p>{actions}</div>'
+
 
     def inline_notice():
         return f'<div class="ds-inline">{icon("file")}<div><strong>이미지를 불러오지 못했어요</strong><p>본문은 계속 읽을 수 있어요.</p>{button("이미지 폴더 연결", "outlined size-s")}</div></div>'
@@ -270,7 +295,7 @@ def generate():
             message = sample['bannerPersistentTitle']
             detail = '<p>' + e(sample['bannerPersistentDetail']) + '</p>'
             action = f'<button type="button" class="icon-button" data-banner-dismiss aria-label="안내 닫기">{icon("close")}</button>'
-        return f'<div class="ds-banner" role="status">{icon("warning")}<div class="ds-banner-content"><strong>{e(message)}</strong>{detail}</div><div class="ds-banner-action">{action}</div></div><p class="ds-demo-result" role="status"></p>'
+        return f'<div class="ds-banner{" is-error" if state == "retry" else ""}" role="status">{icon("warning")}<div class="ds-banner-content"><strong>{e(message)}</strong>{detail}</div><div class="ds-banner-action">{action}</div></div><p class="ds-demo-result" role="status"></p>'
 
     def text_field(state):
         error = state == 'error'
@@ -292,6 +317,8 @@ def generate():
             'disabled': button('파일 열기 · 비활성', disabled=True),
             'loading': button('준비 중', 'loading',disabled=True),
         },
+        'dropdown-menu': {state: dropdown_menu(state) for state in ['normal', 'longText', 'disabled']},
+        'floating-action': {state: floating_action(state) for state in ['icon', 'label', 'pressed', 'disabled']},
         'layout': {
             'spacing': ''.join(f'<div class="spacing-example"><code>{e(key)}</code><span style="display:inline-block;background:var(--primary);width:{value}px;height:8px"></span><small>{value}</small></div>' for key, value in tokens['spacing'].items()),
             'radius': ''.join(f'<div class="radius-example" style="border-radius:{value}px"><code>{e(key)}</code><small>{value}</small></div>' for key, value in tokens['radii'].items()),
@@ -301,7 +328,7 @@ def generate():
             'empty': '<div class="panel"><strong>아직 문서가 없어요</strong><p>첫 문서를 열어보세요.</p></div>',
             'error': '<div class="panel"><strong class="error">문서를 열지 못했어요</strong><p>접근 권한을 확인하거나 파일을 다시 선택해주세요.</p></div>',
         },
-        'topbar': {state: topbar(state) for state in ['default','back','actions','longTitle']},
+        'topbar': {state: topbar(state) for state in ['default','back','actions','longTitle','brandOnly']},
         'search': {'idle': search_bar('idle'), 'results': search_bar(False), 'empty': search_bar(True)},
         'content': {'code': code_block(sample['code']), 'table': table},
         'markdown-text': {state: markdown_text(state) for state in ['headings', 'inline', 'divider']},
@@ -309,7 +336,7 @@ def generate():
         'markdown-resources': {state: markdown_resource(state) for state in ['ready', 'loading', 'accessRequired', 'failure', 'rendered', 'fallback']},
         'icons': {'brand': '<p>MDive · 대표 심볼</p><div class="brand-original" data-palette="deepsea" data-theme="dark">' + brand_svg + '</div><p>대표 심볼은 앱 정체성에, 동작 아이콘은 조작에 사용합니다.</p>', 'normal': '<div class="icon-grid">' + ''.join(f'<div>{icon(key)}<small>{e(key)}</small></div>' for key in icons['paths']) + '</div>'},
         'navigation': {'normal': '<div class="tabs"><span class="selected">목차</span><span>책갈피</span></div><p class="muted">한 패널의 두 탭 · 배치 초안</p>'},
-        'feedback': {**{state: state_panel(state) for state in ['loading', 'empty', 'error']}, 'inline': inline_notice()},
+        'feedback': {**{state: state_panel(state) for state in ['loading', 'homeLoading', 'empty', 'singleError', 'error']}, 'inline': inline_notice()},
         'dialog': {state: confirmation(state) for state in ['confirmation', 'longText', 'busy']},
         'bottomsheet': {state: bottom_sheet(state) for state in ['default', 'scrolling']},
         'toast': {state: toast(state) for state in ['success', 'information']},

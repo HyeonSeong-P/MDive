@@ -1,6 +1,6 @@
 # 디자인 시스템 · 편안한 심해
 
-상태: 관리 방식과 `app`·`designsystem` 두 모듈 분리는 사용자 합의. 색상·크기·간격·컴포넌트 표현은 첫 검토용 초안이며 아직 시각 승인 전이다.
+상태: 관리 방식과 제품·공통 라이브러리·독립 카탈로그 앱 분리는 사용자 합의. 색상·크기·간격·컴포넌트 표현은 첫 검토용 초안이며 아직 시각 승인 전이다.
 
 ## 원본과 생성물
 
@@ -37,18 +37,23 @@ python3 -m unittest discover -s tools -p 'test_*.py'
 
 ## 모듈과 실행
 
-Gradle 모듈은 `app`과 `designsystem` 두 개다. `design-system/`은 플랫폼 공통 원본 폴더이며 세 번째 Gradle 모듈이 아니다.
+Gradle 모듈은 제품 `app`, 공통 라이브러리 `designsystem`, 카탈로그 앱 `:designsystem:catalog`다. `design-system/`은 플랫폼 공통 원본 폴더다.
 
 - `designsystem`: Android 라이브러리. Compose 테마·재사용 컴포넌트·글꼴·생성된 값과 카탈로그 표현을 소유한다. 앱의 ViewModel·domain·data를 참조하지 않는다.
-- `app`: 제품 진입점과 화면 MVI를 소유한다. 카탈로그 실행 Activity와 State·Intent·Effect·ViewModel은 `src/debug/`에만 둔다. 디자인 시스템 의존성은 카탈로그를 사용하는 debug 빌드에만 연결한다. 제품은 Compose 템플릿이며 release에 카탈로그를 연결하지 않는다.
+- `app`: 제품 진입점과 화면 MVI를 소유하고 main/release에서 DS를 사용한다. 기본 실행은 제품 홈이며 카탈로그 Activity를 포함하지 않는다.
+- `designsystem/catalog`: `designsystem`을 참조하는 별도 Android 앱. 카탈로그 실행 Activity와 State·Intent·Effect·ViewModel, 독립 MVI 베이스와 카탈로그 기기 테스트를 소유한다. 제품 앱에 의존하지 않는다. 사용자 요청으로 제품과 카탈로그의 런처 혼동을 없애기 위해 분리했다.
+
+Android Studio에서 Gradle Sync 후 제품은 `app`, 카탈로그는 `designsystem.catalog` 모듈을 대상으로 하는 Android App 실행 구성을 선택한다. 카탈로그 실행 구성이 없다면 Run → Edit Configurations에서 Android App 구성을 추가하고 해당 모듈과 Default Activity를 지정한다. 두 앱은 서로 다른 applicationId로 함께 설치할 수 있다.
 
 ```sh
-./gradlew :app:assembleDebug :app:testDebugUnitTest
-./gradlew :app:installDebug
-adb shell am start -n com.parka.mdive/.catalog.CatalogActivity
+./gradlew :designsystem:catalog:assembleDebug
+./gradlew :designsystem:catalog:installDebug
+adb shell am start -n com.parka.mdive.catalog/com.parka.mdive.catalog.CatalogActivity
+# 카탈로그 기기 회귀
+./gradlew :designsystem:catalog:connectedDebugAndroidTest
 ```
 
-`adb`가 PATH에 없다면 Android SDK의 `platform-tools/adb`를 사용한다. debug 앱 설치 후 앱 서랍의 **MDive 디자인 시스템** 아이콘으로도 열 수 있다. release에는 카탈로그 Activity와 해당 아이콘이 없다. 카탈로그의 테마 전환과 상태 비교는 검토 도구이며 제품에 테마 선택 기능을 추가하는 결정이 아니다.
+`adb`가 PATH에 없다면 Android SDK의 `platform-tools/adb`를 사용한다. 설치 후 앱 서랍의 **MDive 디자인 시스템** 아이콘으로도 열 수 있다. 제품은 **MDive** 아이콘으로 연다. 카탈로그의 테마 전환과 상태 비교는 검토 도구이며 제품에 테마 선택 기능을 추가하는 결정이 아니다.
 
 ## 카탈로그 읽는 방법
 
@@ -230,3 +235,49 @@ API 근거: [Android Bottom sheets](https://developer.android.com/develop/ui/com
 제품의 `screens.css`는 화면 배치·스크롤·오버레이 위치, 검토 도구, 실제로 화면 전용인 목차·책갈피 행과 준비된 그림 내부 표현만 소유한다. 버튼·검색·탭·문서 타이포·배너·입력·시트의 색·글꼴·내부 여백·모서리·상태를 여기서 덮어쓰지 않는다. 공통 변경은 DS 원본과 카탈로그에서 처리한다. 대응표와 허용한 화면 전용 영역은 [컴포넌트 사용 기준](../design/screens/component-usage.md)을 따른다.
 
 `tools/test_screen_component_contracts.py`는 같은 렌더러 참조, 공통 마크업 구조·아이콘 원본 일치, 제품 CSS의 공통 외형 덮어쓰기 방지를 검사한다. 이는 실제 브라우저·Android 렌더 검증과 별개다. 이번 공유 HTML 정리는 Compose의 기존 API를 대조했으며 Android 제품 화면을 구현하지 않았다.
+
+## 카탈로그 앱 분리 검증 · 2026-10-27
+
+제품 debug의 카탈로그 Activity·런처와 관련 기기 테스트를 `designsystem/catalog`의 독립 앱으로 옮겼다. 제품 debug/release 빌드·단위 테스트 5개, 카탈로그 debug·기기 테스트 APK 빌드가 통과했다. API 37 `emulator-5554`에서 제품 기기 테스트 8개가 모두 통과했고, 카탈로그 19개 중 18개가 통과했다. 기존 검색 테스트 `searchInputAcceptsFocusAndTextInNarrowBar`의 입력 후 `1/3` 표시 확인 실패는 분리 전과 동일하게 남아 있으며 이번 변경으로 해결했다고 표시하지 않는다.
+
+두 APK를 함께 설치하고 각각 콜드 실행했다. UIAutomator로 제품의 첫 실행 홈과 독립 카탈로그의 기초 규칙 목록을 확인했고, 제품 런처가 `MainActivity` 하나로 해석됨을 확인했다. 개인 기기는 사용하지 않았다. 실제 Android Studio 실행 구성 선택과 전체 시각·접근성 검증은 별도다.
+
+## 제품 상단바와 기본 화면 여백 · 2026-10-27
+
+홈은 기존 브랜드 아이콘만 상단바에 표시하고 앱명 텍스트를 반복하지 않는다. 아이콘의 접근성 이름은 `MDive`다. 읽기의 문서 제목·뒤로·도구 구성은 유지한다. 공통 상단바는 브랜드만 배치하는 경우에도 기존 높이와 터치 영역 기준을 유지한다.
+
+제품 화면 본문의 기본 여백은 좌우 16dp, 위아래 16dp이며 공통 `spacing.page`를 사용한다. 상태 화면은 중앙 정렬을 유지하고 가장자리 여백을 적용한다. 시스템 인셋·상단바 높이·48dp 터치 영역·컴포넌트 내부 패딩·들여쓰기·전체 폭 시트는 의미에 맞는 별도 기준을 따른다. 공통 컴포넌트 내부 간격을 모두 16dp로 변경한다는 뜻은 아니다. 보드 바깥 검토 페이지 여백도 제품 화면 여백과 구분한다.
+
+상단바·여백 갱신 검증: 생성물 최신 검사, Python 회귀 23개, 제품 debug/release·단위 테스트, 카탈로그 debug 빌드 통과. API 37 제품 테스트 5개와 카탈로그 브랜드 전용·긴 제목/액션 테스트 각 1개 통과. 독립 검토에서 조치할 결함 없음. 실제 HTML 확인 범위는 [화면 검증 기록](../design/screens/README.md)을 따른다.
+
+## 화면별 스켈레톤 방향·상태 표현 검토안 · 2026-10-27
+
+**사용자 확정은 화면별 전체 로딩 스켈레톤 방향과 아래 승인된 문서 퐁당 일러스트 자체다.** 구체 막대 배치와 상태 표현은 DS·디자인 보드에서 검토한 뒤 제품 앱에 반영한다. 이번 카탈로그·HTML 변경을 제품 앱 적용 완료로 해석하지 않는다.
+
+전체 로딩은 공통 막대 원시 `MDiveSkeleton` / `.ds-skeleton-line`을 각 화면의 실제 구조에 맞게 조합한다. 홈은 목록 제목·문서 행, 읽기는 본문 제목·문단 줄을 표현하며 구성은 화면이 소유한다. 접근성 로딩 이름을 한 번 제공하고 비상호작용 막대는 숨긴다. 정적 표현을 기본으로 하며 모션을 추가한다면 모션 제한을 존중해야 한다.
+
+**검토안·승인 대기:** `MDiveStatePanel`의 사각 배경 아이콘 타일을 제거하고, 첫 실행은 승인된 정적 문서 퐁당 일러스트·짧은 환영 문구·파일 열기를 중심으로, 빈/전체 실패는 문구와 복구 행동을 우선하는 안을 카탈로그와 디자인 보드에 제공한다. 구체 배치는 사용자 결정 후 앱에 적용한다. 부분 리소스의 spinner·배너와 주변 본문 유지 동작은 그대로다. 문서가 물에 들어가는 모션·GIF·Lottie나 새 의존성은 도입하지 않는다.
+
+## 승인된 문서 퐁당 일러스트 · 2026-10-27
+
+사용자 승인 ImageGen PNG의 단색 형태를 자동 트레이스해 `design-system/illustrations/document-plunge.svg`를 공통 원본으로 사용한다. 임의의 새 SVG 구도로 재창작하지 않는다. HTML은 `.ds-welcome-illustration`의 SVG mask와 primary 색, Compose 카탈로그는 같은 벡터 원본에서 생성한 리소스에 primary tint를 적용해 세 색상안의 라이트·다크를 따른다. 단색 정적 장식이므로 인접 환영 문구가 의미를 전달하는 곳에서는 접근성에서 숨긴다.
+
+이번 승인은 일러스트 자체와 디자인 화면·DS 카탈로그 추가에 한정한다. 첫 실행 전체 배치·문구, 전체 로딩 스켈레톤의 세부 배치, 빈/실패 개편은 검토안으로 유지하며 제품 앱은 이번 개편을 적용하지 않는다. 사용자 요청에 따라 직접 브라우저 시각 확인은 수행하지 않고 정적 계약 검사로 확인한다.
+
+## 디자인 리뷰 반영 조합 · 앱 적용 대기
+
+문서가 있는 재방문 홈은 문서 목록 우선의 우하단 파일 열기 FAB, 첫 실행은 승인 일러스트와 compact L 파일 열기, 빈 상태는 compact M 단일 복구를 조합한다. 일반 전체 열기 실패는 primary 재시도·quiet 홈 복귀만 사용한다. 홈 기존 문서의 접근 실패는 별도 파일 다시 연결·목록 제거·닫기 다이얼로그다. `.ds-state-actions.is-compact`, 시트 내부 `.ds-state.is-flush`는 공통 외형 계약이고 화면은 묶음 위치만 소유한다.
+
+읽기는 뒤로·제목·독립 즐겨찾기·검색·더보기 한 행이다. 더보기는 버튼에 앵커된 팝업 메뉴로 목차/책갈피·위치 책갈피 추가·읽기 설정을 제공하며 즐겨찾기를 중복하지 않는다. 정상 렌더는 `.ds-render-status` 중립 상태, 복구 오류는 오류 배너로 구분한다. 지속 오류는 문서 흐름 안에서 공간을 확보하고 일시 완료 토스트만 겹친다. 제목은 앞 간격을 뒤보다 넓게 하며 검색 한 줄의 48dp 터치·좌우 16dp를 유지한 채 중복 패딩을 줄인다. 제품 앱 적용과 미정 행동 정책 확정은 이번 범위가 아니다.
+
+제목 리듬의 플랫폼 계약은 구분한다. HTML `.md-flow`의 직접 자식 제목은 공통 CSS로 앞 32dp·뒤 8dp(첫 제목 앞 0)를 적용한다. Compose `MDiveMarkdownFlow`는 기존 `ColumnScope`와 일반 블록 간격 16dp를 유지하며 제목을 자동 판별하지 않는다. 제목과 본문은 `MDiveMarkdownSection(heading, content, spaceBefore)`으로 명시 조합한다. 기본 `spaceBefore=16dp`와 바깥 Flow 간격 16dp가 제목 앞 32dp를 만들고 section 내부 제목 뒤는 8dp, 본문 블록 사이는 16dp다. 첫 section은 `spaceBefore=0`을 사용한다. 기존 weight/align 사용 계약은 유지한다.
+
+## 문서가 있는 홈의 파일 열기 FAB · 확정
+
+공통 `MDiveFloatingActionButton` / `.button.size-l.floating-action-button`은 기존 primary L 버튼의 색·pressed·48dp 터치 계약과 공통 그림자를 사용한다. `file-add`는 문서 윤곽과 더하기를 결합한 공통 아이콘이다. 디자인 화면은 `파일 열기` 라벨을 함께 제공한다. 화면은 우하단 16dp 위치와 목록 끝 예약 공간만 소유한다. 문서가 있는 홈에서 상단 열기를 중복하지 않고, 첫 실행은 기존 중앙 CTA만 유지한다. 다이얼로그 뒤 FAB는 배경처럼 비활성/접근성 제외다. 로딩/전체 실패의 제공 정책은 미정으로 유지하며 제품 앱은 이번 범위에 반영하지 않는다.
+
+## 읽기 상단 팝업 메뉴와 오류 복구 구분
+
+`.ds-popup-menu` / `.ds-popup-menu-item`은 더보기 버튼에 앵커되는 공통 메뉴 표면·48dp 이상 행동 행이다. 화면은 상단바 바로 아래·우측 16dp 앵커 좌표만 소유한다. 즐겨찾기는 별도 48dp 상단 아이콘 토글이며 `aria-pressed`와 추가/해제 접근성 이름으로 시연한다. 더보기 세로 점은 공통 `more` 원본의 채움 아이콘으로 표시한다. 일반 문서 열기 실패는 재시도·홈 복귀만, 기존 홈 문서의 접근 실패는 `파일 다시 연결`·목록 제거·닫기로 구분한다. 재연결 시 동일 문서 판별·권한·책갈피 승계 규칙은 여전히 미정이다. 제품 앱은 이번 변경에 수정하지 않는다.
+
+근거: [Acrobat Android의 Navigate and search](https://www.adobe.com/devnet-docs/acrobat/android/en/navigatesearch.html)는 열린 파일의 공통 작업을 상단에 두고 overflow에서 목차·책갈피 등 탐색 항목에 접근하는 구성을 설명한다. [Android 메뉴 문서](https://developer.android.com/develop/ui/views/components/menus#PopupMenu)는 popup을 호출한 view에 고정되는 세로 행동 목록으로 설명한다. MDive는 이 역할 분담·앵커 관계만 참고하며 Acrobat의 몰입 모드 자동 숨김이나 PDF 페이지별 책갈피 정책을 채택하지 않는다.

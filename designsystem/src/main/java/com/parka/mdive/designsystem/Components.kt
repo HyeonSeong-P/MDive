@@ -98,7 +98,7 @@ fun MDiveSearchBar(
                             Modifier.fillMaxWidth().heightIn(min = DesignTokens.Sizes.getValue("touch") - inset * 2)
                                 .clip(inputShape).background(colors.surfaceVariant)
                                 .border(if (inputFocused) 1.5.dp else 1.dp, if (inputFocused) colors.primary else colors.outline, inputShape)
-                                .padding(horizontal = DesignTokens.Spacing.getValue("control"), vertical = DesignTokens.Spacing.getValue("control") - inset),
+                                .padding(horizontal = DesignTokens.Spacing.getValue("sm"), vertical = DesignTokens.Spacing.getValue("control") - inset),
                             contentAlignment = Alignment.CenterStart,
                         ) {
                             if (query.isEmpty()) Text("문서 검색", color = colors.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
@@ -107,7 +107,7 @@ fun MDiveSearchBar(
                     }
                 },
             )
-            Text(result, modifier = Modifier.padding(horizontal = 8.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(result, modifier = Modifier.padding(horizontal = 4.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             MDiveIconButton("up", "이전 검색 결과", onPrevious, enabled = navigationEnabled)
             MDiveIconButton("down", "다음 검색 결과", onNext, enabled = navigationEnabled)
         }

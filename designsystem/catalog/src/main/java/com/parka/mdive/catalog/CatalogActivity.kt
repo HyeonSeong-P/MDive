@@ -37,10 +37,10 @@ import com.parka.mdive.designsystem.CatalogContent
 import com.parka.mdive.designsystem.MDiveDesignTheme
 import com.parka.mdive.designsystem.generated.CatalogThemes
 import com.parka.mdive.designsystem.generated.catalogEntries
-import com.parka.mdive.ui.base.BaseViewModel
-import com.parka.mdive.ui.base.UiEffect
-import com.parka.mdive.ui.base.UiIntent
-import com.parka.mdive.ui.base.UiState
+import com.parka.mdive.catalog.base.BaseViewModel
+import com.parka.mdive.catalog.base.UiEffect
+import com.parka.mdive.catalog.base.UiIntent
+import com.parka.mdive.catalog.base.UiState
 
 data class CatalogState(val darkOverride: Boolean? = null, val showLicenses: Boolean = false, val paletteId: String = "deepsea", val reviewExpanded: Boolean = false, val selectedEntryId: String? = null) : UiState
 sealed interface CatalogIntent : UiIntent {
@@ -69,7 +69,7 @@ class CatalogViewModel : BaseViewModel<CatalogState, CatalogIntent, CatalogEffec
     }
 }
 
-/** Debug-only host. MainActivity and release builds keep their original product entry point. */
+/** Standalone design-system review app; independent of the product application. */
 class CatalogActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -24,7 +24,12 @@ internal fun MarkdownCatalog(id: String, state: String) {
     MDiveMarkdownFlow {
         when (id) {
             "markdown-text" -> when (state) {
-                "headings" -> (1..6).forEach { MDiveMarkdownHeading(it, listOf(MDiveTextRun("H$it · ${CatalogSamples.markdownTitle}"))) }
+                "headings" -> (1..6).forEach { level ->
+                    MDiveMarkdownSection(
+                        heading = { MDiveMarkdownHeading(level, listOf(MDiveTextRun("H$level · ${CatalogSamples.markdownTitle}"))) },
+                        spaceBefore = if (level == 1) 0.dp else 16.dp,
+                    ) { MDiveMarkdownText(body) }
+                }
                 "inline" -> {
                     MDiveMarkdownText(listOf(MDiveTextRun("일반 한글 English 🙂 "), MDiveTextRun("강조와 굵게", emphasis = true, strong = true), MDiveTextRun(" 취소선", strike = true), MDiveTextRun(" val x = 1 ", code = true), MDiveTextRun("링크", strong = true, link = CatalogSamples.markdownLink), MDiveTextRun("\n줄바꿈 뒤 본문", highlighted = true)), onLink = { event = "링크: $it" })
                     MDiveMarkdownText(listOf(MDiveTextRun(CatalogSamples.markdownLink, link = CatalogSamples.markdownLink)), onLink = { event = "링크: $it" })

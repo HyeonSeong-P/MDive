@@ -4,6 +4,7 @@ package com.parka.mdive.designsystem.generated
 object CatalogIcons {
     const val viewport = 24f
     const val strokeWidth = 1.7f
+    val filled = setOf("more")
     val paths = mapOf(
         "back" to "M19 12H5 M11 6L5 12L11 18",
         "search" to "M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21",
@@ -22,5 +23,7 @@ object CatalogIcons {
         "check" to "M5 12L10 17L20 7",
         "chevron" to "M9 6L15 12L9 18",
         "warning" to "M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01",
+        "more" to "M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z",
+        "file-add" to "M14 3H5V21H11 M14 3V8H19V11 M14 3L19 8 M8 12H13 M8 16H10 M18 14V22 M14 18H22",
     )
 }

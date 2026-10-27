@@ -17,8 +17,8 @@ window.MDiveComponents = (() => {
   }
   const observer = new ResizeObserver(entries => entries.forEach(entry => layoutBanner(entry.target)));
   function layoutBanners(root = document) {
-    const banners = [...root.querySelectorAll('.ds-banner')];
-    if (root.matches?.('.ds-banner')) banners.unshift(root);
+    const banners = [...root.querySelectorAll('.ds-banner,.ds-render-status')];
+    if (root.matches?.('.ds-banner,.ds-render-status')) banners.unshift(root);
     banners.forEach(banner => {
       if (!observed.has(banner)) { observer.observe(banner); observed.add(banner); }
       layoutBanner(banner);

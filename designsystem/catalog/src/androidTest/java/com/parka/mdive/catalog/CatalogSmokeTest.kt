@@ -49,7 +49,9 @@ class CatalogSmokeTest {
 
         openEntry("content")
         val horizontal = SemanticsMatcher.keyIsDefined(SemanticsProperties.HorizontalScrollAxisRange)
-        val code = compose.onNode(horizontal and hasText("fun dive", substring = true))
+        // The catalog also contains a fallback block with the same source. Target the original.
+        val code = compose.onNode(horizontal and hasText("fun dive", substring = true) and
+            !hasText("미지원 언어도 원문 유지", substring = true))
         code.performScrollTo()
         assertTrue(code.fetchSemanticsNode().config[SemanticsProperties.HorizontalScrollAxisRange].maxValue() > 0f)
         code.performTouchInput { swipeLeft() }

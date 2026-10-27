@@ -40,15 +40,15 @@ body { margin: 0; background: #e8eeec; color: #192f39; font-family: Pretendard, 
 .app-frame { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
 .app-frame > .topbar { flex: none; }
 .viewport-content { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
-.document-content { padding: var(--space-lg) var(--space-page) var(--space-xl); }
-.home-content { padding: var(--space-xl) var(--space-page); }
+.document-content { padding: var(--space-page); }
+.home-content { padding: var(--space-page); }
 .doc-kicker { font-size: var(--font-caption); font-weight: 600; letter-spacing: .1em; color: var(--primary); }
 .home-content h1 { font-size: var(--font-title); line-height: var(--leading-title); letter-spacing: -.04em; font-weight: 600; margin: var(--space-control) 0; }
 .home-content .intro { color: var(--muted); margin: 0 0 var(--space-lg); }
-.home-content > .button { width: 100%; margin-bottom: var(--space-lg); }
+.home-content > .button { width: fit-content; max-width: 100%; margin-bottom: var(--space-md); }
 .home-content h2 { font-size: var(--font-uiTitle); font-weight: 600; margin: var(--space-section) 0 var(--space-sm); display: flex; align-items: center; justify-content: space-between; }
 .home-content h2 span { font-size: var(--font-caption); font-weight: 400; color: var(--muted); }
-.reader-actions { display: flex; align-items: center; padding-inline: var(--space-sm); min-height: var(--size-touch); flex: none; }
+.reader-actions { display: flex; align-items: center; padding-inline: var(--space-page); min-height: var(--size-touch); flex: none; }
 .reader-actions > .button { margin-inline-end: auto; }
 .state-viewport { display: flex; flex-direction: column; }
 .state-viewport > .ds-state { flex: none; margin: auto; }
@@ -57,11 +57,11 @@ body { margin: 0; background: #e8eeec; color: #192f39; font-family: Pretendard, 
 .state-sheet-body > .ds-state { flex: none; margin: auto; }
 .screen-sheet { position: absolute; bottom: 0; left: 0; right: 0; max-height: 88%; max-width: 100%; margin: 0; }
 .screen-sheet > .ds-sheet-body { flex: 1; min-height: 0; max-height: none; }
-.screen-dialog { position: absolute; width: calc(100% - 48px); left: 50%; top: 50%; transform: translate(-50%, -50%); max-height: 90%; }
+.screen-dialog { position: absolute; width: calc(100% - 2 * var(--space-page)); left: 50%; top: 50%; transform: translate(-50%, -50%); max-height: 90%; }
 .scrim { position: absolute; inset: 0; background: color-mix(in srgb, var(--onBackground) calc(var(--opacity-scrim) * 100%), transparent); }
-.floating-notice { position: absolute; bottom: 12px; left: 12px; right: 12px; }
-.toast-position { position: absolute; bottom: 20px; left: 20px; right: 20px; display: flex; justify-content: center; pointer-events: none; }
-.banner-position { position: absolute; top: 112px; left: 12px; right: 12px; }
+.inline-notice { margin: var(--space-page); }
+.toast-position { position: absolute; bottom: var(--space-page); left: var(--space-page); right: var(--space-page); display: flex; justify-content: center; pointer-events: none; }
+
 
 /* Screen-owned reading tools. Their row content is not a generic document row. */
 .tool-list > button, .bookmark-item { display: flex; align-items: center; gap: var(--space-sm); width: 100%; text-align: start; padding: var(--space-md) 0; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--outline) calc(var(--opacity-divider) * 100%), transparent); background: transparent; color: var(--onSurface); font: var(--font-ui)/var(--leading-ui) var(--family-ui), sans-serif; }
@@ -152,3 +152,40 @@ body { margin: 0; background: #e8eeec; color: #192f39; font-family: Pretendard, 
 .review-controls select { font: inherit; border: 1px solid #b8c9cc; background: white; padding: 9px 12px; border-radius: 6px; min-height: 40px; }
 .screen-sheet > .state-sheet-body { min-height: 320px; }
 @media print { .screen-sheet > .state-sheet-body { min-height: 0; } }
+
+/* Screen-shaped placeholder composition; line appearance belongs to feedback.css. */
+.home-skeleton, .reader-skeleton { padding: var(--space-page); }
+.home-skeleton > div, .reader-skeleton > div { display: flex; flex-direction: column; gap: var(--space-section); }
+.skeleton-group { display: flex; flex-direction: column; gap: var(--space-md); }
+.skeleton-row { display: flex; flex-direction: column; gap: var(--space-sm); padding-block: var(--space-sm); }
+
+/* Screen-owned action grouping; button appearance remains in the shared DS. */
+.recovery-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: var(--space-sm); }
+.more-tool-actions { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-sm); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+.device[data-narrow=true] .recovery-actions, .device[data-scale="1.6"] .recovery-actions { flex-direction: column; align-items: center; }
+
+.home-content > .inline-notice { margin: 0 0 var(--space-page); }
+
+/* First-run illustration needs more breathing room above its greeting. */
+#home-empty .ds-welcome-illustration { margin-bottom: var(--space-control); }
+
+/* File-open FAB placement is screen-owned; the shared DS owns its surface. */
+.home-file-fab { position: absolute; right: var(--space-page); bottom: var(--space-page); max-width: calc(100% - 2 * var(--space-page)); }
+.home-with-file-fab { --home-fab-height: max(var(--size-touch), calc(var(--font-ui) * var(--leading-ui) + 2 * var(--space-buttonLY))); padding-bottom: calc(var(--home-fab-height) + 2 * var(--space-page)); }
+
+#home-empty .welcome-copy { display: flex; flex-direction: column; gap: var(--space-sm); }
+
+/* A section starts directly below the toolbar; later sections keep their rhythm. */
+.home-content > h2:first-child { margin-top: 0; }
+.home-with-file-fab { --home-fab-height: var(--size-touch); }
+
+/* Anchored overflow placement only; the shared DS owns menu surface and rows. */
+.reader-popup-position { position: absolute; top: var(--size-topBar); right: var(--space-page); max-width: calc(100% - 2 * var(--space-page)); }
+
+/* Specification embed mode reuses the original product board without review chrome. */
+html[data-embed=board], html[data-embed=board] body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+html[data-embed=board] .design-header, html[data-embed=board] .design-intro, html[data-embed=board] .screen-nav, html[data-embed=board] .board-header, html[data-embed=board] .inspector, html[data-embed=board] .design-footer, html[data-embed=board] .demo-status { display: none !important; }
+html[data-embed=board] .design-layout, html[data-embed=board] .boards, html[data-embed=board] .board, html[data-embed=board] .board-content { display: block; max-width: none; width: 100%; margin: 0; padding: 0; border: 0; }
+html[data-embed=board] .board[hidden] { display: none !important; }
+html[data-embed=board] .device { width: 100%; height: 100vh; height: 100dvh; margin: 0; border: 0; border-radius: 0; box-shadow: none; }

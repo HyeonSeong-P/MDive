@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MDive · 제품 화면 디자인</title>
 <link rel="stylesheet" href="../../../design-system/generated/tokens.css">
-<link rel="stylesheet" href="../../../design-system/components.css">
-<link rel="stylesheet" href="../../../design-system/feedback.css">
-<link rel="stylesheet" href="screens.css">
+<link rel="stylesheet" href="../../../design-system/components.css?v=circle-fab">
+<link rel="stylesheet" href="../../../design-system/feedback.css?reader-menu">
+<link rel="stylesheet" href="screens.css?v=spec-embed">
 </head>
 <body>
 <header class="design-header">
@@ -58,6 +58,7 @@
 </ul>
 </details>
 </div>
+<p class="design-intro">검토 상태: 전체 로딩의 스켈레톤 방향은 확정입니다. 문서 퐁당 일러스트는 승인됐습니다. 구체 막대 배치·첫 실행 전체 구성·빈/실패 표현은 검토안이며, 제품 앱에는 이번 개편을 적용하지 않습니다.</p>
 <div class="design-layout">
 <nav class="screen-nav" aria-label="디자인 화면 목록">
 <a href="#all" id="show-all">모든 화면 보기 · 인쇄</a>
@@ -71,6 +72,7 @@
 <a href="#remove" data-select="remove">목록 제거 확인</a>
 <h2>읽기</h2>
 <a href="#reader" data-select="reader">문서 읽기 · 전체 콘텐츠</a>
+<a href="#reader-more" data-select="reader-more">읽기 · 도구 더보기</a>
 <a href="#reader-loading" data-select="reader-loading">읽기 · 로딩</a>
 <a href="#reader-error" data-select="reader-error">읽기 · 전체 실패</a>
 <a href="#local-image" data-select="local-image">로컬 이미지 · 접근 불가</a>
@@ -123,17 +125,9 @@
 </div>
 <div class="app-frame">
 <header class="topbar">
-<span class="brand-mark" aria-hidden="true"></span>
-<strong>MDive</strong>
+<span class="brand-mark" role="img" aria-label="MDive"></span>
 </header>
-<div class="viewport-content home-content">
-<div class="doc-kicker">YOUR READING SPACE</div>
-<h1>다시,<br>읽어볼까요?</h1>
-<p class="intro">남겨둔 생각을 이어 읽어보세요.</p>
-<button class="button size-l" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 5V19 M5 12H19"/>
-</svg>파일 열기</button>
+<div class="viewport-content home-content home-with-file-fab">
 <h2>즐겨찾기 <span>02</span>
 </h2>
 <button class="document-row" data-favorite="true" data-go="reader">
@@ -199,6 +193,7 @@
 </svg>
 </button>
 </div>
+<button class="button size-l floating-action-button is-icon-only home-file-fab" type="button" data-demo="파일 열기 시각 예시입니다. 실제 파일 선택기를 열지 않습니다." aria-label="파일 열기"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 3H5V21H11 M14 3V8H19V11 M14 3L19 8 M8 12H13 M8 16H10 M18 14V22 M14 18H22"/></svg></button>
 </div>
 <div class="system-nav" aria-hidden="true">
 <span>
@@ -221,7 +216,7 @@
 <th>파일 열기</th>
 <td>
 <code>MDiveButton(Primary)</code>
-<p>화면 폭 채움, space-page 좌우, 상단 설명 후 space-lg. 실제 Android 파일 선택기는 시스템 UI.</p>
+<p>문서가 있는 홈은 문서+더하기 FAB, 오른쪽·아래 space-page. 목록 끝에 높이·여백 예약. 첫 실행은 중앙 L CTA만 유지. 실제 Android 파일 선택기는 시스템 UI.</p>
 </td>
 </tr>
 <tr>
@@ -257,19 +252,17 @@
 </div>
 <div class="app-frame">
 <header class="topbar">
-<span class="brand-mark" aria-hidden="true"></span>
-<strong>MDive</strong>
+<span class="brand-mark" role="img" aria-label="MDive"></span>
 </header>
 <div class="viewport-content state-viewport">
 <div class="ds-state">
-<div class="ds-state-visual">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M14 3H5V21H19V8L14 3Z M14 3V8H19 M8 12H16 M8 16H14"/>
-</svg>
+
+<span class="ds-welcome-illustration" aria-hidden="true"></span>
+<div class="welcome-copy">
+<h3>반가워요.</h3>
+<p>Markdown 문서를 열고 편안하게 읽어보세요.</p>
 </div>
-<h3>읽기 좋은 곳에, 잘 오셨어요.</h3>
-<p>Markdown 문서를 열어 나만의 읽기를 시작하세요.</p>
-<div class="ds-state-actions">
+<div class="ds-state-actions is-compact">
 <button class="button size-l" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">파일 열기</button>
 </div>
 </div>
@@ -296,7 +289,7 @@
 <th>파일 열기</th>
 <td>
 <code>MDiveButton(Primary)</code>
-<p>화면 폭 채움, space-page 좌우, 상단 설명 후 space-lg. 실제 Android 파일 선택기는 시스템 UI.</p>
+<p>내용 폭 파일 열기, 첫 실행 L·재방문 M. 기본 좌우 space-page. 실제 Android 파일 선택기는 시스템 UI.</p>
 </td>
 </tr>
 <tr>
@@ -332,17 +325,9 @@
 </div>
 <div class="app-frame">
 <header class="topbar">
-<span class="brand-mark" aria-hidden="true"></span>
-<strong>MDive</strong>
+<span class="brand-mark" role="img" aria-label="MDive"></span>
 </header>
-<div class="viewport-content home-content">
-<div class="doc-kicker">YOUR READING SPACE</div>
-<h1>다시,<br>읽어볼까요?</h1>
-<p class="intro">남겨둔 생각을 이어 읽어보세요.</p>
-<button class="button size-l" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 5V19 M5 12H19"/>
-</svg>파일 열기</button>
+<div class="viewport-content home-content home-with-file-fab">
 <h2>즐겨찾기 <span>00</span>
 </h2>
 <div class="ds-inline">
@@ -393,6 +378,7 @@
 </svg>
 </button>
 </div>
+<button class="button size-l floating-action-button is-icon-only home-file-fab" type="button" data-demo="파일 열기 시각 예시입니다. 실제 파일 선택기를 열지 않습니다." aria-label="파일 열기"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 3H5V21H11 M14 3V8H19V11 M14 3L19 8 M8 12H13 M8 16H10 M18 14V22 M14 18H22"/></svg></button>
 </div>
 <div class="system-nav" aria-hidden="true">
 <span>
@@ -415,7 +401,7 @@
 <th>파일 열기</th>
 <td>
 <code>MDiveButton(Primary)</code>
-<p>화면 폭 채움, space-page 좌우, 상단 설명 후 space-lg. 실제 Android 파일 선택기는 시스템 UI.</p>
+<p>문서가 있는 홈은 문서+더하기 FAB, 오른쪽·아래 space-page. 목록 끝에 높이·여백 예약. 첫 실행은 중앙 L CTA만 유지. 실제 Android 파일 선택기는 시스템 UI.</p>
 </td>
 </tr>
 <tr>
@@ -451,17 +437,10 @@
 </div>
 <div class="app-frame">
 <header class="topbar">
-<span class="brand-mark" aria-hidden="true"></span>
-<strong>MDive</strong>
+<span class="brand-mark" role="img" aria-label="MDive"></span>
 </header>
-<div class="viewport-content state-viewport">
-<div class="ds-state">
-<div class="ds-state-visual"><span class="loading-dot" role="status" aria-label="불러오는 중"></span>
-</div>
-<h3>목록을 준비하고 있어요</h3>
-<p>저장된 문서 목록을 확인하고 있습니다.</p>
-
-</div>
+<div class="viewport-content">
+<div class="ds-skeleton home-skeleton" role="status" aria-label="문서 목록을 준비하고 있어요"><div aria-hidden="true"><div class="skeleton-group"><span class="ds-skeleton-line" style="width:34%;height:18px"></span><div class="skeleton-row"><span class="ds-skeleton-line" style="width:72%"></span><span class="ds-skeleton-line" style="width:43%;height:10px"></span></div><div class="skeleton-row"><span class="ds-skeleton-line" style="width:72%"></span><span class="ds-skeleton-line" style="width:43%;height:10px"></span></div><div class="skeleton-row"><span class="ds-skeleton-line" style="width:72%"></span><span class="ds-skeleton-line" style="width:43%;height:10px"></span></div></div><div class="skeleton-group"><span class="ds-skeleton-line" style="width:34%;height:18px"></span><div class="skeleton-row"><span class="ds-skeleton-line" style="width:72%"></span><span class="ds-skeleton-line" style="width:43%;height:10px"></span></div><div class="skeleton-row"><span class="ds-skeleton-line" style="width:72%"></span><span class="ds-skeleton-line" style="width:43%;height:10px"></span></div><div class="skeleton-row"><span class="ds-skeleton-line" style="width:72%"></span><span class="ds-skeleton-line" style="width:43%;height:10px"></span></div></div></div></div>
 </div>
 </div>
 <div class="system-nav" aria-hidden="true">
@@ -485,7 +464,7 @@
 <th>파일 열기</th>
 <td>
 <code>MDiveButton(Primary)</code>
-<p>화면 폭 채움, space-page 좌우, 상단 설명 후 space-lg. 실제 Android 파일 선택기는 시스템 UI.</p>
+<p>내용 폭 파일 열기, 첫 실행 L·재방문 M. 기본 좌우 space-page. 실제 Android 파일 선택기는 시스템 UI.</p>
 </td>
 </tr>
 <tr>
@@ -498,8 +477,8 @@
 <tr>
 <th>전체 상태</th>
 <td>
-<code>MDiveStatePanel</code>
-<p>Loading / Failure를 Empty와 구분. loading 시 진행 의미 제공.</p>
+<code>MDiveSkeleton</code>
+<p>화면 구조에 맞는 비상호작용 스켈레톤. status 이름 한 번, 장식 막대는 접근성에서 숨김.</p>
 </td>
 </tr>
 </tbody>
@@ -528,19 +507,14 @@
 </div>
 <div class="app-frame">
 <header class="topbar">
-<span class="brand-mark" aria-hidden="true"></span>
-<strong>MDive</strong>
+<span class="brand-mark" role="img" aria-label="MDive"></span>
 </header>
 <div class="viewport-content state-viewport">
 <div class="ds-state">
-<div class="ds-state-visual">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
-</svg><span class="ds-state-failure" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M6 6L18 18 M18 6L6 18"/></svg></span>
-</div>
+
 <h3>목록을 불러오지 못했어요</h3>
 <p>저장된 목록을 확인할 수 없습니다.</p>
-<div class="ds-state-actions">
+<div class="ds-state-actions is-compact">
 <button class="button secondary size-m" type="button" data-go="home">다시 시도</button>
 </div>
 </div>
@@ -567,7 +541,7 @@
 <th>파일 열기</th>
 <td>
 <code>MDiveButton(Primary)</code>
-<p>화면 폭 채움, space-page 좌우, 상단 설명 후 space-lg. 실제 Android 파일 선택기는 시스템 UI.</p>
+<p>내용 폭 파일 열기, 첫 실행 L·재방문 M. 기본 좌우 space-page. 실제 Android 파일 선택기는 시스템 UI.</p>
 </td>
 </tr>
 <tr>
@@ -609,18 +583,10 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
-<span class="brand-mark" aria-hidden="true"></span>
-<strong>MDive</strong>
+<header class="topbar" inert aria-hidden="true">
+<span class="brand-mark" role="img" aria-label="MDive"></span>
 </header>
-<div class="viewport-content home-content">
-<div class="doc-kicker">YOUR READING SPACE</div>
-<h1>다시,<br>읽어볼까요?</h1>
-<p class="intro">남겨둔 생각을 이어 읽어보세요.</p>
-<button class="button size-l" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 5V19 M5 12H19"/>
-</svg>파일 열기</button>
+<div class="viewport-content home-content home-with-file-fab" inert aria-hidden="true">
 <h2>즐겨찾기 <span>02</span>
 </h2>
 <button class="document-row" data-favorite="true" data-go="reader">
@@ -686,21 +652,13 @@
 </svg>
 </button>
 </div>
-<div class="floating-notice">
-<div class="ds-banner" role="status">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
-</svg>
-<div class="ds-banner-content">
-<strong>문서를 열지 못했어요</strong>
-<p>작은 함수의 힘.md에 접근할 수 없습니다. 원본 파일은 그대로 유지됩니다.</p>
+<button class="button size-l floating-action-button is-icon-only home-file-fab" type="button" data-demo="파일 열기 시각 예시입니다. 실제 파일 선택기를 열지 않습니다." inert aria-hidden="true" aria-label="파일 열기"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 3H5V21H11 M14 3V8H19V11 M14 3L19 8 M8 12H13 M8 16H10 M18 14V22 M14 18H22"/></svg></button>
+<div class="scrim" aria-hidden="true"></div>
+<div class="ds-overlay ds-dialog screen-dialog" data-preview role="dialog" aria-modal="true" aria-labelledby="access-error-dialog-title" aria-describedby="access-error-dialog-detail">
+<div class="ds-dialog-body"><h3 id="access-error-dialog-title">문서를 열지 못했어요</h3><p id="access-error-dialog-detail">작은 함수의 힘.md에 접근할 수 없습니다. 파일이 이동되었거나 접근 권한이 달라졌을 수 있습니다.</p><p>목록의 항목과 원본 파일은 그대로 유지됩니다.</p></div>
+<div class="ds-dialog-actions"><button class="button size-m" type="button" data-demo="파일 다시 연결 시안입니다. 실제 파일 선택기는 연결하지 않습니다.">파일 다시 연결</button><button class="button outlined size-m" type="button" data-go="remove">목록에서 제거…</button><button class="button quiet size-m" type="button" data-go="home">닫기</button></div>
 </div>
-<div class="ds-banner-action">
-<button class="button outlined size-s" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">다시 선택</button>
-<button class="button quiet size-s" type="button" data-go="remove">목록에서 제거</button>
-</div>
-</div>
-</div>
+
 </div>
 <div class="system-nav" aria-hidden="true">
 <span>
@@ -723,7 +681,7 @@
 <th>파일 열기</th>
 <td>
 <code>MDiveButton(Primary)</code>
-<p>화면 폭 채움, space-page 좌우, 상단 설명 후 space-lg. 실제 Android 파일 선택기는 시스템 UI.</p>
+<p>문서가 있는 홈은 문서+더하기 FAB, 오른쪽·아래 space-page. 목록 끝에 높이·여백 예약. 첫 실행은 중앙 L CTA만 유지. 실제 Android 파일 선택기는 시스템 UI.</p>
 </td>
 </tr>
 <tr>
@@ -736,14 +694,14 @@
 <tr>
 <th>접근 실패</th>
 <td>
-<code>MDiveRecoveryBanner + MDiveButton(Outlined/Quiet, S)</code>
-<p>재선택·목록 제거를 하나의 행동 영역에 같은 너비로 세로 배치. 일반 폭은 오른쪽, 좁은 폭·큰 글자는 아래 오른쪽. 안내 위치는 시각 제안.</p>
+<code>MDiveConfirmationDialog + MDiveButton(Outlined/Quiet, S)</code>
+<p>홈 목록을 배경으로 유지하는 복구 다이얼로그. 파일 다시 연결·별도 제거 확인·닫기를 제공하며 배경 조작은 막는다.</p>
 </td>
 </tr>
 </tbody>
 </table>
 <h3>구현 전 열린 결정</h3>
-<p class="decision">재연결 시 동일 문서 판별·책갈피 승계와 안내 위치 미정.</p>
+<p class="decision">안내는 복구 다이얼로그로 제공한다. 재연결 시 동일 문서 판별·책갈피 승계는 미정.</p>
 <h3>출처 · 동작 원본</h3>
 <p>
 <a href="../../product/home.md">home.md</a> · <a href="../../product/screens/home.html#s-02">기존 와이어프레임</a>
@@ -765,18 +723,10 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
-<span class="brand-mark" aria-hidden="true"></span>
-<strong>MDive</strong>
+<header class="topbar" inert aria-hidden="true">
+<span class="brand-mark" role="img" aria-label="MDive"></span>
 </header>
-<div class="viewport-content home-content">
-<div class="doc-kicker">YOUR READING SPACE</div>
-<h1>다시,<br>읽어볼까요?</h1>
-<p class="intro">남겨둔 생각을 이어 읽어보세요.</p>
-<button class="button size-l" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 5V19 M5 12H19"/>
-</svg>파일 열기</button>
+<div class="viewport-content home-content home-with-file-fab" inert aria-hidden="true">
 <h2>즐겨찾기 <span>02</span>
 </h2>
 <button class="document-row" data-favorite="true" data-go="reader">
@@ -842,9 +792,10 @@
 </svg>
 </button>
 </div>
+<button class="button size-l floating-action-button is-icon-only home-file-fab" type="button" data-demo="파일 열기 시각 예시입니다. 실제 파일 선택기를 열지 않습니다." inert aria-hidden="true" aria-label="파일 열기"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 3H5V21H11 M14 3V8H19V11 M14 3L19 8 M8 12H13 M8 16H10 M18 14V22 M14 18H22"/></svg></button>
 <div class="scrim">
 </div>
-<div class="ds-overlay ds-dialog screen-dialog" data-preview role="dialog" aria-label="목록에서 제거 확인">
+<div class="ds-overlay ds-dialog screen-dialog" data-preview role="dialog" aria-modal="true" aria-label="목록에서 제거 확인">
 <div class="ds-dialog-body">
 <h3>목록에서 제거할까요?</h3>
 <p>이 문서의 바로가기를 목록에서 제거합니다. 원본 파일은 삭제되지 않습니다.</p>
@@ -883,7 +834,7 @@
 <th>파일 열기</th>
 <td>
 <code>MDiveButton(Primary)</code>
-<p>화면 폭 채움, space-page 좌우, 상단 설명 후 space-lg. 실제 Android 파일 선택기는 시스템 UI.</p>
+<p>문서가 있는 홈은 문서+더하기 FAB, 오른쪽·아래 space-page. 목록 끝에 높이·여백 예약. 첫 실행은 중앙 L CTA만 유지. 실제 Android 파일 선택기는 시스템 UI.</p>
 </td>
 </tr>
 <tr>
@@ -925,40 +876,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <div class="doc-kicker">NOTES / SOFTWARE DESIGN</div>
@@ -1028,10 +960,10 @@
 <span>편안하게 읽기</span>
 </div>
 </button>
-<div class="ds-banner md-content-banner"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 3H5V21H19V8L14 3Z M14 3V8H19 M8 12H16 M8 16H14"/></svg><div class="ds-banner-content"><strong>렌더링된 콘텐츠</strong><p>Markdown에서 편안한 읽기로 이어지는 흐름</p></div><div class="ds-banner-action"><button class="button outlined size-s" data-go="source">원문 보기</button><button class="button outlined size-s" data-go="expand-diagram">콘텐츠 확대</button></div></div>
+<div class="ds-render-status"><div class="ds-banner-content"><strong>렌더링된 콘텐츠</strong><p>Markdown에서 편안한 읽기로 이어지는 흐름</p></div><div class="ds-banner-action"><button class="button outlined size-s" data-go="source">원문 보기</button><button class="button outlined size-s" data-go="expand-diagram">콘텐츠 확대</button></div></div>
 <h2>작은 변화의 누적</h2>
 <div class="md-rendered md-math" aria-label="수식 예시: 1 더하기 r의 n 제곱">(1 + r)<sup>n</sup>
-</div><div class="ds-banner md-content-banner"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 3H5V21H19V8L14 3Z M14 3V8H19 M8 12H16 M8 16H14"/></svg><div class="ds-banner-content"><strong>렌더링된 콘텐츠</strong><p>1 더하기 r의 n 제곱 · 준비된 수식 예시</p></div><div class="ds-banner-action"><button class="button outlined size-s" data-go="math-source">원문 보기</button></div></div>
+</div><div class="ds-render-status"><div class="ds-banner-content"><strong>렌더링된 콘텐츠</strong><p>1 더하기 r의 n 제곱 · 준비된 수식 예시</p></div><div class="ds-banner-action"><button class="button outlined size-s" data-go="math-source">원문 보기</button></div></div>
 <p>
 <a href="../../product/document-viewing.md">링크 표현 예시 · 문서 표시 명세</a>
 </p><p><button class="button secondary size-m" type="button" data-go="reader-extensions">각주·callout·접기 예시 읽기</button>
@@ -1053,7 +985,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -1071,7 +1003,7 @@
 </td>
 </tr>
 <tr>
-<th>리소스</th><td><code>MDiveMarkdownImage(Ready) + MDiveRenderedBlock(Ready)</code><p>준비된 이미지/렌더 slot, 대체 설명, 별도 이미지 확대 버튼. 렌더 정상 상태도 설명·원문/확대 행동을 복구 배너 셸에 제공. 파일 로더·엔진은 없음.</p></td></tr><tr><th>스크롤</th>
+<th>리소스</th><td><code>MDiveMarkdownImage(Ready) + MDiveRenderedBlock(Ready)</code><p>준비된 이미지/렌더 slot, 대체 설명, 별도 이미지 확대 버튼. 렌더 정상 상태는 중립 설명·원문/확대 행동으로 제공. 파일 로더·엔진은 없음.</p></td></tr><tr><th>스크롤</th>
 <td>
 <code>화면 호스트 + 콘텐츠</code>
 <p>본문만 세로 스크롤. 상단바·도구와 시스템 바가 본문을 가리지 않음. 읽던 위치는 문서 논리 위치이며 HTML 스크롤 픽셀 저장을 명세하지 않음.</p>
@@ -1102,32 +1034,23 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<div class="viewport-content state-viewport">
-<div class="ds-state">
-<div class="ds-state-visual"><span class="loading-dot" role="status" aria-label="불러오는 중"></span>
-</div>
-<h3>문서를 준비하고 있어요</h3>
-<p>파일 내용을 읽고 있습니다.</p>
-
-</div>
+<div class="viewport-content">
+<div class="ds-skeleton reader-skeleton" role="status" aria-label="문서를 준비하고 있어요"><div aria-hidden="true"><span class="ds-skeleton-line" style="width:68%;height:28px"></span><div class="skeleton-group"><span class="ds-skeleton-line" style="width:100%"></span><span class="ds-skeleton-line" style="width:96%"></span><span class="ds-skeleton-line" style="width:88%"></span><span class="ds-skeleton-line" style="width:62%"></span></div><div class="skeleton-group"><span class="ds-skeleton-line" style="width:100%"></span><span class="ds-skeleton-line" style="width:92%"></span><span class="ds-skeleton-line" style="width:98%"></span><span class="ds-skeleton-line" style="width:74%"></span></div><div class="skeleton-group"><span class="ds-skeleton-line" style="width:94%"></span><span class="ds-skeleton-line" style="width:100%"></span><span class="ds-skeleton-line" style="width:66%"></span></div></div></div>
 </div>
 </div>
 <div class="system-nav" aria-hidden="true">
@@ -1144,7 +1067,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -1171,8 +1094,8 @@
 <tr>
 <th>전체 상태</th>
 <td>
-<code>MDiveStatePanel</code>
-<p>본문을 전혀 읽을 수 없는 실패. 부분 리소스 실패와 분리.</p>
+<code>MDiveSkeleton</code>
+<p>본문 제목·문단 구조의 비상호작용 스켈레톤. 로딩 이름 한 번만 전달하고 장식 막대는 접근성에서 숨김.</p>
 </td>
 </tr>
 </tbody>
@@ -1200,35 +1123,29 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
 <div class="viewport-content state-viewport">
 <div class="ds-state">
-<div class="ds-state-visual">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
-</svg><span class="ds-state-failure" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M6 6L18 18 M18 6L6 18"/></svg></span>
-</div>
+
 <h3>문서를 열지 못했어요</h3>
 <p>파일에 접근할 수 없거나 내용을 읽지 못했습니다.</p>
-<div class="ds-state-actions">
-<button class="button secondary size-m" type="button" data-go="home">홈으로 · 시안</button>
+<div class="ds-state-actions is-compact">
+<button class="button size-m" type="button" data-demo="재시도 행동의 시각 예시입니다. 파일을 읽지 않습니다.">다시 시도</button>
+<button class="button quiet size-m" type="button" data-go="home">홈으로</button>
 </div>
 </div>
 </div>
@@ -1247,7 +1164,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -1281,7 +1198,7 @@
 </tbody>
 </table>
 <h3>구현 전 열린 결정</h3>
-<p class="decision">열기 실패 시 읽기 화면에서 재시도·다시 선택·홈 복귀 제공 합의. 원인별 문구·복구 동작의 배치는 시각 초안.</p>
+<p class="decision">열기 실패 시 읽기 화면에서 재시도·홈 복귀 제공 합의. 원인별 문구·복구 동작의 배치는 시각 초안.</p>
 <h3>출처 · 동작 원본</h3>
 <p>
 <a href="../../product/document-viewing.md">document-viewing.md</a> · <a href="../../product/screens/reader.html#s-01">기존 와이어프레임</a>
@@ -1303,45 +1220,26 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <h1>흐름을 그려보기</h1>
 <p>자료를 확인하며 생각을 이어가 보세요.</p>
-<div class="ds-banner md-content-banner">
+<div class="ds-banner is-error md-content-banner">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
 </svg><div class="ds-banner-content">
@@ -1368,7 +1266,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -1424,45 +1322,26 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <h1>흐름을 그려보기</h1>
 <p>자료를 확인하며 생각을 이어가 보세요.</p>
-<div class="ds-banner md-content-banner">
+<div class="ds-banner is-error md-content-banner">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
 </svg><div class="ds-banner-content">
@@ -1488,7 +1367,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -1544,45 +1423,26 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <h1>흐름을 그려보기</h1>
 <p>자료를 확인하며 생각을 이어가 보세요.</p>
-<div class="ds-banner md-content-banner">
+<div class="ds-banner is-error md-content-banner">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
 </svg><div class="ds-banner-content">
@@ -1609,7 +1469,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -1665,40 +1525,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <h1>흐름을 그려보기</h1>
@@ -1734,7 +1575,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -2288,40 +2129,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <div class="doc-kicker">NOTES / SOFTWARE DESIGN</div>
@@ -2507,40 +2329,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <div class="doc-kicker">NOTES / SOFTWARE DESIGN</div>
@@ -2718,40 +2521,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <div class="doc-kicker">NOTES / SOFTWARE DESIGN</div>
@@ -2840,12 +2624,8 @@
 <button role="tab" aria-selected="true" class="selected" data-go="toc">목차</button>
 <button role="tab" aria-selected="false" class="" data-go="bookmarks">책갈피</button>
 </div>
-<div class="ds-state">
-<div class="ds-state-visual">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>
-</div>
+<div class="ds-state is-flush">
+
 <h3>목차가 없어요</h3>
 <p>이 문서에는 표시할 제목이 없어요.</p>
 
@@ -2909,40 +2689,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <div class="doc-kicker">NOTES / SOFTWARE DESIGN</div>
@@ -3031,15 +2792,11 @@
 <button role="tab" aria-selected="false" class="" data-go="toc">목차</button>
 <button role="tab" aria-selected="true" class="selected" data-go="bookmarks">책갈피</button>
 </div>
-<div class="ds-state">
-<div class="ds-state-visual">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</div>
+<div class="ds-state is-flush">
+
 <h3>책갈피가 없어요</h3>
 <p>다시 읽을 위치를 책갈피로 남겨보세요.</p>
-<div class="ds-state-actions">
+<div class="ds-state-actions is-compact">
 <button class="button secondary size-m" type="button" data-go="saved">현재 위치 추가</button>
 </div>
 </div>
@@ -3102,40 +2859,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <div class="doc-kicker">NOTES / SOFTWARE DESIGN</div>
@@ -3293,40 +3031,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <div class="doc-kicker">NOTES / SOFTWARE DESIGN</div>
@@ -3484,40 +3203,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <div class="doc-kicker">NOTES / SOFTWARE DESIGN</div>
@@ -3832,40 +3532,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <div class="doc-kicker">NOTES / SOFTWARE DESIGN</div>
@@ -3965,7 +3646,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -4021,40 +3702,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <div class="doc-kicker">NOTES / SOFTWARE DESIGN</div>
@@ -4154,7 +3816,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -4210,41 +3872,35 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
+<div class="inline-notice">
+<div class="ds-banner is-error">
+<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+<path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
+</svg>
+<div class="ds-banner-content">
+<strong>책갈피를 저장하지 못했어요</strong>
+</div>
+<div class="ds-banner-action">
+<button class="button outlined size-s" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">다시 시도</button>
+</div>
+</div>
+</div>
 <article class="document-content md-flow">
 <div class="doc-kicker">NOTES / SOFTWARE DESIGN</div>
 <h1>작게 나누면,<br>더 잘 이해된다.</h1>
@@ -4322,19 +3978,7 @@
 </p>
 </article>
 </div>
-<div class="banner-position">
-<div class="ds-banner">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
-</svg>
-<div class="ds-banner-content">
-<strong>책갈피를 저장하지 못했어요</strong>
-</div>
-<div class="ds-banner-action">
-<button class="button outlined size-s" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">다시 시도</button>
-</div>
-</div>
-</div>
+
 </div>
 <div class="system-nav" aria-hidden="true">
 <span>
@@ -4350,7 +3994,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -4406,41 +4050,35 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
+<div class="inline-notice">
+<div class="ds-banner is-error">
+<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+<path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
+</svg>
+<div class="ds-banner-content">
+<strong>연결된 문서를 열지 못했어요</strong>
+</div>
+<div class="ds-banner-action">
+<button class="button outlined size-s" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">다시 시도</button>
+</div>
+</div>
+</div>
 <article class="document-content md-flow">
 <div class="doc-kicker">NOTES / SOFTWARE DESIGN</div>
 <h1>작게 나누면,<br>더 잘 이해된다.</h1>
@@ -4518,19 +4156,7 @@
 </p>
 </article>
 </div>
-<div class="banner-position">
-<div class="ds-banner">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
-</svg>
-<div class="ds-banner-content">
-<strong>연결된 문서를 열지 못했어요</strong>
-</div>
-<div class="ds-banner-action">
-<button class="button outlined size-s" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">다시 시도</button>
-</div>
-</div>
-</div>
+
 </div>
 <div class="system-nav" aria-hidden="true">
 <span>
@@ -4546,7 +4172,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -4602,41 +4228,35 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
+<div class="inline-notice">
+<div class="ds-banner is-error">
+<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+<path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
+</svg>
+<div class="ds-banner-content">
+<strong>코드를 복사하지 못했어요</strong>
+</div>
+<div class="ds-banner-action">
+<button class="button outlined size-s" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">다시 시도</button>
+</div>
+</div>
+</div>
 <article class="document-content md-flow">
 <div class="doc-kicker">NOTES / SOFTWARE DESIGN</div>
 <h1>작게 나누면,<br>더 잘 이해된다.</h1>
@@ -4714,19 +4334,7 @@
 </p>
 </article>
 </div>
-<div class="banner-position">
-<div class="ds-banner">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
-</svg>
-<div class="ds-banner-content">
-<strong>코드를 복사하지 못했어요</strong>
-</div>
-<div class="ds-banner-action">
-<button class="button outlined size-s" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">다시 시도</button>
-</div>
-</div>
-</div>
+
 </div>
 <div class="system-nav" aria-hidden="true">
 <span>
@@ -4742,7 +4350,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -4798,41 +4406,35 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
+<div class="inline-notice">
+<div class="ds-banner is-error">
+<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+<path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
+</svg>
+<div class="ds-banner-content">
+<strong>즐겨찾기를 저장하지 못했어요</strong>
+</div>
+<div class="ds-banner-action">
+<button class="button outlined size-s" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">다시 시도</button>
+</div>
+</div>
+</div>
 <article class="document-content md-flow">
 <div class="doc-kicker">NOTES / SOFTWARE DESIGN</div>
 <h1>작게 나누면,<br>더 잘 이해된다.</h1>
@@ -4910,19 +4512,7 @@
 </p>
 </article>
 </div>
-<div class="banner-position">
-<div class="ds-banner">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
-</svg>
-<div class="ds-banner-content">
-<strong>즐겨찾기를 저장하지 못했어요</strong>
-</div>
-<div class="ds-banner-action">
-<button class="button outlined size-s" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">다시 시도</button>
-</div>
-</div>
-</div>
+
 </div>
 <div class="system-nav" aria-hidden="true">
 <span>
@@ -4938,7 +4528,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -4994,45 +4584,26 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <h1>작은 변화의 누적</h1>
 <p>꾸준히 더한 변화는 시간이 지나며 커집니다.</p>
-<div class="ds-banner md-content-banner">
+<div class="ds-banner is-error md-content-banner">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/>
 </svg><div class="ds-banner-content">
@@ -5059,7 +4630,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -5115,40 +4686,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow">
 <h1>작은 변화의 누적</h1>
@@ -5182,7 +4734,7 @@
 <th>상단·도구</th>
 <td>
 <code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
-<p>제목 1줄; 위 상단바 고정, 다음 도구 행 고정. 도구 행 touch 높이. 배치는 시각 제안.</p>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
 </td>
 </tr>
 <tr>
@@ -5224,40 +4776,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow"><div class="doc-kicker">READ / EXTENSIONS</div><h1>생각을 남기는 방법</h1><p>중요한 문장을 <mark>문서 강조</mark>로 구분하고, H<sub>2</sub>O와 x<sup>2</sup>, <ins>추가한 문장</ins>과 <u>밑줄</u>을 같은 흐름에서 읽습니다.</p><aside class="md-callout"><div><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/></svg><strong>참고 · 일반 callout</strong></div><p>문서 작성자의 보조 설명입니다. 앱의 복구 안내와 구분합니다.</p></aside><aside class="md-callout md-callout-important"><div><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/></svg><strong>Important · GitHub alert</strong></div><p>서비스 계정 연결 없이도 읽을 수 있는 문서 콘텐츠 표현의 예시입니다.</p></aside><aside class="md-callout md-callout-warning"><div><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/></svg><strong>Warning · GitHub alert</strong></div><p>종류를 색만으로 전달하지 않고 제목과 아이콘을 함께 표시합니다.</p></aside><details class="md-details"><summary>접힌 예시 · 작성자의 보충 설명</summary><div><p>선택하면 이 본문이 펼쳐집니다. 닫아도 다음 본문을 계속 읽습니다.</p></div></details><details class="md-details" open><summary>펼친 예시 · 작은 함수의 조건</summary><div><ul><li>이름으로 의도를 전합니다.</li><li>하나의 책임을 분명히 합니다.</li></ul></div></details><p>접힘과 펼침은 비교 상태입니다. 초기 상태·저장·숨긴 본문의 검색 정책은 미정입니다.</p><button class="button secondary size-m" type="button" data-go="reader-references">각주·참고문헌 예시</button></article>
 </div>
@@ -5274,40 +4807,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow"><div class="doc-kicker">READ / REFERENCES</div><h1>근거를 따라 읽기</h1><p id="reference-origin" tabindex="-1">작은 단위는 이해를 돕습니다.<sup><a href="#reference-note" data-reference="reference-note" aria-label="각주 1 예시로 이동">[1]</a></sup> 설계의 배경은 <a href="#reference-book" data-reference="reference-book">[설계 노트]</a>를 참고합니다.</p><dl class="md-definitions"><dt>책갈피</dt><dd>다시 볼 문서 안의 위치를 구분하는 읽기 도구.</dd><dt>즐겨찾기</dt><dd>자주 읽을 문서 자체를 홈에 남기는 바로가기.</dd></dl><h2>각주</h2><ol class="md-footnotes"><li id="reference-note" tabindex="-1">한 번에 모든 책임을 분리한다는 뜻은 아닙니다. <a href="#reference-origin" data-reference="reference-origin">본문 예시로 돌아가기 ↩</a></li></ol><h2>참고문헌</h2><div id="reference-book" tabindex="-1"><p><strong>[설계 노트]</strong> 문서를 작은 단위로 읽기. 시각 검토를 위한 가상 참고문헌입니다.</p><a href="#reference-origin" data-reference="reference-origin">인용한 본문 예시로 돌아가기 ↩</a></div><p class="type-caption muted">참조 이동은 이 보드 안의 시연입니다. 팝업·복귀 방식이나 인용 데이터 형식을 확정하지 않습니다.</p></article>
 </div>
@@ -5324,40 +4838,21 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
 <article class="document-content md-flow"><h1>본문은 먼저 읽어요</h1><p>이미지나 다이어그램 준비를 기다리는 동안에도 주변 문단을 계속 읽습니다.</p><div class="ds-banner md-content-banner"><span class="loading-dot" aria-hidden="true"></span><div class="ds-banner-content"><strong>이미지 준비 중</strong><p>산과 바다 · 이미지 대체 설명 예시</p></div></div><h2>다이어그램</h2><div class="ds-banner md-content-banner"><span class="loading-dot" aria-hidden="true"></span><div class="ds-banner-content"><strong>콘텐츠 렌더링 중</strong><p>Markdown에서 읽기 화면으로 이어지는 흐름</p></div><div class="ds-banner-action"><button class="button outlined size-s" type="button" data-go="source">원문 보기 예시</button></div></div><h2>다음 문단</h2><p>로딩은 개별 콘텐츠 영역에 표시합니다. 문서 전체 로딩과 구분하며 완료 시점과 취소 정책은 구현 전에 정합니다.</p><button class="button secondary size-m" type="button" data-go="local-image">로컬 이미지 접근 안내 비교</button><button class="button secondary size-m" type="button" data-go="resource-error">렌더 실패 비교</button></article>
 </div>
@@ -5374,42 +4869,23 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
-<article class="document-content md-flow"><div class="doc-kicker">READ / LONG CONTENT</div><h1>아주 긴 문서 제목도 좁은 화면에서 끝까지 읽을 수 있도록</h1><p>이 예시는 320 기준 폭과 160% 글자에서 제목·긴 단어·복구 행동·가로 콘텐츠의 배치를 비교하기 위한 준비된 문서입니다.</p><p><a href="#" data-demo="긴 링크의 표시만 확인합니다. URI 해석·허용 정책은 미정입니다.">https://example.invalid/notes/averylongdocumentpathwithoutbreaks/reading</a></p><div class="md-code"><div class="md-code-bar"><span>KOTLIN</span><button class="button quiet size-s" type="button" data-go="copied">복사 예시</button></div><pre><code>val message = "긴 코드 줄은 원래 공백과 줄 구성을 유지하며 블록 안에서 가로로 읽습니다."</code></pre></div><div class="md-table-scroll"><table class="md-table type-documentTable"><thead><tr><th scope="col">확인할 상태</th><th scope="col">기대하는 시각 표현</th><th scope="col">정책 상태</th></tr></thead><tbody><tr><td>긴 표의 열</td><td>표 안에서 가로 스크롤</td><td>구체 열 너비 미정</td></tr></tbody></table></div><div class="ds-banner md-content-banner"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/></svg><div class="ds-banner-content"><strong>이미지 접근 연결 필요</strong><p>긴 대체 설명도 배너 안에서 줄바꿈하며 본문을 밀어내지 않고 세로로 이어집니다.</p></div><div class="ds-banner-action"><button class="button outlined size-s" data-demo="폴더 연결 진입의 시각 예시입니다. 실제 선택기를 열지 않습니다.">이미지 폴더 연결</button></div></div><h2>실패 이후에도 계속 읽기</h2><p>하나의 이미지에 접근하지 못해도 코드와 표, 뒤따르는 문장을 유지합니다.</p><button class="button secondary size-m" type="button" data-go="embedded-preview">임베드 상태 예시</button></article>
+<article class="document-content md-flow"><div class="doc-kicker">READ / LONG CONTENT</div><h1>아주 긴 문서 제목도 좁은 화면에서 끝까지 읽을 수 있도록</h1><p>이 예시는 320 기준 폭과 160% 글자에서 제목·긴 단어·복구 행동·가로 콘텐츠의 배치를 비교하기 위한 준비된 문서입니다.</p><p><a href="#" data-demo="긴 링크의 표시만 확인합니다. URI 해석·허용 정책은 미정입니다.">https://example.invalid/notes/averylongdocumentpathwithoutbreaks/reading</a></p><div class="md-code"><div class="md-code-bar"><span>KOTLIN</span><button class="button quiet size-s" type="button" data-go="copied">복사 예시</button></div><pre><code>val message = "긴 코드 줄은 원래 공백과 줄 구성을 유지하며 블록 안에서 가로로 읽습니다."</code></pre></div><div class="md-table-scroll"><table class="md-table type-documentTable"><thead><tr><th scope="col">확인할 상태</th><th scope="col">기대하는 시각 표현</th><th scope="col">정책 상태</th></tr></thead><tbody><tr><td>긴 표의 열</td><td>표 안에서 가로 스크롤</td><td>구체 열 너비 미정</td></tr></tbody></table></div><div class="ds-banner is-error md-content-banner"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/></svg><div class="ds-banner-content"><strong>이미지 접근 연결 필요</strong><p>긴 대체 설명도 배너 안에서 줄바꿈하며 본문을 밀어내지 않고 세로로 이어집니다.</p></div><div class="ds-banner-action"><button class="button outlined size-s" data-demo="폴더 연결 진입의 시각 예시입니다. 실제 선택기를 열지 않습니다.">이미지 폴더 연결</button></div></div><h2>실패 이후에도 계속 읽기</h2><p>하나의 이미지에 접근하지 못해도 코드와 표, 뒤따르는 문장을 유지합니다.</p><button class="button secondary size-m" type="button" data-go="embedded-preview">임베드 상태 예시</button></article>
 </div>
 </div>
 <div class="system-nav" aria-hidden="true">
@@ -5424,42 +4900,23 @@
 <span>● ▰</span>
 </div>
 <div class="app-frame">
-<header class="topbar">
+<header class="topbar reader-topbar">
 <button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M19 12H5 M11 6L5 12L11 18"/>
 </svg>
 </button>
 <strong>작은 함수의 힘.md</strong>
-<button class="icon-button" type="button" aria-label="즐겨찾기 전환 · 시안" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/>
-</svg>
-</button>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
 <button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
 <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
 <path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
 </svg>
 </button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader-more" aria-haspopup="menu" aria-expanded="false"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
 </header>
-<nav class="reader-actions" aria-label="읽기 도구">
-<button class="button quiet size-s" type="button" data-go="toc">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4"/>
-</svg>목차·책갈피</button>
-<button class="icon-button" type="button" aria-label="현재 위치 책갈피 추가 예시" data-go="saved">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M6 4H18V21L12 17L6 21Z"/>
-</svg>
-</button>
-<button class="icon-button" type="button" aria-label="읽기 설정 · 시안" data-go="settings">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M4 7H20 M4 17H20 M9 4V10 M15 14V20"/>
-</svg>
-</button>
-</nav>
 <div class="viewport-content">
-<article class="document-content md-flow"><h1>부가 콘텐츠 읽기</h1><dl class="md-metadata"><div><dt>문서</dt><dd>설계 노트</dd></div><div><dt>작성일</dt><dd>2026-10-27 · 예시</dd></div></dl><p class="type-caption muted">노출할 필드를 준비한 표시 예시입니다. front matter의 본문 노출 정책은 미정입니다.</p><h2>준비된 콘텐츠</h2><div class="md-embedded-media" role="img" aria-label="미디어 자리 예시">▶ 준비된 비실행 미디어 예시</div><p>실제 HTML·미디어 실행, URL 로딩과 자동 재생은 포함하지 않습니다.</p><h2>일부 콘텐츠 준비 실패</h2><div class="ds-banner md-content-banner"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/></svg><div class="ds-banner-content"><strong>콘텐츠를 표시하지 못했어요</strong><p>임베드 콘텐츠의 시각 실패 예시입니다. 주변 본문은 유지합니다.</p></div><div class="ds-banner-action"><button class="button outlined size-s" data-demo="원문 진입의 시각 예시입니다. 실제 HTML을 실행하지 않습니다.">원문 보기 예시</button></div></div><p>허용 태그·URL·접근·주석 비노출·필드 선택은 별도 제품 결정입니다.</p></article>
+<article class="document-content md-flow"><h1>부가 콘텐츠 읽기</h1><dl class="md-metadata"><div><dt>문서</dt><dd>설계 노트</dd></div><div><dt>작성일</dt><dd>2026-10-27 · 예시</dd></div></dl><p class="type-caption muted">노출할 필드를 준비한 표시 예시입니다. front matter의 본문 노출 정책은 미정입니다.</p><h2>준비된 콘텐츠</h2><div class="md-embedded-media" role="img" aria-label="미디어 자리 예시">▶ 준비된 비실행 미디어 예시</div><p>실제 HTML·미디어 실행, URL 로딩과 자동 재생은 포함하지 않습니다.</p><h2>일부 콘텐츠 준비 실패</h2><div class="ds-banner is-error md-content-banner"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/></svg><div class="ds-banner-content"><strong>콘텐츠를 표시하지 못했어요</strong><p>임베드 콘텐츠의 시각 실패 예시입니다. 주변 본문은 유지합니다.</p></div><div class="ds-banner-action"><button class="button outlined size-s" data-demo="원문 진입의 시각 예시입니다. 실제 HTML을 실행하지 않습니다.">원문 보기 예시</button></div></div><p>허용 태그·URL·접근·주석 비노출·필드 선택은 별도 제품 결정입니다.</p></article>
 </div>
 </div>
 <div class="system-nav" aria-hidden="true">
@@ -5482,17 +4939,9 @@
 </div>
 <div class="app-frame">
 <header class="topbar">
-<span class="brand-mark" aria-hidden="true"></span>
-<strong>MDive</strong>
+<span class="brand-mark" role="img" aria-label="MDive"></span>
 </header>
-<div class="viewport-content home-content">
-<div class="doc-kicker">YOUR READING SPACE</div>
-<h1>다시,<br>읽어볼까요?</h1>
-<p class="intro">남겨둔 생각을 이어 읽어보세요.</p>
-<button class="button size-l" type="button" data-demo="시각 예시입니다. 실제 파일·저장 작업은 수행하지 않습니다.">
-<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-<path d="M12 5V19 M5 12H19"/>
-</svg>파일 열기</button>
+<div class="viewport-content home-content home-with-file-fab">
 <h2>즐겨찾기 <span>02</span>
 </h2>
 <button class="document-row" data-favorite="true" data-go="reader">
@@ -5520,7 +4969,8 @@
 </svg>
 </button>
 <h2>최근 문서 <span>불러오기 실패</span>
-</h2><div class="ds-banner md-content-banner"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/></svg><div class="ds-banner-content"><strong>최근 문서를 불러오지 못했어요</strong><p>즐겨찾기와 파일 열기는 유지한 시각 예시입니다.</p></div><div class="ds-banner-action"><button class="button outlined size-s" data-demo="최근 목록 재시도 시각 예시입니다. 실제 목록을 읽지 않습니다.">다시 시도</button></div></div></div>
+</h2><div class="ds-banner is-error md-content-banner"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L22 21H2L12 3Z M12 9V14 M12 17H12.01"/></svg><div class="ds-banner-content"><strong>최근 문서를 불러오지 못했어요</strong><p>즐겨찾기와 파일 열기는 유지한 시각 예시입니다.</p></div><div class="ds-banner-action"><button class="button outlined size-s" data-demo="최근 목록 재시도 시각 예시입니다. 실제 목록을 읽지 않습니다.">다시 시도</button></div></div></div>
+<button class="button size-l floating-action-button is-icon-only home-file-fab" type="button" data-demo="파일 열기 시각 예시입니다. 실제 파일 선택기를 열지 않습니다." aria-label="파일 열기"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 3H5V21H11 M14 3V8H19V11 M14 3L19 8 M8 12H13 M8 16H10 M18 14V22 M14 18H22"/></svg></button>
 </div>
 <div class="system-nav" aria-hidden="true">
 <span>
@@ -5543,7 +4993,7 @@
 <th>파일 열기</th>
 <td>
 <code>MDiveButton(Primary)</code>
-<p>화면 폭 채움, space-page 좌우, 상단 설명 후 space-lg. 실제 Android 파일 선택기는 시스템 UI.</p>
+<p>문서가 있는 홈은 문서+더하기 FAB, 오른쪽·아래 space-page. 목록 끝에 높이·여백 예약. 첫 실행은 중앙 L CTA만 유지. 실제 Android 파일 선택기는 시스템 UI.</p>
 </td>
 </tr>
 <tr>
@@ -5565,13 +5015,96 @@
 </aside>
 </div>
 </section>
+<section class="board" id="reader-more" aria-labelledby="title-reader-more">
+<header class="board-header">
+<div class="eyebrow">D-41 / 읽기</div>
+<h2 id="title-reader-more">읽기 · 상단 팝업 메뉴</h2>
+<span class="draft">시각 검토안 · 기능 유지 · 앱 적용 대기</span>
+</header>
+<div class="board-content">
+<div class="device" data-palette="deepsea" data-theme="light">
+<div class="system-status" aria-hidden="true">
+<span>9:41</span>
+<span>● ▰</span>
+</div>
+<div class="app-frame">
+<header class="topbar reader-topbar">
+<button class="icon-button" type="button" aria-label="홈으로 · 시안" data-go="home">
+<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+<path d="M19 12H5 M11 6L5 12L11 18"/>
+</svg>
+</button>
+<strong>작은 함수의 힘.md</strong>
+<button class="icon-button" type="button" data-favorite-toggle aria-pressed="false" aria-label="즐겨찾기에 추가 · 시안"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"/></svg></button>
+<button class="icon-button" type="button" aria-label="문서 검색 · 시안" data-go="search">
+<svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+<path d="M17 10.5C17 14.1 14.1 17 10.5 17C6.9 17 4 14.1 4 10.5C4 6.9 6.9 4 10.5 4C14.1 4 17 6.9 17 10.5 M15 15L21 21"/>
+</svg>
+</button>
+<button class="icon-button" type="button" aria-label="읽기 도구 더보기 · 시안" data-go="reader" aria-haspopup="menu" aria-expanded="true" aria-controls="reader-more-menu"><svg class="icon is-filled" aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5A2 2 0 1 1 10 5A2 2 0 1 1 14 5Z M14 12A2 2 0 1 1 10 12A2 2 0 1 1 14 12Z M14 19A2 2 0 1 1 10 19A2 2 0 1 1 14 19Z"/></svg></button>
+</header>
+<div class="viewport-content">
+<article class="document-content md-flow"><h1>작게 나누면, 더 잘 이해된다.</h1><p>읽던 본문을 유지한 채 필요한 도구를 선택하는 시각 예시입니다.</p></article>
+</div>
+<div class="ds-popup-menu reader-popup-position" id="reader-more-menu" role="menu" aria-label="읽기 도구"><button class="ds-popup-menu-item" role="menuitem" type="button" data-go="toc">목차 · 책갈피</button><button class="ds-popup-menu-item" role="menuitem" type="button" data-go="saved">현재 위치 책갈피 추가</button><button class="ds-popup-menu-item" role="menuitem" type="button" data-go="settings">읽기 설정</button><button class="ds-popup-menu-item" role="menuitem" type="button" data-go="reader">닫기</button></div>
+</div>
+<div class="system-nav" aria-hidden="true">
+<span>
+</span>
+</div>
+</div>
+<aside class="inspector">
+<div class="eyebrow">COMPOSE HANDOFF</div>
+<h3>구성·토큰·상태 계약</h3>
+<table>
+<tbody>
+<tr>
+<th>상단·도구</th>
+<td>
+<code>MDiveTopBar + MDiveIconButton + MDiveButton(Quiet)</code>
+<p>단일 상단 행: 뒤로·한 줄 제목·즐겨찾기·검색·더보기. 48dp 터치 유지. 더보기는 버튼에 앵커된 팝업 메뉴이며 목차/책갈피·위치 책갈피 추가·설정을 제공한다.</p>
+</td>
+</tr>
+<tr>
+<th>본문</th>
+<td>
+<code>MDiveMarkdownFlow + MDiveMarkdownHeading + MDiveMarkdownText</code>
+<p>본문 body, 제목 documentH1–documentH6, 인라인 MDiveTextRun. 좌우 space-page, 블록 간 space-documentBlock. 읽기 배율 적용 범위는 미정이며 파서·호환 버전을 선택하지 않음.</p>
+</td>
+</tr>
+<tr>
+<th>코드·표</th>
+<td>
+<code>MDiveCodeBlock + MDiveMarkdownTable</code>
+<p>임의 source·강조 범위·열/행 데이터를 받는 실제 DS API. 코드 원문·공백 유지, 코드·표 내부 가로 스크롤. onCopy/onLink는 호스트 이벤트로 전달하고 파싱·클립보드는 수행하지 않음.</p>
+</td>
+</tr>
+<tr>
+<th>리소스</th><td><code>MDiveMarkdownImage(Ready) + MDiveRenderedBlock(Ready)</code><p>준비된 이미지/렌더 slot, 대체 설명, 별도 이미지 확대 버튼. 렌더 정상 상태는 중립 설명·원문/확대 행동으로 제공. 파일 로더·엔진은 없음.</p></td></tr><tr><th>스크롤</th>
+<td>
+<code>화면 호스트 + 콘텐츠</code>
+<p>본문만 세로 스크롤. 상단바·도구와 시스템 바가 본문을 가리지 않음. 읽던 위치는 문서 논리 위치이며 HTML 스크롤 픽셀 저장을 명세하지 않음.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>구현 전 열린 결정</h3>
+<p class="decision">상단·시스템 뒤로의 홈 복귀는 합의. 도구 배치·채택 문법의 정확한 방언/호환 정책은 미정. 체크리스트는 읽기 전용.</p>
+<h3>출처 · 동작 원본</h3>
+<p>
+<a href="../../product/document-viewing.md">document-viewing.md</a> · <a href="../../product/screens/reader.html#s-01">기존 와이어프레임</a>
+</p>
+<p class="minor">화면·상태 선택과 버튼은 검토용 연결입니다. 파일·네트워크·검색·저장·클립보드·확대 제스처를 실제 구현하지 않습니다. HTML 미리보기와 Android의 접근성·모션 검증은 별개입니다.</p>
+</aside>
+</div>
+</section>
 </main>
 </div>
 <div id="demo-status" class="demo-status" role="status" hidden>
 </div>
 <footer class="design-footer">MDive · 별도 디자인 산출물 / 기존 기획 원본 유지 / 시각 승인 전 초안<br>인쇄 시 모든 화면과 인접 명세가 출력됩니다. 브라우저 검증과 Android 구현 검증은 별개입니다.</footer>
 <script src="../../../design-system/components.js"></script>
-<script src="screens.js">
+<script src="screens.js?v=spec-embed">
 </script>
 </body>
 </html>

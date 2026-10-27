@@ -26,3 +26,5 @@ rootProject.name = "MDive"
 include(":app")
 
 include(":designsystem")
+
+include(":designsystem:catalog")

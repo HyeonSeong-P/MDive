@@ -24,6 +24,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.parka.mdive.designsystem.MDiveButton
+import com.parka.mdive.designsystem.MDiveBrandMark
 import com.parka.mdive.designsystem.MDiveButtonState
 import com.parka.mdive.designsystem.MDiveDesignTheme
 import com.parka.mdive.designsystem.MDiveSearchBar
@@ -73,6 +74,13 @@ class CatalogControlsTest {
         compose.onNodeWithText("1/3").assertIsDisplayed()
         compose.onNodeWithContentDescription("이전 검색 결과").assertIsDisplayed()
         compose.onNodeWithContentDescription("다음 검색 결과").assertIsDisplayed()
+    }
+
+    @Test
+    fun brandOnlyTopBarExposesBrandWithoutTitle() {
+        compose.setContent { MDiveDesignTheme { MDiveTopBar(leading = { MDiveBrandMark() }) } }
+        compose.onNodeWithContentDescription("MDive").assertIsDisplayed()
+        compose.onNodeWithText("MDive").assertDoesNotExist()
     }
 
     @Test

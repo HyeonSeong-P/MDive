@@ -10,6 +10,12 @@ import unittest
 
 
 class GeneratorTest(unittest.TestCase):
+    def test_brand_only_topbar_has_named_mark_without_empty_title(self):
+        self.run_generator()
+        page = (self.root / "design-system/generated/catalog.html").read_text()
+        self.assertIn('<div class="topbar"><span class="brand-mark" role="img" aria-label="MDive"></span></div>', page)
+        self.assertNotIn("<strong></strong>", page)
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
@@ -39,7 +45,14 @@ class GeneratorTest(unittest.TestCase):
         self.assertIn('href="../feedback.css"', page)
         self.assertIn('src="../components.js"', page)
         self.assertNotIn('const layoutBanner = () =>', page)
-        self.assertIn('class="ds-state-failure"', page)
+        self.assertNotIn('class="ds-state-visual"', page)
+        self.assertIn('class="ds-state-actions is-compact"', page)
+        self.assertIn('class="ds-render-status md-content-banner"', page)
+        self.assertIn('class="ds-banner is-error md-content-banner"', page)
+        self.assertIn('class="icon is-filled"', page)
+        self.assertIn('class="ds-popup-menu" role="menu"', page)
+        self.assertIn('class="ds-welcome-illustration"', page)
+        self.assertIn('class="ds-skeleton" role="status"', page)
         self.assertIn('class="ds-sheet-handle"', page)
 
     def test_button_size_matrix_and_shared_size_propagation(self):
