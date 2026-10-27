@@ -16,7 +16,7 @@ app의 Hilt 구성: data 구현을 domain 계약에 바인딩해 ui에 제공
 
 `domain`에서는 `ui`, `data`, Android 프레임워크, Compose를 import하지 않는다. `ui`에서도 `data` 구현을 import하지 않는다. 앱 진입점 또는 DI 구성 코드만 도메인 계약과 데이터 구현을 함께 알고 연결한다.
 
-Gradle 모듈은 제품 앱 `app`, 공통 Android 라이브러리 `designsystem`, 별도 카탈로그 앱 `:designsystem:catalog` 세 개다. 카탈로그 앱은 `designsystem/catalog` 아래에 두며 사용자 요청으로 제품 실행과 분리했다. 제품의 `ui`, `domain`, `data`는 `app` 내부 패키지 경계로 유지하며, S01에서 `ui/home`, `ui/reader`, `ui/navigation`의 제품 호스트를 추가했다. 파일 선택·로더·파서·영속 저장은 아직 없으므로 `domain`·`data`의 빈 계약이나 구현을 선행 추가하지 않는다. 패키지가 물리적 의존성을 강제하지 않으므로 리뷰와 테스트에서 import 방향을 확인한다. 의존성 주입은 Hilt를 사용하며, Hilt 모듈과 저장소 구현 바인딩은 앱의 DI 구성 코드에 둔다. `domain` 모델·인터페이스·유즈케이스에는 Hilt 또는 Android 어노테이션을 붙이지 않는다. `MDiveApplication`의 `@HiltAndroidApp`, `MainActivity`의 `@AndroidEntryPoint`, 화면별 `@HiltViewModel` 및 KSP로 Hilt를 연결한다.
+Gradle 모듈은 제품 앱 `app`, 공통 Android 라이브러리 `designsystem`, 별도 카탈로그 앱 `:designsystem:catalog` 세 개다. 카탈로그 앱은 `designsystem/catalog` 아래에 두며 사용자 요청으로 제품 실행과 분리했다. 제품의 `ui`, `domain`, `data`는 `app` 내부 패키지 경계로 유지하며, S01에서 `ui/home`, `ui/reader`, `ui/navigation`의 제품 호스트를 추가했다. S02는 `domain/document`의 문서 참조·원문·실패 결과·저장소 계약과 `data/document`의 ContentResolver 로더·인코딩 판독을 추가한다. `di/DocumentModule`이 구현을 바인딩한다. 문서 참조는 Android 타입을 포함하지 않는 불투명 문자열이며 URI 해석·스트림·권한은 플랫폼 경계가 소유한다. 파서·영속 저장의 빈 계약은 선행 추가하지 않는다. 패키지가 물리적 의존성을 강제하지 않으므로 리뷰와 테스트에서 import 방향을 확인한다. 의존성 주입은 Hilt를 사용하며, Hilt 모듈과 저장소 구현 바인딩은 앱의 DI 구성 코드에 둔다. `domain` 모델·인터페이스·유즈케이스에는 Hilt 또는 Android 어노테이션을 붙이지 않는다. `MDiveApplication`의 `@HiltAndroidApp`, `MainActivity`의 `@AndroidEntryPoint`, 화면별 `@HiltViewModel` 및 KSP로 Hilt를 연결한다.
 
 `designsystem`은 테마·글꼴·stateless Compose 컴포넌트와 카탈로그 표현을 소유하며 `app`에 의존하지 않는다. `app`의 main/release 제품 호스트와 독립 `:designsystem:catalog` 앱이 `designsystem`을 사용한다. 카탈로그 화면 MVI와 카탈로그 테스트는 `designsystem/catalog`에 둔다. 카탈로그는 제품 앱을 참조하지 않으며 자체 MVI 베이스를 소유한다. 제품 테마는 시스템 라이트·다크를 따르는 `MDiveDesignTheme`이며 카탈로그의 테마 비교 상태와 분리한다. 공통 값·카탈로그 원본과 생성 과정은 [디자인 시스템](../product/design-system.md)에서 관리한다. 제품 `app`은 `MainActivity` 하나를 런처로 제공하고, 카탈로그는 별도 applicationId `com.parka.mdive.catalog`로 설치한다.
 
@@ -62,8 +62,14 @@ Gradle 모듈은 제품 앱 `app`, 공통 Android 라이브러리 `designsystem`
 - [Compose slot API](https://developer.android.com/develop/ui/compose/layouts/basics): Composable 람다로 교체 가능한 영역을 제공한다.
 - [Compose UI 조합하기 심화](https://wisemuji.medium.com/jetpack-compose-ui-%EC%A1%B0%ED%95%A9-composition-%ED%95%98%EA%B8%B0-%EC%8B%AC%ED%99%94-33910e8f09df): slot과 compound component의 쓰임과 과도한 추상화의 비용.
 
-## S01 제품 호스트 경계
+## S01 제품 호스트 경계 · 당시 구현 기록
 
-홈은 DS 첫 실행 상태와 비활성 파일 열기를 표시한다. 실제 선택기를 연결하기 전까지 읽기 화면으로 이동하거나 예시 파일을 제품 데이터로 표시하지 않는다. 읽기 로딩·빈 내용·전체 실패는 독립 콘텐츠와 Preview/테스트에서 검증한다. 실패 복구 콜백은 파일 처리 없이 호스트로 전달하며 실제 재시도·재선택은 S02에서 연결한다. 상태 수집은 `collectAsStateWithLifecycle`, Effect는 화면별 `repeatOnLifecycle(STARTED)` 단일 수집자를 사용한다. 시스템 인셋과 상태 패널의 중앙/넘침 스크롤 배치는 화면 호스트가 소유한다.
+아래는 S01 당시 경계이며 S02 연결은 다음 절을 따른다. 홈은 DS 첫 실행 상태와 비활성 파일 열기를 표시한다. 실제 선택기를 연결하기 전까지 읽기 화면으로 이동하거나 예시 파일을 제품 데이터로 표시하지 않는다. 읽기 로딩·빈 내용·전체 실패는 독립 콘텐츠와 Preview/테스트에서 검증한다. 실패 복구 콜백은 파일 처리 없이 호스트로 전달하며 실제 재시도·재선택은 S02에서 연결한다. 상태 수집은 `collectAsStateWithLifecycle`, Effect는 화면별 `repeatOnLifecycle(STARTED)` 단일 수집자를 사용한다. 시스템 인셋과 상태 패널의 중앙/넘침 스크롤 배치는 화면 호스트가 소유한다.
 
 Navigation 3·Lifecycle·AndroidX Hilt·Dagger Hilt/KSP·Serialization 의존성은 main/release 제품 조립에 필요해 추가했다. 테스트 의존성의 Espresso 3.7.0·AndroidX Test JUnit 1.3.0은 기존 API 37 reflection 오류를 피하는 기기 검증용 갱신이다. minSdk와 제품 앱 배포 버전은 유지한다. 이후 사용자 요청으로 제품 실행과 분리한 카탈로그 앱 모듈을 추가했다.
+
+## S02 파일 로더 경계
+
+홈의 Activity Result `OpenDocument` 선택 결과를 UI 소유 Navigation 3 Reader key의 문자열 입력으로 전달한다. Reader ViewModel은 domain 저장소를 호출하고 로딩·빈 원문·실패·원문 준비 상태를 노출한다. 원문 준비 시 제품은 중간 안내만 표시하고 debug 개발 호스트에서 실제 원문을 검증한다. 파일 확장자·인코딩·크기와 취소 정책은 [제품 로더 명세](../product/document-viewing.md#s02-로더-경계--확정)를 따른다.
+
+ContentResolver 메타데이터·스트림은 IO에서 처리하며 실제 읽기 바이트 상한을 적용하고 스트림을 닫는다. 코루틴 취소는 실패로 변환하지 않고 늦은 응답의 상태 반영을 차단한다. 외부 provider의 blocking IO가 즉시 중단됨을 보장하지는 않는다. 영속 URI 권한이나 저장 목록은 추가하지 않는다.

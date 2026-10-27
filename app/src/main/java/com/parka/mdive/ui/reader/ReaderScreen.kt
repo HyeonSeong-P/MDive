@@ -1,10 +1,15 @@
 package com.parka.mdive.ui.reader
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
+import com.parka.mdive.domain.document.DocumentReference
+import com.parka.mdive.domain.document.DocumentFailure
+import com.parka.mdive.domain.document.SourceDocument
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -25,14 +30,15 @@ import com.parka.mdive.ui.base.CollectEffects
 @Composable
 fun ReaderRoute(
     onNavigateHome: () -> Unit,
-    onRetry: () -> Unit,
+    reference: DocumentReference,
     viewModel: ReaderViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(reference) { viewModel.onIntent(ReaderIntent.Open(reference)) }
+    BackHandler { viewModel.onIntent(ReaderIntent.Back) }
     CollectEffects(viewModel.effects) { effect ->
         when (effect) {
             ReaderEffect.NavigateHome -> onNavigateHome()
-            ReaderEffect.RetryRequested -> onRetry()
         }
     }
     ReaderScreen(
@@ -48,6 +54,7 @@ fun ReaderScreen(
     onBack: () -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
+    sourcePreview: (@Composable (SourceDocument) -> Unit)? = null,
 ) {
     Surface(modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().safeDrawingPadding()) {
@@ -61,6 +68,17 @@ fun ReaderScreen(
             else CenteredScrollableState(Modifier.weight(1f)) {
                 when (state.content) {
                     ReaderContent.Loading -> Unit
+                    ReaderContent.SourceReady -> {
+                        val document = state.document
+                        if (sourcePreview != null && document != null) sourcePreview(document)
+                        else MDiveStatePanel(
+                            title = "파일을 읽었어요",
+                            detail = "본문 표시는 다음 단계에서 연결됩니다.",
+                            kind = MDiveStateKind.Empty,
+                            showSymbol = false,
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                        )
+                    }
                     ReaderContent.Empty -> MDiveStatePanel(
                         title = "빈 문서예요",
                         detail = "표시할 내용이 없습니다.",
@@ -71,7 +89,13 @@ fun ReaderScreen(
                     )
                     ReaderContent.Failure -> MDiveStatePanel(
                         title = "문서를 열지 못했어요",
-                        detail = "문서를 읽을 수 없어요. 다시 시도하거나 홈으로 돌아가세요.",
+                        detail = when (state.failure) {
+                            DocumentFailure.Access -> "파일에 접근할 수 없어요. 접근 권한이나 파일 상태를 확인해주세요."
+                            DocumentFailure.UnsupportedFile -> "파일 이름과 확장자를 확인해주세요. md, markdown, txt 파일을 지원해요."
+                            DocumentFailure.TooLarge -> "5 MiB 이하의 파일을 열어주세요."
+                            DocumentFailure.Encoding -> "UTF-8 또는 BOM이 있는 UTF-16 파일을 열어주세요."
+                            else -> "문서를 읽을 수 없어요. 다시 시도하거나 홈으로 돌아가세요."
+                        },
                         kind = MDiveStateKind.Failure,
                         showSymbol = false,
                         actionWidth = MDiveStateActionWidth.Compact,

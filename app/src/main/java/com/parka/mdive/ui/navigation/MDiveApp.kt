@@ -10,6 +10,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.parka.mdive.domain.document.DocumentReference
 import com.parka.mdive.ui.home.HomeRoute
 import com.parka.mdive.ui.reader.ReaderRoute
 import com.parka.mdive.ui.reader.ReaderViewModel
@@ -18,10 +19,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface Destination : NavKey {
     @Serializable data object Home : Destination
-    @Serializable data object Reader : Destination
+    @Serializable data class Reader(val reference: String) : Destination
 }
 
-/** UI owns the back stack. S02 will add real selected-document input and forward navigation. */
+/** The UI owns both platform selection and the serializable document locator in the back stack. */
 @Composable
 fun MDiveApp(
     modifier: Modifier = Modifier,
@@ -36,13 +37,16 @@ fun MDiveApp(
             rememberViewModelStoreNavEntryDecorator(),
         ),
         entryProvider = entryProvider {
-            entry<Destination.Home> { HomeRoute() }
-            entry<Destination.Reader> {
+            entry<Destination.Home> {
+                HomeRoute(onDocumentSelected = { reference ->
+                    if (backStack.lastOrNull() == Destination.Home) backStack.add(Destination.Reader(reference.value))
+                })
+            }
+            entry<Destination.Reader> { destination ->
                 val viewModel = hiltViewModel<ReaderViewModel>()
                 ReaderRoute(
                     onNavigateHome = { if (backStack.size > 1) backStack.removeLastOrNull() },
-                    // No loader or picker is connected in S01; Reader is unreachable from product home.
-                    onRetry = {},
+                    reference = DocumentReference(destination.reference),
                     viewModel = viewModel,
                 )
             }
