@@ -3,7 +3,7 @@
 const boards = [...document.querySelectorAll('.board')];
 const devices = [...document.querySelectorAll('.device')];
 const links = [...document.querySelectorAll('[data-select]')];
-const fontTokens = ['body', 'title', 'ui', 'uiTitle', 'caption', 'code', 'bodySmall'];
+const fontTokens = ['body', 'title', 'ui', 'uiTitle', 'caption', 'code', 'bodySmall', 'documentH1', 'documentH2', 'documentH3', 'documentH4', 'documentH5', 'documentH6'];
 const baseFonts = Object.fromEntries(fontTokens.map(key => [key, parseFloat(getComputedStyle(document.documentElement).getPropertyValue(`--font-${key}`))]));
 const controls = ['palette', 'brightness', 'width', 'scale'].map(id => document.getElementById(id));
 function updateAppearance() {
@@ -12,6 +12,7 @@ function updateAppearance() {
     device.dataset.palette = palette;
     device.dataset.theme = brightness;
     device.dataset.scale = scale;
+    device.style.setProperty("--ds-font-scale", scale);
     device.dataset.narrow = String(Number(width) <= 320);
     fontTokens.forEach(key => device.style.setProperty(`--font-${key}`, `${baseFonts[key] * Number(scale)}px`));
     device.style.setProperty('--review-width', `${width}px`);
@@ -25,6 +26,7 @@ function selectBoard(id, moveFocus = false) {
     if (!all && link.dataset.select === id) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   });
+  window.MDiveComponents.layoutBanners();
   document.getElementById('show-all').setAttribute('aria-current', all ? 'page' : 'false');
   if (active && moveFocus) {
     active.tabIndex = -1;
@@ -32,11 +34,20 @@ function selectBoard(id, moveFocus = false) {
     active.scrollIntoView({block: 'start', behavior: 'instant'});
   }
 }
-controls.forEach(control => control.addEventListener('change', updateAppearance));
+controls.forEach(control => control.addEventListener('change', () => { updateAppearance(); window.MDiveComponents.layoutBanners(); }));
 window.addEventListener('hashchange', () => selectBoard(location.hash.slice(1), true));
 document.addEventListener('click', event => {
+  const reference = event.target.closest('[data-reference]');
+  if (reference) {
+    event.preventDefault();
+    const target = document.getElementById(reference.dataset.reference);
+    target?.scrollIntoView({block: 'center', behavior: 'instant'});
+    target?.focus({preventScroll: true});
+    return;
+  }
   const button = event.target.closest('[data-go], [data-demo]');
   if (!button) return;
+  if (button.tagName === 'A') event.preventDefault();
   if (button.dataset.go) {
     if (location.hash === `#${button.dataset.go}`) selectBoard(button.dataset.go, true);
     else location.hash = button.dataset.go;

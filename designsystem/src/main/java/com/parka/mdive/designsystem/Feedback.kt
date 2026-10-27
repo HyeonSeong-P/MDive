@@ -82,9 +82,9 @@ fun MDiveInlineNotice(
             .border(1.dp, colors.outline.copy(alpha = DesignTokens.Opacities.getValue("divider")), shape)
             .padding(DesignTokens.Spacing.getValue("md")),
         horizontalArrangement = Arrangement.spacedBy(DesignTokens.Spacing.getValue("control")),
-        verticalAlignment = Alignment.Top,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (loading) MDiveLoadingMark(Modifier.padding(top = 2.dp))
+        if (loading) MDiveLoadingMark()
         else MDiveIcon(if (error) "close" else "file", tint = if (error) colors.error else colors.onSurfaceVariant, size = 20.dp)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(DesignTokens.Spacing.getValue("sm"))) {
             Text(title, style = mdiveTextStyle("uiTitle"), color = colors.onSurface)
@@ -126,10 +126,12 @@ fun MDiveRecoveryBanner(
                     Text(title, style = mdiveTextStyle("label"), color = colors.onSurface)
                     if (!detail.isNullOrBlank()) Text(detail, style = mdiveTextStyle("caption"), color = colors.onSurfaceVariant)
                 }
-                if (!wrapAction) action?.invoke()
+                if (!wrapAction && action != null) Column(verticalArrangement = Arrangement.spacedBy(DesignTokens.Spacing.getValue("xs")), horizontalAlignment = Alignment.End) { action() }
                 if (onDismiss != null) MDiveIconButton("close", "안내 닫기", onDismiss)
             }
-            if (wrapAction) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { action?.invoke() }
+            if (wrapAction) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                Column(verticalArrangement = Arrangement.spacedBy(DesignTokens.Spacing.getValue("xs")), horizontalAlignment = Alignment.End) { action?.invoke() }
+            }
         }
     }
 }

@@ -27,6 +27,15 @@
   --calloutDangerBackground: #E9F0EF;
   --documentMarkBackground: #F4D77A;
   --documentMarkText: #352706;
+  --buttonPrimaryPressed: #135A65;
+  --buttonPrimaryPressedTop: #23646E;
+  --buttonNeutralPressed: #C8D1D2;
+  --buttonNeutralPressedForeground: #192F39;
+  --buttonCodePressed: #3C525C;
+  --buttonPressedPrimary: #135A65;
+  --buttonPressedSurface: #C8D1D2;
+  --buttonPressedText: #192F39;
+  --buttonPressedCode: #3C525C;
 }
 [data-palette="deepsea"][data-theme="dark"] {
   --background: #0D1D27;
@@ -56,6 +65,15 @@
   --calloutDangerBackground: #1D3641;
   --documentMarkBackground: #6A5317;
   --documentMarkText: #FFF0BC;
+  --buttonPrimaryPressed: #ACDDE3;
+  --buttonPrimaryPressedTop: #B3DFE5;
+  --buttonNeutralPressed: #435A63;
+  --buttonNeutralPressedForeground: #DCE8EA;
+  --buttonCodePressed: #334249;
+  --buttonPressedPrimary: #ACDDE3;
+  --buttonPressedSurface: #435A63;
+  --buttonPressedText: #DCE8EA;
+  --buttonPressedCode: #334249;
 }
 [data-palette="blue"][data-theme="light"] {
   --background: #F3F9FF;
@@ -85,6 +103,15 @@
   --calloutDangerBackground: #E2F0FC;
   --documentMarkBackground: #F4D77A;
   --documentMarkText: #352706;
+  --buttonPrimaryPressed: #135390;
+  --buttonPrimaryPressedTop: #235D96;
+  --buttonNeutralPressed: #C2D2E0;
+  --buttonNeutralPressedForeground: #18334B;
+  --buttonCodePressed: #3D546A;
+  --buttonPressedPrimary: #135390;
+  --buttonPressedSurface: #C2D2E0;
+  --buttonPressedText: #18334B;
+  --buttonPressedCode: #3D546A;
 }
 [data-palette="blue"][data-theme="dark"] {
   --background: #12283B;
@@ -114,6 +141,15 @@
   --calloutDangerBackground: #23435D;
   --documentMarkBackground: #6A5317;
   --documentMarkText: #FFF0BC;
+  --buttonPrimaryPressed: #BFDFFF;
+  --buttonPrimaryPressedTop: #C4E2FF;
+  --buttonNeutralPressed: #49657C;
+  --buttonNeutralPressedForeground: #DFEDFA;
+  --buttonCodePressed: #36495A;
+  --buttonPressedPrimary: #BFDFFF;
+  --buttonPressedSurface: #49657C;
+  --buttonPressedText: #DFEDFA;
+  --buttonPressedCode: #36495A;
 }
 [data-palette="green"][data-theme="light"] {
   --background: #F8F9F2;
@@ -143,6 +179,15 @@
   --calloutDangerBackground: #EAF0DF;
   --documentMarkBackground: #F4D77A;
   --documentMarkText: #352706;
+  --buttonPrimaryPressed: #325741;
+  --buttonPrimaryPressedTop: #40614C;
+  --buttonNeutralPressed: #CBD3C3;
+  --buttonNeutralPressedForeground: #29382D;
+  --buttonCodePressed: #485D51;
+  --buttonPressedPrimary: #325741;
+  --buttonPressedSurface: #CBD3C3;
+  --buttonPressedText: #29382D;
+  --buttonPressedCode: #485D51;
 }
 [data-palette="green"][data-theme="dark"] {
   --background: #18261E;
@@ -172,6 +217,15 @@
   --calloutDangerBackground: #2D4233;
   --documentMarkBackground: #6A5317;
   --documentMarkText: #FFF0BC;
+  --buttonPrimaryPressed: #C5E1C9;
+  --buttonPrimaryPressedTop: #CAE4CE;
+  --buttonNeutralPressed: #516454;
+  --buttonNeutralPressedForeground: #E2EBDA;
+  --buttonCodePressed: #3B4B40;
+  --buttonPressedPrimary: #C5E1C9;
+  --buttonPressedSurface: #516454;
+  --buttonPressedText: #E2EBDA;
+  --buttonPressedCode: #3B4B40;
 }
 :root {
   --space-xs: 4px;
@@ -189,6 +243,14 @@
   --space-documentInset: 16px;
   --space-documentMarker: 32px;
   --space-tableCell: 12px;
+  --space-quietButtonX: 12px;
+  --space-buttonSX: 12px;
+  --space-buttonMX: 16px;
+  --space-buttonLX: 20px;
+  --space-buttonSY: 6px;
+  --space-buttonMY: 8px;
+  --space-buttonLY: 12px;
+  --space-sheetHandleY: 6px;
   --font-body: 18px;
   --font-title: 28px;
   --font-ui: 14px;
@@ -235,6 +297,9 @@
   --size-bannerActionBreakpoint: 300px;
   --size-bannerDismissActionBreakpoint: 360px;
   --size-checkbox: 22px;
+  --size-buttonS: 36px;
+  --size-buttonM: 40px;
+  --size-buttonL: 48px;
 }
 :root { --icon-stroke: 1.7; }
 :root {

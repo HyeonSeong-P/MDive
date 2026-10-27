@@ -126,7 +126,7 @@ def generate():
 
     table = '<div class="md-table-scroll" tabindex="0" aria-label="문서 표, 가로 스크롤"><table class="md-table type-documentTable"><thead><tr>' + ''.join(f'<th scope="col">{e(cell)}</th>' for cell in sample['table'][0]) + '</tr></thead><tbody>' + ''.join('<tr>' + ''.join(f'<td style="text-align:{["start", "center", "end"][index % 3]}">{e(cell)}</td>' for index, cell in enumerate(row)) + '</tr>' for row in sample['table'][1:]) + '</tbody></table></div>'
     def content_event(label, event):
-        return f'<button type="button" class="button {"quiet" if event == "copy" else "secondary"}" data-content-event="{e(event)}">{e(label)}</button>'
+        return f'<button type="button" class="button {"quiet size-s" if event == "copy" else "outlined size-s"}" data-content-event="{e(event)}">{e(label)}</button>'
 
     def code_block(source, language='KOTLIN'):
         return f'<div class="md-code"><div class="md-code-bar"><span>{e(language)}</span>{content_event("코드 복사 · 시연", "copy")}</div><pre><code>{e(source)}</code></pre><output class="md-result" aria-live="polite"></output></div>'
@@ -239,11 +239,13 @@ def generate():
             'error': ('문서를 열 수 없어요', '파일이 이동되었거나 접근 권한이 바뀌었을 수 있어요.'),
         }[kind]
         symbol = '<span class="loading-dot" role="status" aria-label="불러오는 중"></span>' if kind == 'loading' else icon('file')
+        if kind == 'error':
+            symbol += '<span class="ds-state-failure">' + icon('close') + '</span>'
         actions = '' if kind == 'loading' else '<div class="ds-state-actions">' + button('파일 열기' if kind == 'empty' else '다시 선택', leading='plus' if kind == 'empty' else None) + (button('다시 시도', 'quiet') if kind == 'error' else '') + '</div>'
         return f'<div class="ds-state"><div class="ds-state-visual">{symbol}</div><h3>{e(title)}</h3><p>{e(detail)}</p>{actions}</div>'
 
     def inline_notice():
-        return f'<div class="ds-inline">{icon("file")}<div><strong>이미지를 불러오지 못했어요</strong><p>본문은 계속 읽을 수 있어요.</p>{button("이미지 폴더 연결", "quiet")}</div></div>'
+        return f'<div class="ds-inline">{icon("file")}<div><strong>이미지를 불러오지 못했어요</strong><p>본문은 계속 읽을 수 있어요.</p>{button("이미지 폴더 연결", "outlined size-s")}</div></div>'
 
     def confirmation(state):
         busy = state == 'busy'
@@ -253,7 +255,7 @@ def generate():
 
     def bottom_sheet(state):
         body = '<p>현재 문서에서 원하는 위치를 선택합니다.</p>' + ''.join(f'<div class="document-row">{icon("bookmark")}<div><strong>다시 읽을 위치 {index + 1}</strong><small>제목과 본문 미리보기 · 시연 데이터</small></div></div>' for index in range(16 if state == 'scrolling' else 3))
-        return f'<button type="button" class="button secondary" data-open-demo>바텀시트 열기</button><dialog class="ds-overlay ds-sheet" aria-label="읽기 도구 시연"><button type="button" class="ds-sheet-handle" data-sheet-drag data-close-demo aria-label="패널 닫기 · 아래로 드래그"><span></span></button><div class="ds-sheet-heading"><strong>읽기 도구</strong><button type="button" class="icon-button" aria-label="패널 닫기" data-close-demo>{icon("close")}</button></div><div class="ds-sheet-body">{body}</div></dialog><p class="ds-demo-result" role="status"></p>'
+        return f'<button type="button" class="button secondary" data-open-demo>바텀시트 열기</button><dialog class="ds-overlay ds-sheet" aria-label="읽기 도구 시연"><button type="button" class="ds-sheet-handle" data-sheet-drag data-close-demo aria-label="패널 닫기 · 아래로 드래그"><span></span></button><div class="ds-sheet-heading"><strong>읽기 도구</strong></div><div class="ds-sheet-body">{body}</div></dialog><p class="ds-demo-result" role="status"></p>'
 
     def toast(state):
         message = sample['toastSuccess'] if state == 'success' else sample['toastInformation']
@@ -263,7 +265,7 @@ def generate():
         if state == 'retry':
             message = sample['bannerRetryTitle']
             detail = ''
-            action = '<button type="button" class="button quiet" data-banner-retry>다시 시도</button>'
+            action = '<button type="button" class="button outlined size-s" data-banner-retry>다시 시도</button>'
         else:
             message = sample['bannerPersistentTitle']
             detail = '<p>' + e(sample['bannerPersistentDetail']) + '</p>'
@@ -320,7 +322,7 @@ def generate():
     for entry in entries:
         if entry['category'] not in ['foundations', 'components']:
             raise ValueError(f'Unknown catalog category: {entry["category"]}')
-        if entry['id'] == 'buttons' and (not entry['variants'] or len(entry['variants']) != len(set(entry['variants'])) or not set(entry['variants']).issubset({'primary', 'secondary', 'quiet'})):
+        if entry['id'] == 'buttons' and (not entry['variants'] or len(entry['variants']) != len(set(entry['variants'])) or not set(entry['variants']).issubset({'primary', 'secondary', 'outlined', 'quiet'})):
             raise ValueError('Register each button variant in both platform renderers')
         if not entry['states'] or len(entry['states']) != len(set(entry['states'])):
             raise ValueError(f'Empty or duplicate states: {entry["id"]}')
@@ -334,11 +336,12 @@ def generate():
                 if entry['id'] == 'buttons':
                     states = ''
                     for variant in entry['variants']:
-                        states += f'<h4>{e(variant)}</h4><div class="state-matrix">'
-                        for state in entry['states']:
-                            classes = ('secondary' if variant == 'secondary' else 'quiet' if variant == 'quiet' else '') + (' ' + state if state in ['pressed', 'loading'] else '')
-                            states += f'<div class="example" data-state="{e(state)}"><p><small>{e(state)}</small></p>{button("파일 열기",classes,"plus",state in ["disabled","loading"])}</div>'
-                        states += '</div>'
+                        for size in ['s', 'm', 'l']:
+                            states += f'<h4>{e(variant)} · {size.upper()} / 터치 영역 ≥48px</h4><div class="state-matrix">'
+                            for state in entry['states']:
+                                classes = (variant if variant != 'primary' else '') + f' size-{size}' + (' ' + state if state in ['pressed', 'loading'] else '')
+                                states += f'<div class="example" data-state="{e(state)}" data-size="{size}"><p><small>{e(state)}</small></p>{button("파일 열기",classes,"plus",state in ["disabled","loading"])}</div>'
+                            states += '</div>'
                 else:
                     states = ''.join(f'<div class="example" data-state="{e(state)}"><p><small>{e(state)} · 초안</small></p>{renders[entry["id"]][state]}</div>' for state in entry['states'] if entry['id'] != 'colors' or state == mode)
                 anatomy = ' · '.join(map(e, entry['anatomy']))
@@ -467,24 +470,13 @@ document.querySelectorAll('.ds-field input').forEach((input,index) => {
   support.id = 'input-support-'+index;
   input.setAttribute('aria-describedby', support.id);
 });
-for (const banner of document.querySelectorAll('.ds-banner')) {
-  const layoutBanner = () => {
-    const style = getComputedStyle(banner);
-    const hasBoth = banner.querySelector('[data-banner-retry]') && banner.querySelector('[data-banner-dismiss]');
-    const breakpoint = parseFloat(style.getPropertyValue(hasBoth ? '--size-bannerDismissActionBreakpoint' : '--size-bannerActionBreakpoint'));
-    const fontScale = parseFloat(getComputedStyle(banner.querySelector('strong')).fontSize) / parseFloat(style.getPropertyValue('--font-ui'));
-    const actionWidth = banner.querySelector('.ds-banner-action')?.scrollWidth || 0;
-    banner.dataset.stacked = String(banner.clientWidth / fontScale < breakpoint || actionWidth > banner.clientWidth * .5);
-  };
-  new ResizeObserver(layoutBanner).observe(banner); layoutBanner();
-}
 for (const dismiss of document.querySelectorAll('[data-banner-dismiss]')) dismiss.addEventListener('click', () => {
   const banner = dismiss.closest('.ds-banner'); banner.hidden = true;
   banner.nextElementSibling.textContent = '안내를 닫았습니다. 실제 데이터는 변경하지 않았습니다.';
 });
 for (const retry of document.querySelectorAll('[data-banner-retry]')) retry.addEventListener('click', () => { retry.closest('.ds-banner').nextElementSibling.textContent = '복구 동작 시연 · 실제 저장 요청은 하지 않습니다.'; });
 </script>'''
-    page = '<!doctype html>\n<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MDive 디자인 시스템</title><link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="../catalog.css"><link rel="stylesheet" href="../feedback.css"><main><header class="site-head"><div><p class="eyebrow">MDIVE / DESIGN SYSTEM</p><h1>디자인 시스템</h1><p>컴포넌트 검토용 초안 · 화면 적용 전의 독립 예시입니다.</p></div><div class="review-controls"><label>색상안 <select id="palette">' + options + '</select></label><label>밝기 <select id="mode"><option value="light">라이트</option><option value="dark">다크</option></select></label></div></header><div class="doc-shell"><nav aria-label="디자인 시스템 목차">' + nav + '<hr><a href="../../docs/product/design-system.md">관리 설명</a><a href="../../docs/product/design-system-references.md">공식 사례 조사</a></nav><div class="themes">' + columns + '</div></div><footer>사용 규칙과 상태는 공통 원본에서 생성합니다. HTML의 오버레이·입력은 샘플 조작입니다. 실제 파일·저장은 수행하지 않으며 Android 동작은 Compose 카탈로그에서 검증합니다.</footer></main>' + script + '</html>\n'
+    page = '<!doctype html>\n<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MDive 디자인 시스템</title><link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="../components.css"><link rel="stylesheet" href="../catalog.css"><link rel="stylesheet" href="../feedback.css"><main><header class="site-head"><div><p class="eyebrow">MDIVE / DESIGN SYSTEM</p><h1>디자인 시스템</h1><p>컴포넌트 검토용 초안 · 화면 적용 전의 독립 예시입니다.</p></div><div class="review-controls"><label>색상안 <select id="palette">' + options + '</select></label><label>밝기 <select id="mode"><option value="light">라이트</option><option value="dark">다크</option></select></label></div></header><div class="doc-shell"><nav aria-label="디자인 시스템 목차">' + nav + '<hr><a href="../../docs/product/design-system.md">관리 설명</a><a href="../../docs/product/design-system-references.md">공식 사례 조사</a></nav><div class="themes">' + columns + '</div></div><footer>사용 규칙과 상태는 공통 원본에서 생성합니다. HTML의 오버레이·입력은 샘플 조작입니다. 실제 파일·저장은 수행하지 않으며 Android 동작은 Compose 카탈로그에서 검증합니다.</footer></main><script src="../components.js"></script>' + script + '</html>\n'
     return {GENERATED / 'DesignTokens.kt': kotlin, GENERATED / 'CatalogEntries.kt': manifest, GENERATED / 'CatalogSamples.kt': samples, GENERATED / 'CatalogIcons.kt': icon_kotlin, ROOT / 'design-system/generated/tokens.css': css, ROOT / 'design-system/generated/catalog.html': page}
 
 

@@ -126,7 +126,7 @@ fun MDiveCodeBlock(source: String, modifier: Modifier = Modifier, language: Stri
     Column(modifier.fillMaxWidth().background(colors.getValue("codeBackground"), RoundedCornerShape(DesignTokens.Radii.getValue("code")))) {
         if (language != null || onCopy != null) Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(language.orEmpty(), Modifier.weight(1f).padding(vertical = 14.dp), color = colors.getValue("codeText"), style = mdiveTextStyle("caption"))
-            if (onCopy != null) MDiveIconButton("copy", "코드 복사", { onCopy(source) }, tint = colors.getValue("codeText"))
+            if (onCopy != null) MDiveIconButton("copy", "코드 복사", { onCopy(source) }, tint = colors.getValue("codeText"), pressedBackground = colors.getValue("buttonPressedCode"), pressedTint = colors.getValue("codeText"))
         }
         val annotated = buildAnnotatedString {
             append(source)
@@ -175,11 +175,11 @@ fun MDiveMarkdownImage(
         when (state) {
             MDiveResourceState.Ready -> {
                 Box(Modifier.fillMaxWidth().clearAndSetSemantics { if (alt.isNotEmpty()) { contentDescription = alt; role = Role.Image } }) { content() }
-                if (onExpand != null) MDiveButton("이미지 확대", onExpand, variant = MDiveButtonVariant.Secondary)
+                if (onExpand != null) MDiveButton("이미지 확대", onExpand, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S)
             }
             MDiveResourceState.Loading -> MDiveRecoveryBanner("이미지 준비 중", alt, icon = "file", loading = true)
-            MDiveResourceState.AccessRequired -> MDiveRecoveryBanner("이미지 접근 연결 필요", alt, icon = "file", action = { if (onConnect != null) MDiveButton("폴더 연결", onConnect, variant = MDiveButtonVariant.Secondary) })
-            MDiveResourceState.Failure -> MDiveRecoveryBanner("이미지를 불러오지 못했어요", alt, action = { if (onRetry != null) MDiveButton("다시 시도", onRetry, variant = MDiveButtonVariant.Secondary) })
+            MDiveResourceState.AccessRequired -> MDiveRecoveryBanner("이미지 접근 연결 필요", alt, icon = "file", action = { if (onConnect != null) MDiveButton("폴더 연결", onConnect, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S) })
+            MDiveResourceState.Failure -> MDiveRecoveryBanner("이미지를 불러오지 못했어요", alt, action = { if (onRetry != null) MDiveButton("다시 시도", onRetry, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S) })
         }
         if (title != null) Text(title, style = mdiveTextStyle("caption"))
     }
@@ -203,8 +203,8 @@ fun MDiveRenderedBlock(
             action = if (onViewSource == null && (onExpand == null || state != MDiveResourceState.Ready)) null else {
                 {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (onViewSource != null) MDiveButton("원문 보기", onViewSource, variant = MDiveButtonVariant.Secondary)
-                        if (state == MDiveResourceState.Ready && onExpand != null) MDiveButton("콘텐츠 확대", onExpand, variant = MDiveButtonVariant.Secondary)
+                        if (onViewSource != null) MDiveButton("원문 보기", onViewSource, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S)
+                        if (state == MDiveResourceState.Ready && onExpand != null) MDiveButton("콘텐츠 확대", onExpand, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S)
                     }
                 }
             },
@@ -214,7 +214,7 @@ fun MDiveRenderedBlock(
 
 @Composable
 fun MDiveContentFallback(kind: String, reason: String, modifier: Modifier = Modifier, onViewSource: (() -> Unit)? = null) {
-    MDiveRecoveryBanner(kind, reason, modifier, action = { if (onViewSource != null) MDiveButton("원문 보기", onViewSource, variant = MDiveButtonVariant.Secondary) })
+    MDiveRecoveryBanner(kind, reason, modifier, action = { if (onViewSource != null) MDiveButton("원문 보기", onViewSource, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S) })
 }
 
 /** Prepared inline rendering placed in the same text flow; no math syntax is interpreted. */

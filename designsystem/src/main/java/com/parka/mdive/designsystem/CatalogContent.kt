@@ -180,17 +180,19 @@ private fun GuideSection(title: String, lines: List<String>) {
 @Composable
 private fun ButtonMatrix(entry: CatalogEntry) {
     entry.variants.forEach { variant ->
-        Text(variant.uppercase(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            entry.states.forEach { state ->
-                Column(Modifier.width(148.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(state, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    MDiveButton(
-                        if (state == "loading") "처리 중" else "파일 열기", {}, Modifier.fillMaxWidth().testTag("button-$variant-$state"),
-                        variant = when (variant) { "primary" -> MDiveButtonVariant.Primary; "secondary" -> MDiveButtonVariant.Secondary; "quiet" -> MDiveButtonVariant.Quiet; else -> error("Unknown button variant: $variant") },
-                        state = when (state) { "normal" -> MDiveButtonState.Normal; "pressed" -> MDiveButtonState.Pressed; "disabled" -> MDiveButtonState.Disabled; "loading" -> MDiveButtonState.Loading; else -> error("Unknown button state: $state") },
-                        icon = "plus",
-                    )
+        MDiveButtonSize.entries.forEach { size ->
+            Text("${variant.uppercase()} · ${size.name} / 터치 영역 ≥48dp", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                entry.states.forEach { state ->
+                    Column(Modifier.width(148.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(state, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        MDiveButton(
+                            if (state == "loading") "처리 중" else "파일 열기", {}, Modifier.fillMaxWidth().testTag(if (size == MDiveButtonSize.M) "button-$variant-$state" else "button-$variant-${size.name}-$state"),
+                            variant = when (variant) { "primary" -> MDiveButtonVariant.Primary; "secondary" -> MDiveButtonVariant.Secondary; "outlined" -> MDiveButtonVariant.Outlined; "quiet" -> MDiveButtonVariant.Quiet; else -> error("Unknown button variant: $variant") },
+                            state = when (state) { "normal" -> MDiveButtonState.Normal; "pressed" -> MDiveButtonState.Pressed; "disabled" -> MDiveButtonState.Disabled; "loading" -> MDiveButtonState.Loading; else -> error("Unknown button state: $state") },
+                            icon = "plus", size = size,
+                        )
+                    }
                 }
             }
         }
@@ -275,7 +277,7 @@ private fun CatalogExample(entry: CatalogEntry, state: String, darkTheme: Boolea
                 MDiveButton("다시 시도 · 시연", {}, Modifier.fillMaxWidth(), variant = MDiveButtonVariant.Quiet)
             })
             "inline" -> MDiveInlineNotice("이미지를 불러오지 못했어요", "본문은 계속 읽을 수 있어요.", error = true, action = {
-                MDiveButton("폴더 연결 · 시연", {}, variant = MDiveButtonVariant.Quiet)
+                MDiveButton("폴더 연결 · 시연", {}, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S)
             })
         }
         "textfield" -> {
@@ -294,7 +296,7 @@ private fun CatalogExample(entry: CatalogEntry, state: String, darkTheme: Boolea
             var dismissed by remember(state) { mutableStateOf(false) }
             if (dismissed) MDiveButton("배너 다시 보기", { dismissed = false }, variant = MDiveButtonVariant.Secondary)
             else if (state == "retry") MDiveRecoveryBanner(CatalogSamples.bannerRetryTitle, action = {
-                MDiveButton("다시 시도", { dismissed = true }, variant = MDiveButtonVariant.Quiet)
+                MDiveButton("다시 시도", { dismissed = true }, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S)
             })
             else MDiveRecoveryBanner(CatalogSamples.bannerPersistentTitle, CatalogSamples.bannerPersistentDetail, onDismiss = { dismissed = true })
         }
