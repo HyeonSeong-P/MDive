@@ -14,7 +14,8 @@ import org.commonmark.parser.IncludeSourceSpans
 import org.commonmark.parser.Parser
 
 /** CommonMark AST stays inside data; source spans retain syntax for later feature sessions. */
-class CommonMarkParser @Inject constructor() : MarkdownParser {
+class CommonMarkParser @Inject constructor(private val codeHighlighter: CodeHighlighter) : MarkdownParser {
+    constructor() : this(CodeHighlighter())
     override suspend fun parse(source: String): MarkdownDocument = withContext(Dispatchers.Default) {
         ensureActive()
         val root = try {
@@ -26,7 +27,7 @@ class CommonMarkParser @Inject constructor() : MarkdownParser {
             parser(tables = false).parse(source)
         }
         ensureActive()
-        MarkdownDocument(blocks(root, source))
+        MarkdownDocument(blocks(root, source, CodeSourceReader(source)))
     }
 
     private fun parser(tables: Boolean): Parser = Parser.builder()
@@ -35,22 +36,28 @@ class CommonMarkParser @Inject constructor() : MarkdownParser {
         .apply { if (tables) customBlockParserFactory(GfmTableFactory()) }
         .build()
 
-    private suspend fun blocks(parent: Node, source: String, depth: Int = 0, taskPrefix: Int = 0): List<MarkdownBlock> =
+    private suspend fun blocks(parent: Node, source: String, codeSource: CodeSourceReader, depth: Int = 0, taskPrefix: Int = 0): List<MarkdownBlock> =
         children(parent).mapIndexed { index, node ->
             currentCoroutineContext().ensureActive()
             if (depth >= 128) MarkdownBlock.Source(raw(node, source)) else when (node) {
                 is Heading -> MarkdownBlock.Heading(node.level, runs(node, source))
                 is Paragraph -> MarkdownBlock.Paragraph(runs(node, source, skipPrefix = if (index == 0) taskPrefix else 0))
-                is BlockQuote -> MarkdownBlock.Quote(blocks(node, source, depth + 1))
-                is BulletList -> list(node, null, source, depth)
-                is OrderedList -> list(node, node.markerStartNumber, source, depth)
+                is BlockQuote -> MarkdownBlock.Quote(blocks(node, source, codeSource, depth + 1))
+                is BulletList -> list(node, null, source, codeSource, depth)
+                is OrderedList -> list(node, node.markerStartNumber, source, codeSource, depth)
                 is TableBlock -> table(node, source)
+                is FencedCodeBlock -> {
+                    val language = node.info.trim().takeWhile { !it.isWhitespace() }.ifEmpty { null }
+                    if (language.equals("mermaid", ignoreCase = true)) MarkdownBlock.Source(raw(node, source))
+                    else codeSource.read(node).let { MarkdownBlock.Code(it, language, codeHighlighter.highlight(it, language)) }
+                }
+                is IndentedCodeBlock -> MarkdownBlock.Code(codeSource.read(node), null)
                 is ThematicBreak -> MarkdownBlock.Divider
                 else -> MarkdownBlock.Source(raw(node, source))
             }
         }
 
-    private suspend fun list(node: Node, start: Int?, source: String, depth: Int): MarkdownBlock.ListBlock {
+    private suspend fun list(node: Node, start: Int?, source: String, codeSource: CodeSourceReader, depth: Int): MarkdownBlock.ListBlock {
         val items = children(node)
         val tasks = items.map { item ->
             val paragraph = item.firstChild as? Paragraph
@@ -63,7 +70,7 @@ class CommonMarkParser @Inject constructor() : MarkdownParser {
             } else null
         }
         return MarkdownBlock.ListBlock(start, items.mapIndexed { index, item ->
-            blocks(item, source, depth + 1, taskPrefix = if (tasks[index] == null) 0 else 4)
+            blocks(item, source, codeSource, depth + 1, taskPrefix = if (tasks[index] == null) 0 else 4)
         }, tasks)
     }
 

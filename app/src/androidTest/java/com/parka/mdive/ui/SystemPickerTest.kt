@@ -123,4 +123,18 @@ class SystemPickerTest {
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
     }
 
+    @Test fun actualCodeSelectionCopiesOriginalBodyAndReturnsHome() {
+        selectFixture("code.md")
+        awaitText("코드 실제 선택")
+        compose.onNodeWithText("code.md").assertIsDisplayed()
+        compose.onNodeWithContentDescription("코드 복사").performClick()
+        compose.runOnIdle {
+            val clipboard = compose.activity.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            org.junit.Assert.assertEquals(FixtureDocumentsProvider.CODE_BODY, clipboard.primaryClip?.getItemAt(0)?.text?.toString())
+        }
+        compose.onNodeWithText("코드 뒤 본문").assertIsDisplayed()
+        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+        compose.onNodeWithText("반가워요.").assertIsDisplayed()
+    }
+
 }

@@ -15,6 +15,8 @@ class FixtureDocumentsProvider : DocumentsProvider() {
         const val AUTHORITY = "com.parka.mdive.s02.fixtures"
         const val SOURCE = "# 실제 선택\r\n\r\n  원문 공백\t **굵게** *강조* `코드`\n\n> 선택한 인용\n\n3. 선택한 목록\n\n---\n\n마지막 본문\n"
         const val GFM_SOURCE = "# GFM 실제 선택\n\n| 왼쪽 | 중앙 | 오른쪽 |\n| :-- | :-: | --: |\n| 셀 본문 | **굵게** | ~~삭제~~ |\n\n- [ ] 할 일\n  - [X] 완료한 일\n\n~~취소선~~ 뒤 본문\n\n[보존 링크](a.md)\n\n마지막 혼합 본문"
+        const val CODE_BODY = "  val wave = \"🌊\"\t  \r\n\r\n"
+        const val CODE_SOURCE = "# 코드 실제 선택\n\n```Kt\r\n$CODE_BODY```\n\n코드 뒤 본문"
         @Volatile var failReads = false
     }
     override fun onCreate() = true
@@ -27,7 +29,7 @@ class FixtureDocumentsProvider : DocumentsProvider() {
     }
     override fun queryDocument(documentId: String, projection: Array<out String>?): Cursor = cursor(projection).apply { addDocument(documentId) }
     override fun queryChildDocuments(parentDocumentId: String, projection: Array<out String>?, sortOrder: String?): Cursor = cursor(projection).apply {
-        listOf("gfm.md", "source.md", "empty.txt", "utf16.markdown", "broken.md", "large.md", "unsupported.pdf", "missing.md", "nameless").forEach { addDocument(it) }
+        listOf("code.md", "gfm.md", "source.md", "empty.txt", "utf16.markdown", "broken.md", "large.md", "unsupported.pdf", "missing.md", "nameless").forEach { addDocument(it) }
     }
     override fun isChildDocument(parentDocumentId: String, documentId: String) = parentDocumentId == "root" && documentId != "root"
     private fun cursor(projection: Array<out String>?) = MatrixCursor(projection ?: arrayOf(
@@ -43,6 +45,7 @@ class FixtureDocumentsProvider : DocumentsProvider() {
         val bytes = when (documentId) {
             "source.md" -> SOURCE.toByteArray()
             "gfm.md" -> GFM_SOURCE.toByteArray()
+            "code.md" -> CODE_SOURCE.toByteArray()
             "empty.txt" -> byteArrayOf()
             "utf16.markdown" -> byteArrayOf(0xFF.toByte(), 0xFE.toByte()) + SOURCE.toByteArray(Charsets.UTF_16LE)
             "broken.md" -> byteArrayOf(0xC3.toByte(), 0x28)

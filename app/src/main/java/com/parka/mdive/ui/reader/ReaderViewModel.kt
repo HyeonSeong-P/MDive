@@ -31,11 +31,13 @@ data class ReaderState(
 
 sealed interface ReaderIntent : UiIntent {
     data class Open(val reference: DocumentReference) : ReaderIntent
+    data class CopyCode(val source: String) : ReaderIntent
     data object Back : ReaderIntent
     data object Retry : ReaderIntent
 }
 
 sealed interface ReaderEffect : UiEffect {
+    data class CopyCode(val source: String) : ReaderEffect
     data object NavigateHome : ReaderEffect
 }
 
@@ -55,6 +57,9 @@ class ReaderViewModel @Inject constructor(
                 read()
             }
             ReaderIntent.Retry -> if (!leaving && uiState.value.content == ReaderContent.Failure) read()
+            is ReaderIntent.CopyCode -> if (!leaving && uiState.value.content == ReaderContent.SourceReady) {
+                viewModelScope.launch { emitEffect(ReaderEffect.CopyCode(intent.source)) }
+            }
             ReaderIntent.Back -> {
                 leaving = true
                 readJob?.cancel()
