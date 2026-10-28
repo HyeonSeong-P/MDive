@@ -65,19 +65,15 @@ fun ReaderScreen(
                 onNavigationClick = onBack,
             )
             if (state.content == ReaderContent.Loading) ReaderLoadingContent(Modifier.weight(1f))
-            else CenteredScrollableState(Modifier.weight(1f)) {
+            else if (state.content == ReaderContent.SourceReady && sourcePreview == null) {
+                state.markdown?.let { ReaderMarkdownContent(it, Modifier.weight(1f)) }
+            } else CenteredScrollableState(Modifier.weight(1f)) {
                 when (state.content) {
                     ReaderContent.Loading -> Unit
                     ReaderContent.SourceReady -> {
                         val document = state.document
                         if (sourcePreview != null && document != null) sourcePreview(document)
-                        else MDiveStatePanel(
-                            title = "파일을 읽었어요",
-                            detail = "본문 표시는 다음 단계에서 연결됩니다.",
-                            kind = MDiveStateKind.Empty,
-                            showSymbol = false,
-                            contentPadding = PaddingValues(horizontal = 16.dp),
-                        )
+
                     }
                     ReaderContent.Empty -> MDiveStatePanel(
                         title = "빈 문서예요",

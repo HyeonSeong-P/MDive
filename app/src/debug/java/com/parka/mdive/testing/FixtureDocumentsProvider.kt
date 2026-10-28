@@ -13,7 +13,7 @@ import java.io.FileNotFoundException
 class FixtureDocumentsProvider : DocumentsProvider() {
     companion object {
         const val AUTHORITY = "com.parka.mdive.s02.fixtures"
-        const val SOURCE = "# 실제 선택\r\n  원문 공백\t\n"
+        const val SOURCE = "# 실제 선택\r\n\r\n  원문 공백\t **굵게** *강조* `코드`\n\n> 선택한 인용\n\n3. 선택한 목록\n\n---\n\n마지막 본문\n"
         @Volatile var failReads = false
     }
     override fun onCreate() = true
