@@ -1,14 +1,14 @@
 package com.parka.mdive.data.document
 
-import com.parka.mdive.domain.document.MarkdownBlock
-import com.parka.mdive.domain.document.MarkdownDocument
-import com.parka.mdive.domain.document.MarkdownParser
-import com.parka.mdive.domain.document.MarkdownRun
+import com.parka.mdive.domain.document.*
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import org.commonmark.ext.gfm.strikethrough.Strikethrough
+import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
+import org.commonmark.ext.gfm.tables.*
 import org.commonmark.node.*
 import org.commonmark.parser.IncludeSourceSpans
 import org.commonmark.parser.Parser
@@ -17,42 +17,93 @@ import org.commonmark.parser.Parser
 class CommonMarkParser @Inject constructor() : MarkdownParser {
     override suspend fun parse(source: String): MarkdownDocument = withContext(Dispatchers.Default) {
         ensureActive()
-        val root = Parser.builder().includeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES).build().parse(source)
+        val root = try {
+            parser(tables = true).parse(source)
+        } catch (error: IllegalArgumentException) {
+            // Preserve reading if the table extension's cell safety limit is reached.
+            if (error.message?.startsWith("Aborting parsing because maximum number of cells reached") != true) throw error
+            ensureActive()
+            parser(tables = false).parse(source)
+        }
         ensureActive()
         MarkdownDocument(blocks(root, source))
     }
 
-    private suspend fun blocks(parent: Node, source: String, depth: Int = 0): List<MarkdownBlock> =
-        children(parent).map { node ->
+    private fun parser(tables: Boolean): Parser = Parser.builder()
+        .includeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
+        .extensions(listOf(StrikethroughExtension.builder().requireTwoTildes(true).build()))
+        .apply { if (tables) customBlockParserFactory(GfmTableFactory()) }
+        .build()
+
+    private suspend fun blocks(parent: Node, source: String, depth: Int = 0, taskPrefix: Int = 0): List<MarkdownBlock> =
+        children(parent).mapIndexed { index, node ->
             currentCoroutineContext().ensureActive()
-            // Bound adapter recursion without discarding deeply nested input.
             if (depth >= 128) MarkdownBlock.Source(raw(node, source)) else when (node) {
                 is Heading -> MarkdownBlock.Heading(node.level, runs(node, source))
-                is Paragraph -> MarkdownBlock.Paragraph(runs(node, source))
+                is Paragraph -> MarkdownBlock.Paragraph(runs(node, source, skipPrefix = if (index == 0) taskPrefix else 0))
                 is BlockQuote -> MarkdownBlock.Quote(blocks(node, source, depth + 1))
-                is BulletList -> MarkdownBlock.ListBlock(null, children(node).map { blocks(it, source, depth + 1) })
-                is OrderedList -> MarkdownBlock.ListBlock(node.markerStartNumber, children(node).map { blocks(it, source, depth + 1) })
+                is BulletList -> list(node, null, source, depth)
+                is OrderedList -> list(node, node.markerStartNumber, source, depth)
+                is TableBlock -> table(node, source)
                 is ThematicBreak -> MarkdownBlock.Divider
                 else -> MarkdownBlock.Source(raw(node, source))
             }
         }
 
-    private fun runs(parent: Node, source: String): List<MarkdownRun> {
+    private suspend fun list(node: Node, start: Int?, source: String, depth: Int): MarkdownBlock.ListBlock {
+        val items = children(node)
+        val tasks = items.map { item ->
+            val paragraph = item.firstChild as? Paragraph
+            val first = paragraph?.sourceSpans?.firstOrNull()?.inputIndex
+            val end = paragraph?.sourceSpans?.lastOrNull()?.let { it.inputIndex + it.length } ?: 0
+            // Inspect source, not decoded Text: escaped/entity brackets must stay ordinary text.
+            if (first != null && first + 3 < end && source[first] == '[' &&
+                source[first + 1] in " xX" && source[first + 2] == ']' && source[first + 3] in " \t\r\n") {
+                source[first + 1] != ' '
+            } else null
+        }
+        return MarkdownBlock.ListBlock(start, items.mapIndexed { index, item ->
+            blocks(item, source, depth + 1, taskPrefix = if (tasks[index] == null) 0 else 4)
+        }, tasks)
+    }
+
+    private fun table(node: TableBlock, source: String): MarkdownBlock.Table {
+        val head = children(node).filterIsInstance<TableHead>().single()
+        val headers = children(head.firstChild).filterIsInstance<TableCell>()
+        val columns = headers.map { cell ->
+            MarkdownTableColumn(runs(cell, source, tableCell = cell), when (cell.alignment) {
+                TableCell.Alignment.CENTER -> MarkdownAlignment.Center
+                TableCell.Alignment.RIGHT -> MarkdownAlignment.Right
+                else -> MarkdownAlignment.Left
+            })
+        }
+        val rows = children(node).filterIsInstance<TableBody>().flatMap { children(it) }.map { row ->
+            children(row).filterIsInstance<TableCell>().map { runs(it, source, tableCell = it) }
+        }
+        return MarkdownBlock.Table(columns, rows)
+    }
+
+    private fun runs(parent: Node, source: String, skipPrefix: Int = 0, tableCell: TableCell? = null): List<MarkdownRun> {
         val result = mutableListOf<MarkdownRun>()
-        fun visit(node: Node, emphasis: Boolean = false, strong: Boolean = false, depth: Int = 0) {
+        fun visit(node: Node, emphasis: Boolean = false, strong: Boolean = false, strike: Boolean = false, depth: Int = 0) {
             when {
-                depth >= 128 -> result += MarkdownRun(raw(node, source), emphasis, strong)
-                node is Text -> result += MarkdownRun(node.literal, emphasis, strong)
-                node is Code -> result += MarkdownRun(node.literal, emphasis, strong, code = true)
-                node is SoftLineBreak -> result += MarkdownRun("\n", emphasis, strong)
-                node is HardLineBreak -> result += MarkdownRun("\n", emphasis, strong)
-                node is Emphasis -> children(node).forEach { visit(it, true, strong, depth + 1) }
-                node is StrongEmphasis -> children(node).forEach { visit(it, emphasis, true, depth + 1) }
-                else -> result += MarkdownRun(raw(node, source), emphasis, strong)
+                depth >= 128 -> result += MarkdownRun(raw(node, source, tableCell), emphasis, strong, strike = strike)
+                node is Text -> result += MarkdownRun(node.literal, emphasis, strong, strike = strike)
+                node is Code -> result += MarkdownRun(node.literal, emphasis, strong, code = true, strike = strike)
+                node is SoftLineBreak || node is HardLineBreak -> result += MarkdownRun("\n", emphasis, strong, strike = strike)
+                node is Emphasis -> children(node).forEach { visit(it, true, strong, strike, depth + 1) }
+                node is StrongEmphasis -> children(node).forEach { visit(it, emphasis, true, strike, depth + 1) }
+                node is Strikethrough -> children(node).forEach { visit(it, emphasis, strong, true, depth + 1) }
+                else -> result += MarkdownRun(raw(node, source, tableCell), emphasis, strong, strike = strike)
             }
         }
         children(parent).forEach { visit(it) }
-        return result
+        var remaining = skipPrefix
+        return result.mapNotNull { run ->
+            val skip = remaining.coerceAtMost(run.text.length)
+            remaining -= skip
+            run.copy(text = run.text.drop(skip)).takeIf { it.text.isNotEmpty() }
+        }
     }
 
     private fun children(node: Node): List<Node> = buildList {
@@ -60,11 +111,27 @@ class CommonMarkParser @Inject constructor() : MarkdownParser {
         while (child != null) { add(child); child = child.next }
     }
 
-    private fun raw(node: Node, source: String): String {
+    private fun raw(node: Node, source: String, tableCell: TableCell? = null): String {
         val spans = node.sourceSpans
         if (spans.isEmpty()) return ""
         val first = spans.first()
         val last = spans.last()
-        return source.substring(first.inputIndex, last.inputIndex + last.length)
+        val cellSpan = tableCell?.sourceSpans?.firstOrNull()
+        if (cellSpan == null) return source.substring(first.inputIndex, last.inputIndex + last.length)
+        // The table extension removes backslashes before pipes prior to inline parsing.
+        // Translate those normalized offsets back to the original cell for inert source runs.
+        val cellSource = source.substring(cellSpan.inputIndex, cellSpan.inputIndex + cellSpan.length)
+        fun originalOffset(normalized: Int): Int {
+            var original = 0
+            var offset = 0
+            while (offset < normalized && original < cellSource.length) {
+                if (cellSource[original] == '\\' && cellSource.getOrNull(original + 1) == '|') original++
+                original++; offset++
+            }
+            return original
+        }
+        val start = originalOffset(first.inputIndex - cellSpan.inputIndex)
+        val end = originalOffset(last.inputIndex + last.length - cellSpan.inputIndex)
+        return cellSource.substring(start, end)
     }
 }

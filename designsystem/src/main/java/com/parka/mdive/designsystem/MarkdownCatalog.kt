@@ -49,7 +49,13 @@ internal fun MarkdownCatalog(id: String, state: String) {
                         MDiveMarkdownListItem(MDiveListMarker.Bullet) { MDiveMarkdownText(body) }
                     }
                     MDiveMarkdownListItem(MDiveListMarker.Ordered(1000)) { MDiveMarkdownText(body) }
-                    listOf(false, true).forEach { checked -> MDiveMarkdownListItem(MDiveListMarker.Task(checked)) { MDiveMarkdownText(listOf(MDiveTextRun(if (checked) "완료한 항목" else "아직 읽지 않은 항목"))) } }
+                    MDiveMarkdownListItem(MDiveListMarker.Task(false)) {
+                        MDiveMarkdownText(listOf(MDiveTextRun("읽기 전용 부모 작업 · 여러 줄로 이어져도 첫 본문 줄에 상태를 맞춥니다.")))
+                        MDiveMarkdownListItem(MDiveListMarker.Task(true)) {
+                            MDiveMarkdownText(listOf(MDiveTextRun("완료한 자식 작업")))
+                        }
+                        MDiveMarkdownText(listOf(MDiveTextRun("같은 부모 항목의 두 번째 문단")))
+                    }
                 }
             }
             "markdown-resources" -> when (state) {

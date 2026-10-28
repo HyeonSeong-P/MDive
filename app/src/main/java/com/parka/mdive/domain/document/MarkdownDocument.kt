@@ -8,17 +8,26 @@ data class MarkdownRun(
     val emphasis: Boolean = false,
     val strong: Boolean = false,
     val code: Boolean = false,
+    val strike: Boolean = false,
 )
 
 sealed interface MarkdownBlock {
     data class Paragraph(val runs: List<MarkdownRun>) : MarkdownBlock
     data class Heading(val level: Int, val runs: List<MarkdownRun>) : MarkdownBlock
     data class Quote(val blocks: List<MarkdownBlock>) : MarkdownBlock
-    data class ListBlock(val start: Int?, val items: List<List<MarkdownBlock>>) : MarkdownBlock
+    data class ListBlock(
+        val start: Int?, val items: List<List<MarkdownBlock>>,
+        /** null is a regular list item; false/true are inert task states. */
+        val tasks: List<Boolean?> = List(items.size) { null },
+    ) : MarkdownBlock
+    data class Table(val columns: List<MarkdownTableColumn>, val rows: List<List<List<MarkdownRun>>>) : MarkdownBlock
     data object Divider : MarkdownBlock
     /** Unsupported syntax remains readable, inert source in the document flow. */
     data class Source(val source: String) : MarkdownBlock
 }
+
+enum class MarkdownAlignment { Left, Center, Right }
+data class MarkdownTableColumn(val header: List<MarkdownRun>, val alignment: MarkdownAlignment)
 
 interface MarkdownParser {
     suspend fun parse(source: String): MarkdownDocument

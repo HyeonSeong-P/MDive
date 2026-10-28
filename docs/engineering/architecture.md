@@ -85,3 +85,13 @@ S03의 해석 기준과 중간 원문 대체 정책은 [제품 프로필](../pro
 파서 기본 중첩 한도(열린 블록·인라인 각각 100)를 유지한다. 어댑터도 컨테이너·강조 재귀 깊이 128에서 해당 부분을 원문으로 대체하는 안전장치를 둔다. 최상위 깊이 0에서 인용/목록 컨테이너 진입, 인라인 강조/굵게 진입마다 1씩 센다. 미인식 확장 구분자는 텍스트로 남지만 그 안의 기본 CommonMark는 해석될 수 있다(예: `~~**굵게**~~`는 취소선 구분자를 남기고 굵게를 적용). 이를 확장 문법 지원으로 간주하지 않는다.
 
 좁은 폭·큰 글자의 깊은 중첩에서는 UI가 가용 폭을 확인한다. 인용·목록의 다음 들여쓰기 후 폭이 `128dp × fontScale`보다 작아지면 추가 들여쓰기를 멈춘다. 최상위에서 폭을 얻어 하위에 전달하고 인용의 inset 및 실측한 목록 마커 폭을 차감한다. 인용의 intrinsic 측정 안에는 `BoxWithConstraints`를 중첩하지 않는다. 인용은 본문을 현재 폭에 이어 표시하고 목록은 번호/불릿을 별도 줄에 유지한다. 이는 화면 조합의 폭 보호이며 파서 의미나 원문을 변경하지 않는다.
+
+## S04 GFM 파서·DS 연결 경계
+
+제품 인식 규칙과 GFM 예외는 [S04 프로필](../product/document-viewing.md#s04-gfm-본문-프로필--확정)이 소유한다. 기존 core와 같은 0.31.0의 `commonmark-ext-gfm-tables`·`commonmark-ext-gfm-strikethrough`를 추가한다. AST는 data 내부에 유지하고 domain의 표 열/정렬·행, 목록 항목별 task 상태, 인라인 취소선 속성으로 변환한다. UI는 기존 `MDiveMarkdownTable`, 읽기 전용 `MDiveListMarker.Task`/`MDiveCheckbox`, `MDiveTextRun.strike`를 사용한다. 새 모듈·렌더러·네트워크 기능은 추가하지 않는다.
+
+표 확장의 기본 factory가 헤더보다 구분 행 열 수가 많은 입력도 허용하므로, data의 `GfmTableFactory`가 정확한 동수를 먼저 검사한 뒤 고정 버전 factory에 위임한다. 라이브러리의 `internal` 패키지 Java API를 사용하는 작은 호환 경계이므로 버전 갱신 시 표 fixture를 함께 확인한다. 표 확장이 escaped pipe를 제거한 뒤 인라인을 파싱하므로 미지원 링크·이미지 등의 source offset을 원래 셀 위치로 역변환한다. 표 셀 안전 한도 초과 시에는 표 확장을 끄고 기본 본문으로 다시 파싱해 읽기를 유지한다.
+
+task는 해석된 Text를 정규식으로 바꾸는 확장 대신 첫 문단의 원문 시작을 확인해 escape·문자 참조의 오인식을 방지한다. 취소선은 공식 `requireTwoTildes(true)` 옵션으로 제한한다. 기존 중첩 폭 보호를 task에도 적용하며 표의 가로 스크롤은 DS 블록 내부가 소유한다.
+
+근거: [0.31.0 표 factory](https://github.com/commonmark/commonmark-java/blob/commonmark-parent-0.31.0/commonmark-ext-gfm-tables/src/main/java/org/commonmark/ext/gfm/tables/internal/TableBlockParser.java), [0.31.0 취소선 API](https://github.com/commonmark/commonmark-java/blob/commonmark-parent-0.31.0/commonmark-ext-gfm-strikethrough/src/main/java/org/commonmark/ext/gfm/strikethrough/StrikethroughExtension.java).

@@ -157,7 +157,7 @@ def generate():
         body = e(sample['markdownBody'])
         if state == 'quote':
             return f'<div class="md-flow"><blockquote class="type-documentQuote"><p>{body}</p><blockquote><p>중첩 인용</p><ul><li>인용 안의 목록</li></ul></blockquote>{code_block(sample["code"])}</blockquote></div>'
-        return f'<div class="md-flow"><ol start="98"><li>{body}<ul><li>혼합된 자식 목록</li></ul><p>같은 항목의 두 번째 문단</p></li><li>여러 자리 번호도 내어쓰기 유지</li></ol><ul class="md-tasks"><li>{checkbox(readonly=True, label="읽기 전용 작업")}</li><li>{checkbox(checked=True, readonly=True, label="완료한 작업")}</li></ul></div>'
+        return f'<div class="md-flow"><ol start="98"><li>{body}<ul><li>혼합된 자식 목록</li></ul><p>같은 항목의 두 번째 문단</p></li><li>여러 자리 번호도 내어쓰기 유지</li></ol><ul class="md-tasks"><li>{checkbox(readonly=True, label="읽기 전용 부모 작업 · 여러 줄로 이어져도 첫 본문 줄에 상태를 맞춥니다.")}<ul class="md-tasks"><li>{checkbox(checked=True, readonly=True, label="완료한 자식 작업")}</li></ul><p>같은 부모 항목의 두 번째 문단</p></li></ul></div>'
 
     def content_banner(title, detail='', action='', symbol='file', loading=False, error=False):
         visual = '<span class="loading-dot" aria-hidden="true"></span>' if loading else icon(symbol)

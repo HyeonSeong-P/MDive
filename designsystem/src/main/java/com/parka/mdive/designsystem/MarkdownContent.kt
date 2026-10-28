@@ -7,12 +7,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
@@ -67,7 +71,7 @@ fun MDiveMarkdownText(
     runs: List<MDiveTextRun>, modifier: Modifier = Modifier,
     onLink: ((String) -> Unit)? = null,
     style: TextStyle = mdiveTextStyle("body"), textAlign: TextAlign = TextAlign.Start,
-) { Text(annotatedRuns(runs, onLink), modifier, style = style, textAlign = textAlign) }
+) { Text(annotatedRuns(runs, onLink), modifier, style = LocalTextStyle.current.merge(style), textAlign = textAlign) }
 
 @Composable
 fun MDiveMarkdownHeading(level: Int, runs: List<MDiveTextRun>, modifier: Modifier = Modifier, onLink: ((String) -> Unit)? = null) {
@@ -115,18 +119,32 @@ sealed interface MDiveListMarker {
 /** Nest items through the content slot, so indentation follows the actual composition. */
 @Composable
 fun MDiveMarkdownListItem(marker: MDiveListMarker, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
-    Row(modifier.fillMaxWidth(), verticalAlignment = if (marker is MDiveListMarker.Task) androidx.compose.ui.Alignment.CenterVertically else androidx.compose.ui.Alignment.Top) {
+    Row(modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.Top) {
         val label = when (marker) {
             MDiveListMarker.Bullet -> "•"
             is MDiveListMarker.Ordered -> "${marker.number}."
             is MDiveListMarker.Task -> ""
         }
         if (marker is MDiveListMarker.Task) {
-            Box(Modifier.width(DesignTokens.Spacing.getValue("documentMarker")).padding(end = 8.dp)) {
+            // Keep a full first line box for both single-line and wrapped task text.
+            val taskStyle = LocalTextStyle.current.merge(mdiveTextStyle("body")).copy(
+                lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.None),
+            )
+            val line = rememberTextMeasurer().measure("한글", style = taskStyle)
+            val center = (line.getLineTop(0) + line.getLineBottom(0)) / 2f
+            val top = with(LocalDensity.current) {
+                (center.toDp() - DesignTokens.Sizes.getValue("checkbox") / 2).coerceAtLeast(0.dp)
+            }
+            Box(Modifier.width(DesignTokens.Spacing.getValue("documentMarker")).padding(top = top, end = 8.dp)) {
                 MDiveCheckbox(marker.checked, onCheckedChange = null)
             }
         } else Text(label, Modifier.widthIn(min = DesignTokens.Spacing.getValue("documentMarker")).padding(end = 8.dp), style = mdiveTextStyle("body"), textAlign = TextAlign.End)
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(DesignTokens.Spacing.getValue("documentNested")), content = content)
+        val contentStyle = if (marker is MDiveListMarker.Task) LocalTextStyle.current.copy(
+            lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.None),
+        ) else LocalTextStyle.current
+        CompositionLocalProvider(LocalTextStyle provides contentStyle) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(DesignTokens.Spacing.getValue("documentNested")), content = content)
+        }
     }
 }
 

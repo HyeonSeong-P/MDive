@@ -36,10 +36,11 @@ class CommonMarkParserTest {
     @Test fun incompleteAndUnrecognizedExtensionsRemainText() {
         val blocks = parse("**닫히지 않음\n\n~~취소선~~\n\n| A | B |\n| - | - |\n| 1 | 2 |\n\n- [x] task\n\n\$수식\$\n\n[^foot]: 원문")
         assertEquals("**닫히지 않음", (blocks[0] as MarkdownBlock.Paragraph).runs.single().text)
-        assertEquals("~~취소선~~", (blocks[1] as MarkdownBlock.Paragraph).runs.single().text)
-        assertTrue((blocks[2] as MarkdownBlock.Paragraph).runs.joinToString("") { it.text }.contains("| - | - |"))
+        assertEquals(MarkdownRun("취소선", strike = true), (blocks[1] as MarkdownBlock.Paragraph).runs.single())
+        assertTrue(blocks[2] is MarkdownBlock.Table)
         val task = ((blocks[3] as MarkdownBlock.ListBlock).items.single().single() as MarkdownBlock.Paragraph)
-        assertEquals("[x] task", task.runs.joinToString("") { it.text })
+        assertEquals("task", task.runs.joinToString("") { it.text })
+        assertEquals(listOf(true), (blocks[3] as MarkdownBlock.ListBlock).tasks)
         assertEquals("\$수식\$", (blocks[4] as MarkdownBlock.Paragraph).runs.single().text)
         assertEquals("[^foot]: 원문", (blocks[5] as MarkdownBlock.Source).source)
     }
@@ -72,7 +73,8 @@ class CommonMarkParserTest {
         }
         assertTrue(parse(source).joinToString("") { text(it) }.contains("깊은 본문"))
         val extension = (parse("~~**굵게**~~").single() as MarkdownBlock.Paragraph).runs
-        assertEquals("~~굵게~~", extension.joinToString("") { it.text })
+        assertEquals("굵게", extension.joinToString("") { it.text })
+        assertTrue(extension.all { it.strike })
         assertTrue(extension.any { it.text == "굵게" && it.strong })
     }
 

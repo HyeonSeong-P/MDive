@@ -6,6 +6,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.text.TextLayoutResult
@@ -76,6 +79,63 @@ class ReaderMarkdownTest {
             assertFalse(layouts.single().didOverflowWidth)
             assertFalse(layouts.single().didOverflowHeight)
         }
+    }
+
+    @Test fun gfmTableScrollsLocallyAndLongCellWrapsAtLargeFont() {
+        val longCell = "긴셀".repeat(32)
+        val after = "본문".repeat(48)
+        show(parse("| 왼쪽 | 중앙 | 오른쪽 |\n| :-- | :-: | --: |\n| $longCell | **굵게** | 끝셀 |\n\n$after"), large = true)
+        val table = compose.onNodeWithTag("markdown-table")
+        val range = table.fetchSemanticsNode().config[SemanticsProperties.HorizontalScrollAxisRange]
+        assertTrue(range.maxValue() > 0f)
+        val layouts = mutableListOf<TextLayoutResult>()
+        compose.onNodeWithText(longCell).performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        assertTrue(layouts.single().lineCount > 1)
+        assertFalse(layouts.single().didOverflowWidth)
+        table.performSemanticsAction(SemanticsActions.ScrollBy) { it(1000f, 0f) }
+        compose.onNodeWithText("끝셀").assertIsDisplayed()
+        compose.onNodeWithTag("markdown-body").performScrollToNode(hasText(after))
+        val bodyLayouts = mutableListOf<TextLayoutResult>()
+        compose.onNodeWithText(after).performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(bodyLayouts) }
+        assertFalse(bodyLayouts.single().didOverflowWidth)
+        assertFalse(compose.onNodeWithTag("markdown-body").fetchSemanticsNode().config.contains(SemanticsProperties.HorizontalScrollAxisRange))
+    }
+
+    @Test fun tasksExposeTwoInertStatesAndStrikethroughStyles() {
+        show(parse("- [ ] 미완료\n  - [X] ~~**완료**~~\n\n~단일~"))
+        for (state in listOf(ToggleableState.On, ToggleableState.Off)) {
+            compose.onNode(SemanticsMatcher.expectValue(SemanticsProperties.ToggleableState, state))
+                .assertHasNoClickAction()
+                .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.RequestFocus))
+        }
+        val layouts = mutableListOf<TextLayoutResult>()
+        compose.onNodeWithText("완료").performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        assertTrue(layouts.single().layoutInput.text.spanStyles.any { it.item.textDecoration == TextDecoration.LineThrough })
+        compose.onNodeWithText("~단일~").assertIsDisplayed()
+    }
+
+    @Test fun deeplyNestedTasksKeepStatesAndBodyAtLargeFont() {
+        val final = "깊은 task 본문을 좁은 화면에서도 읽어요"
+        val source = (0 until 20).joinToString("\n") { "  ".repeat(it) + "- [x] " + if (it == 19) final else "완료 $it" }
+        show(parse(source), large = true)
+        compose.onNodeWithTag("markdown-body").performScrollToNode(hasText(final))
+        val layouts = mutableListOf<TextLayoutResult>()
+        compose.onNodeWithText(final).performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        assertFalse(layouts.single().didOverflowWidth)
+        assertTrue(layouts.single().size.width > 0)
+        compose.onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.ToggleableState, ToggleableState.On))
+            .fetchSemanticsNodes().forEach { assertFalse(it.config.contains(SemanticsActions.OnClick)) }
+    }
+
+    @Test fun tableWithinQuoteAndListMeasuresWithIntrinsicQuoteAtLargeFont() {
+        show(parse("> - 표 앞 목록\n>\n>   | 인용 헤더 | 다음 헤더 |\n>   | :-- | --: |\n>   | 인용 셀 | "+ "긴 내용".repeat(20) + " |\n\n인용 뒤 본문"), large = true)
+        compose.onNodeWithText("인용 셀").assertIsDisplayed()
+        val table = compose.onNodeWithTag("markdown-table")
+        val range = table.fetchSemanticsNode().config[SemanticsProperties.HorizontalScrollAxisRange]
+        assertTrue(range.maxValue() > 0f)
+        table.performSemanticsAction(SemanticsActions.ScrollBy) { it(1000f, 0f) }
+        compose.onNodeWithTag("markdown-body").performScrollToNode(hasText("인용 뒤 본문"))
+        compose.onNodeWithText("인용 뒤 본문").assertIsDisplayed()
     }
 
 }
