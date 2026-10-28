@@ -1,6 +1,8 @@
 package com.parka.mdive.ui.reader
 
 import androidx.lifecycle.viewModelScope
+import com.parka.mdive.domain.document.MarkdownDocument
+import com.parka.mdive.domain.document.MarkdownParser
 import com.parka.mdive.domain.document.DocumentFailure
 import com.parka.mdive.domain.document.DocumentReadResult
 import com.parka.mdive.domain.document.DocumentReference
@@ -12,6 +14,7 @@ import com.parka.mdive.ui.base.UiIntent
 import com.parka.mdive.ui.base.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
@@ -23,6 +26,7 @@ data class ReaderState(
     val content: ReaderContent = ReaderContent.Loading,
     val document: SourceDocument? = null,
     val failure: DocumentFailure? = null,
+    val markdown: MarkdownDocument? = null,
 ) : UiState
 
 sealed interface ReaderIntent : UiIntent {
@@ -38,6 +42,7 @@ sealed interface ReaderEffect : UiEffect {
 @HiltViewModel
 class ReaderViewModel @Inject constructor(
     private val repository: DocumentRepository,
+    private val parser: MarkdownParser,
 ) : BaseViewModel<ReaderState, ReaderIntent, ReaderEffect>(ReaderState()) {
     private var reference: DocumentReference? = null
     private var readJob: Job? = null
@@ -61,16 +66,26 @@ class ReaderViewModel @Inject constructor(
     private fun read() {
         val selected = reference ?: return
         if (readJob?.isActive == true) return
-        reduce { copy(content = ReaderContent.Loading, document = null, failure = null) }
+        reduce { copy(content = ReaderContent.Loading, document = null, failure = null, markdown = null) }
         readJob = viewModelScope.launch {
             val result = repository.read(selected)
             ensureActive()
             if (leaving) return@launch
             when (result) {
-                is DocumentReadResult.Success -> reduce {
-                    ReaderState(result.document.title,
+                is DocumentReadResult.Success -> {
+                    val markdown = try {
+                        parser.parse(result.document.source)
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (_: Exception) {
+                        reduce { copy(title = result.document.title, content = ReaderContent.Failure, failure = DocumentFailure.Read) }
+                        return@launch
+                    }
+                    ensureActive()
+                    if (leaving) return@launch
+                    reduce { ReaderState(result.document.title,
                         if (result.document.source.isEmpty()) ReaderContent.Empty else ReaderContent.SourceReady,
-                        result.document)
+                        result.document, markdown = markdown) }
                 }
                 is DocumentReadResult.Failure -> reduce { copy(content = ReaderContent.Failure, failure = result.reason) }
             }

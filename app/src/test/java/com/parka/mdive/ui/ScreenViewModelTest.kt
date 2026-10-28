@@ -13,6 +13,9 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ScreenViewModelTest {
+    private val parser = object : MarkdownParser {
+        override suspend fun parse(source: String) = MarkdownDocument(emptyList())
+    }
     @Test fun homeLaunchesOnceAndCancellationLeavesHomeAvailable() = runTest {
         Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
         try {
@@ -53,7 +56,7 @@ class ScreenViewModelTest {
                     references += reference
                     return results.removeFirst()
                 }
-            })
+            }, parser)
             val ref = DocumentReference("opaque")
             vm.onIntent(ReaderIntent.Open(ref))
             assertEquals(DocumentFailure.Access, vm.uiState.value.failure)
@@ -63,7 +66,7 @@ class ScreenViewModelTest {
             assertEquals(" \n", vm.uiState.value.document?.source)
             val emptyVm = ReaderViewModel(object : DocumentRepository {
                 override suspend fun read(reference: DocumentReference) = DocumentReadResult.Success(SourceDocument("empty.txt", ""))
-            })
+            }, parser)
             emptyVm.onIntent(ReaderIntent.Open(ref))
             assertEquals(ReaderContent.Empty, emptyVm.uiState.value.content)
         } finally { Dispatchers.resetMain() }
@@ -76,7 +79,7 @@ class ScreenViewModelTest {
             var calls = 0
             val vm = ReaderViewModel(object : DocumentRepository {
                 override suspend fun read(reference: DocumentReference): DocumentReadResult { calls++; return result.await() }
-            })
+            }, parser)
             vm.onIntent(ReaderIntent.Open(DocumentReference("one")))
             vm.onIntent(ReaderIntent.Open(DocumentReference("two")))
             vm.onIntent(ReaderIntent.Retry)
@@ -88,4 +91,44 @@ class ScreenViewModelTest {
             assertNull(vm.uiState.value.document)
         } finally { Dispatchers.resetMain() }
     }
+    @Test fun parsingStaysLoadingAndBackPreventsLateParsedContent() = runTest {
+        Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+        try {
+            val parsed = CompletableDeferred<MarkdownDocument>()
+            val vm = ReaderViewModel(object : DocumentRepository {
+                override suspend fun read(reference: DocumentReference) = DocumentReadResult.Success(SourceDocument("a.md", "# 제목"))
+            }, object : MarkdownParser {
+                override suspend fun parse(source: String) = parsed.await()
+            })
+            vm.onIntent(ReaderIntent.Open(DocumentReference("one")))
+            assertEquals(ReaderContent.Loading, vm.uiState.value.content)
+            vm.onIntent(ReaderIntent.Back)
+            assertEquals(ReaderEffect.NavigateHome, vm.effects.first())
+            parsed.complete(MarkdownDocument(listOf(MarkdownBlock.Paragraph(listOf(MarkdownRun("late"))))))
+            assertNull(vm.uiState.value.markdown)
+        } finally { Dispatchers.resetMain() }
+    }
+
+    @Test fun parserFailureOffersExistingRetryAndDoesNotExposePartialBody() = runTest {
+        Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+        try {
+            var attempts = 0
+            val expected = MarkdownDocument(listOf(MarkdownBlock.Paragraph(listOf(MarkdownRun("ok")))))
+            val vm = ReaderViewModel(object : DocumentRepository {
+                override suspend fun read(reference: DocumentReference) = DocumentReadResult.Success(SourceDocument("a.md", "ok"))
+            }, object : MarkdownParser {
+                override suspend fun parse(source: String): MarkdownDocument {
+                    if (attempts++ == 0) error("Parser unavailable")
+                    return expected
+                }
+            })
+            vm.onIntent(ReaderIntent.Open(DocumentReference("one")))
+            assertEquals(DocumentFailure.Read, vm.uiState.value.failure)
+            assertNull(vm.uiState.value.markdown)
+            vm.onIntent(ReaderIntent.Retry)
+            assertEquals(expected, vm.uiState.value.markdown)
+            assertEquals(ReaderContent.SourceReady, vm.uiState.value.content)
+        } finally { Dispatchers.resetMain() }
+    }
+
 }

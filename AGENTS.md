@@ -6,7 +6,7 @@
 
 - MDive는 Android용 Markdown 뷰어 앱이다.
 - 사용자 시나리오와 첫 버전의 기능 방향은 `docs/product/overview.md` 및 연결된 기능 명세에서 관리한다. 홈·읽기 기본 시안은 승인됐으며 세부 디자인과 일부 동작은 미정이다. 열린 질문을 임의로 확정하지 않는다.
-- Gradle 모듈은 제품 앱 `app`, 공통 Android 라이브러리 `designsystem`, 별도 카탈로그 앱 `designsystem/catalog`(`:designsystem:catalog`)이다. 제품은 S01의 홈·읽기 호스트와 Hilt·Navigation 3 기반이며 기존 디자인 시스템을 main/release에서 재사용한다. 카탈로그는 독립 앱으로 설치·실행한다. S02에서 시스템 파일 선택과 제목·원문 로더를 연결한다. 원문 검증은 개발 호스트에서 수행하며 Markdown 파싱·렌더링은 후속 단계다. 필요가 확인되기 전에는 추가 모듈, 라이브러리, 추상화를 선행 추가하지 않는다.
+- Gradle 모듈은 제품 앱 `app`, 공통 Android 라이브러리 `designsystem`, 별도 카탈로그 앱 `designsystem/catalog`(`:designsystem:catalog`)이다. 제품은 S01의 홈·읽기 호스트와 Hilt·Navigation 3 기반이며 기존 디자인 시스템을 main/release에서 재사용한다. 카탈로그는 독립 앱으로 설치·실행한다. S02에서 시스템 파일 선택과 제목·원문 로더를 연결한다. 원문 검증은 개발 호스트에서 유지하며 S03은 CommonMark 0.31.2 기본 본문을 파싱해 기존 DS로 표시한다. 파서 AST는 data 내부에서 앱 소유 모델로 변환하고 미지원 콘텐츠는 원문으로 남긴다. GFM·코드·리소스·확장 렌더링은 각 후속 단계다. 필요가 확인되기 전에는 추가 모듈, 라이브러리, 추상화를 선행 추가하지 않는다.
 
 ## 구현 원칙
 

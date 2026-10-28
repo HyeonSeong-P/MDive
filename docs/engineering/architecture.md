@@ -52,7 +52,7 @@ Gradle 모듈은 제품 앱 `app`, 공통 Android 라이브러리 `designsystem`
 
 ## Markdown 뷰어 경계
 
-파일 선택, 홈·읽기, 로컬 이미지 폴더 연결, 링크 처리와 수식·Mermaid를 포함한 표시 범위의 제품 방향은 [제품 문서](../product/overview.md)에서 관리한다. 책갈피와 즐겨찾기는 기기 내 영속 보관한다. 파싱·렌더링 방식, 영속화 기술, 파일·폴더 권한 구현과 세부 문법 호환 범위는 아직 결정하지 않았다. Room·DataStore 등의 선택은 구현 단계에서 검토하며 이 문서에서 선행 확정하지 않는다. 화면 이동 라이브러리는 Navigation 3로 정했으며 세부 목적지·백스택 구성은 확정된 화면 흐름에 맞춰 정한다.
+파일 선택, 홈·읽기, 로컬 이미지 폴더 연결, 링크 처리와 수식·Mermaid를 포함한 표시 범위의 제품 방향은 [제품 문서](../product/overview.md)에서 관리한다. 책갈피와 즐겨찾기는 기기 내 영속 보관한다. 기본 파싱·DS 렌더링은 아래 S03 경계를 따른다. 수식·Mermaid 등 후속 렌더 엔진, 영속화 기술, 후속 폴더 권한과 확장 문법의 세부 호환 범위는 아직 결정하지 않았다. Room·DataStore 등의 선택은 구현 단계에서 검토하며 이 문서에서 선행 확정하지 않는다. 화면 이동 라이브러리는 Navigation 3로 정했으며 세부 목적지·백스택 구성은 확정된 화면 흐름에 맞춰 정한다.
 
 ## 근거 자료
 
@@ -73,3 +73,15 @@ Navigation 3·Lifecycle·AndroidX Hilt·Dagger Hilt/KSP·Serialization 의존성
 홈의 Activity Result `OpenDocument` 선택 결과를 UI 소유 Navigation 3 Reader key의 문자열 입력으로 전달한다. Reader ViewModel은 domain 저장소를 호출하고 로딩·빈 원문·실패·원문 준비 상태를 노출한다. 원문 준비 시 제품은 중간 안내만 표시하고 debug 개발 호스트에서 실제 원문을 검증한다. 파일 확장자·인코딩·크기와 취소 정책은 [제품 로더 명세](../product/document-viewing.md#s02-로더-경계--확정)를 따른다.
 
 ContentResolver 메타데이터·스트림은 IO에서 처리하며 실제 읽기 바이트 상한을 적용하고 스트림을 닫는다. 코루틴 취소는 실패로 변환하지 않고 늦은 응답의 상태 반영을 차단한다. 외부 provider의 blocking IO가 즉시 중단됨을 보장하지는 않는다. 영속 URI 권한이나 저장 목록은 추가하지 않는다.
+
+## S03 기본 파서·DS 어댑터 경계
+
+S03의 해석 기준과 중간 원문 대체 정책은 [제품 프로필](../product/document-viewing.md#s03-기본-본문-프로필--확정)이 소유한다. `org.commonmark:commonmark:0.31.0` core로 CommonMark 0.31.2를 해석하고 data 내부에서 앱 소유 블록·인라인 모델로 변환한다. 특정 라이브러리 AST를 domain·UI·DS에 노출하지 않는다. UI는 준비된 모델을 기존 `MDiveMarkdownHeading/Text/Quote/ListItem/Divider`로 조합하며 DS는 파일이나 파서를 알지 못한다. 파싱은 메인 스레드 밖에서 수행하고 읽기 취소·늦은 결과 차단을 유지한다.
+
+선택 근거는 작은 core와 원문 위치(`BLOCKS_AND_INLINES`, UTF-16 `inputIndex`·`length`) 제공이다. 외부 리소스를 요청하거나 HTML을 실행하는 렌더러는 도입하지 않는다. 미지원 영역은 source span에 대응하는 원문을 보존하며 GFM 플러그인·엔진·새 모듈을 선행 추가하지 않는다. Java 11·minSdk 24 환경을 유지하고 core의 `List.of()` 등 API 호환을 위해 앱에 `desugar_jdk_libs:2.1.5` core-library desugaring을 설정한다. 실제 API 24 기기 실행 여부는 구현 계획의 검증 기록과 구분한다.
+
+근거: [유지관리자 README](https://raw.githubusercontent.com/commonmark/commonmark-java/commonmark-parent-0.31.0/README.md), [태그의 CommonMark 명세](https://raw.githubusercontent.com/commonmark/commonmark-java/commonmark-parent-0.31.0/commonmark-test-util/src/main/resources/spec.txt), [SourceSpan](https://raw.githubusercontent.com/commonmark/commonmark-java/commonmark-parent-0.31.0/commonmark/src/main/java/org/commonmark/node/SourceSpan.java), [Android Java API desugaring](https://developer.android.com/studio/write/java8-support), [Java 11 지원 API 목록](https://developer.android.com/studio/write/java11-default-support-table).
+
+파서 기본 중첩 한도(열린 블록·인라인 각각 100)를 유지한다. 어댑터도 컨테이너·강조 재귀 깊이 128에서 해당 부분을 원문으로 대체하는 안전장치를 둔다. 최상위 깊이 0에서 인용/목록 컨테이너 진입, 인라인 강조/굵게 진입마다 1씩 센다. 미인식 확장 구분자는 텍스트로 남지만 그 안의 기본 CommonMark는 해석될 수 있다(예: `~~**굵게**~~`는 취소선 구분자를 남기고 굵게를 적용). 이를 확장 문법 지원으로 간주하지 않는다.
+
+좁은 폭·큰 글자의 깊은 중첩에서는 UI가 가용 폭을 확인한다. 인용·목록의 다음 들여쓰기 후 폭이 `128dp × fontScale`보다 작아지면 추가 들여쓰기를 멈춘다. 최상위에서 폭을 얻어 하위에 전달하고 인용의 inset 및 실측한 목록 마커 폭을 차감한다. 인용의 intrinsic 측정 안에는 `BoxWithConstraints`를 중첩하지 않는다. 인용은 본문을 현재 폭에 이어 표시하고 목록은 번호/불릿을 별도 줄에 유지한다. 이는 화면 조합의 폭 보호이며 파서 의미나 원문을 변경하지 않는다.

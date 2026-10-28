@@ -39,12 +39,17 @@ class SystemPickerTest {
     }
     private fun selectFixture(name: String) {
         compose.onNodeWithText("파일 열기").performClick()
-        // DocumentsUI remembers its last root; open the drawer only if needed.
-        if (!clickPlatform(name, 1000)) {
-            assertTrue("System drawer: " + platformLabels(), clickPlatform("Show roots", 1000) || clickPlatform("Open navigation drawer", 1000))
-            assertTrue("Fixture root: " + platformLabels(), clickPlatform("MDive S02 tests"))
-            assertTrue("Fixture file: " + platformLabels(), clickPlatform(name))
+        // DocumentsUI transitions asynchronously; re-read its current surface until ready.
+        val deadline = SystemClock.uptimeMillis() + 8000
+        while (SystemClock.uptimeMillis() < deadline) {
+            if (clickPlatform(name, 250)) return
+            val labels = platformLabels()
+            if (labels.contains("Show roots") || labels.contains("Open navigation drawer")) {
+                clickPlatform("Show roots", 250) || clickPlatform("Open navigation drawer", 250)
+            }
+            if (platformLabels().contains("MDive S02 tests")) clickPlatform("MDive S02 tests", 250)
         }
+        throw AssertionError("Fixture selection timed out: " + platformLabels())
     }
     private fun platformBack() {
         android.os.ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand("input keyevent 4")).use { it.readBytes() }
@@ -66,12 +71,14 @@ class SystemPickerTest {
         }
         compose.onNodeWithText("파일 열기").assertIsEnabled()
         selectFixture("source.md")
-        awaitText("파일을 읽었어요")
+        awaitText("실제 선택")
         compose.onNodeWithText("source.md").assertIsDisplayed()
-        compose.onNodeWithText("파일을 읽었어요").assertIsDisplayed()
+        compose.onNodeWithText("실제 선택").assertIsDisplayed()
+        compose.onNodeWithText("선택한 인용").assertIsDisplayed()
+        compose.onNodeWithText("선택한 목록").assertIsDisplayed()
         compose.onNodeWithText(FixtureDocumentsProvider.SOURCE).assertDoesNotExist()
         compose.activityRule.scenario.recreate()
-        awaitText("파일을 읽었어요")
+        awaitText("실제 선택")
         compose.onNodeWithText("source.md").assertIsDisplayed()
         compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
@@ -89,8 +96,10 @@ class SystemPickerTest {
             compose.onNodeWithText("문서를 열지 못했어요").assertIsDisplayed()
             FixtureDocumentsProvider.failReads = false
             compose.onNodeWithText("다시 시도").performClick()
-            awaitText("파일을 읽었어요")
-            compose.onNodeWithText("파일을 읽었어요").assertIsDisplayed()
+            awaitText("실제 선택")
+            compose.onNodeWithText("실제 선택").assertIsDisplayed()
+        compose.onNodeWithText("선택한 인용").assertIsDisplayed()
+        compose.onNodeWithText("선택한 목록").assertIsDisplayed()
         } finally { FixtureDocumentsProvider.failReads = false }
         platformBack()
         awaitText("반가워요.")
