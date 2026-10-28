@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
+import com.parka.mdive.domain.document.MarkdownAlignment
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.parka.mdive.designsystem.*
@@ -54,6 +56,15 @@ private fun Block(block: MarkdownBlock, availableWidth: Dp) {
         is MarkdownBlock.Paragraph -> MDiveMarkdownText(block.runs.presentation())
         is MarkdownBlock.Source -> MDiveMarkdownText(listOf(MDiveTextRun(block.source)))
         MarkdownBlock.Divider -> MDiveMarkdownDivider()
+        is MarkdownBlock.Table -> MDiveMarkdownTable(
+            block.columns.map { column -> MDiveTableColumn(column.header.presentation(), when (column.alignment) {
+                MarkdownAlignment.Left -> TextAlign.Left
+                MarkdownAlignment.Center -> TextAlign.Center
+                MarkdownAlignment.Right -> TextAlign.Right
+            }) },
+            block.rows.map { row -> row.map { it.presentation() } },
+            Modifier.testTag("markdown-table"),
+        )
         is MarkdownBlock.Quote -> {
             val inset = 19.dp // DS quote rail 3dp + documentInset 16dp.
             if (availableWidth - inset < minimumTextWidth) Blocks(block.blocks, availableWidth)
@@ -64,16 +75,21 @@ private fun Block(block: MarkdownBlock, availableWidth: Dp) {
             val density = LocalDensity.current
             val style = MaterialTheme.typography.bodyLarge // MDive theme maps this to the body role.
             val markerWidth = block.items.indices.maxOfOrNull { index ->
+                if (block.tasks.getOrNull(index) != null) return@maxOfOrNull 32.dp
                 val label = block.start?.let { "${it + index}." } ?: "•"
                 with(density) { measurer.measure(label, style).size.width.toDp() } + 8.dp
             }?.coerceAtLeast(32.dp) ?: 0.dp
             val flatten = availableWidth - markerWidth < minimumTextWidth
             MDiveMarkdownFlow(spacing = 8.dp) {
                 block.items.forEachIndexed { index, item ->
+                    val task = block.tasks.getOrNull(index)
+                    val marker = task?.let { MDiveListMarker.Task(it) }
+                        ?: block.start?.let { MDiveListMarker.Ordered(it + index) } ?: MDiveListMarker.Bullet
                     if (flatten) {
-                        MDiveMarkdownText(listOf(MDiveTextRun(block.start?.let { "${it + index}." } ?: "•")))
+                        if (task != null) MDiveCheckbox(task, onCheckedChange = null)
+                        else MDiveMarkdownText(listOf(MDiveTextRun(block.start?.let { "${it + index}." } ?: "•")))
                         Blocks(item, availableWidth)
-                    } else MDiveMarkdownListItem(block.start?.let { MDiveListMarker.Ordered(it + index) } ?: MDiveListMarker.Bullet) {
+                    } else MDiveMarkdownListItem(marker) {
                         Blocks(item, availableWidth - markerWidth)
                     }
                 }
@@ -83,5 +99,5 @@ private fun Block(block: MarkdownBlock, availableWidth: Dp) {
 }
 
 private fun List<MarkdownRun>.presentation() = map {
-    MDiveTextRun(it.text, emphasis = it.emphasis, strong = it.strong, code = it.code)
+    MDiveTextRun(it.text, emphasis = it.emphasis, strong = it.strong, code = it.code, strike = it.strike)
 }

@@ -16,6 +16,8 @@ ksp = "2.3.5"
 coroutines = "1.10.2"
 
 [libraries]
+commonmark-gfm-tables = { module = "org.commonmark:commonmark-ext-gfm-tables", version = "0.31.0" }
+commonmark-gfm-strikethrough = { module = "org.commonmark:commonmark-ext-gfm-strikethrough", version = "0.31.0" }
 commonmark = { module = "org.commonmark:commonmark", version = "0.31.0" }
 desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version = "2.1.5" }
 kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version = "1.9.0" }

@@ -281,3 +281,7 @@ API 근거: [Android Bottom sheets](https://developer.android.com/develop/ui/com
 `.ds-popup-menu` / `.ds-popup-menu-item`은 더보기 버튼에 앵커되는 공통 메뉴 표면·48dp 이상 행동 행이다. 화면은 상단바 바로 아래·우측 16dp 앵커 좌표만 소유한다. 즐겨찾기는 별도 48dp 상단 아이콘 토글이며 `aria-pressed`와 추가/해제 접근성 이름으로 시연한다. 더보기 세로 점은 공통 `more` 원본의 채움 아이콘으로 표시한다. 일반 문서 열기 실패는 재시도·홈 복귀만, 기존 홈 문서의 접근 실패는 `파일 다시 연결`·목록 제거·닫기로 구분한다. 재연결 시 동일 문서 판별·권한·책갈피 승계 규칙은 여전히 미정이다. 제품 앱은 이번 변경에 수정하지 않는다.
 
 근거: [Acrobat Android의 Navigate and search](https://www.adobe.com/devnet-docs/acrobat/android/en/navigatesearch.html)는 열린 파일의 공통 작업을 상단에 두고 overflow에서 목차·책갈피 등 탐색 항목에 접근하는 구성을 설명한다. [Android 메뉴 문서](https://developer.android.com/develop/ui/views/components/menus#PopupMenu)는 popup을 호출한 view에 고정되는 세로 행동 목록으로 설명한다. MDive는 이 역할 분담·앵커 관계만 참고하며 Acrobat의 몰입 모드 자동 숨김이나 PDF 페이지별 책갈피 정책을 채택하지 않는다.
+
+## S04 읽기 전용 task 첫 줄 정렬
+
+제품 파서와 연결한 중첩 task에서 부모 체크 표시가 전체 자식 높이 중앙으로 내려가는 문제를 수정한다. `MDiveMarkdownListItem(Task)`는 본문 첫 줄 높이와 체크 표시 높이를 기준으로 상단을 맞추며, 여러 줄·하위 목록·추가 문단이 부모 표시 위치를 바꾸지 않는다. task 콘텐츠에는 `LineHeightStyle.Alignment.Center`·`Trim.None`을 명시해 한 줄·여러 줄 모두 전체 line box를 유지한다. 본문과 동일한 병합 스타일·행간 설정으로 한 줄을 측정해 실제 중심에 표시를 맞춘다. 이 계약은 한 줄·여러 줄의 첫 줄 상자를 동일하게 유지하고 큰 글자의 sp 환산 차이를 피한다. `MDiveMarkdownText`는 상위 텍스트 스타일을 DS 역할 스타일과 병합해 이 행간 설정을 전달하고 DS의 명시 글꼴·크기·줄 높이·굵기를 우선 유지한다. HTML readonly task도 첫 줄 기준으로 배치한다. 공통 카탈로그 원본·생성 HTML과 Compose 예시에 중첩·여러 줄 항목을 함께 둔다. 읽기 전용 상태 의미와 클릭·포커스 없음 계약은 유지한다. 기본/큰 글자 위치 자동 검증 결과는 [S04 인계](../implementation/open-markdown.md#현재-인계)에 기록한다.

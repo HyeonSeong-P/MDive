@@ -41,6 +41,8 @@ android {
 
 dependencies {
     implementation(libs.commonmark)
+    implementation(libs.commonmark.gfm.tables)
+    implementation(libs.commonmark.gfm.strikethrough)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(project(":designsystem"))
     implementation(libs.androidx.lifecycle.runtime.compose)

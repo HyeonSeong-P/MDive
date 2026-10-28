@@ -6,6 +6,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
@@ -17,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.parka.mdive.designsystem.*
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -112,4 +115,49 @@ class MarkdownComponentsTest {
         compose.onNodeWithText("다음 문단").performScrollTo().assertIsDisplayed()
         compose.onNode(isToggleable()).assertExists().assertHasNoClickAction()
     }
+    private fun assertNestedTaskMarkerMatchesFirstBodyLine(fontScale: Float, wrapped: Boolean = true) {
+        compose.setContent {
+            val density = LocalDensity.current
+            CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale)) {
+                MDiveDesignTheme {
+                    Column(Modifier.width(280.dp)) {
+                        MDiveMarkdownListItem(MDiveListMarker.Task(false)) {
+                            MDiveMarkdownText(listOf(MDiveTextRun(if (wrapped) "부모 본문이 여러 줄로 이어져도 첫 줄에 상태를 맞추는 예시" else "부모")), Modifier.testTag("parent-body"))
+                            MDiveMarkdownListItem(MDiveListMarker.Task(true)) {
+                                MDiveMarkdownText(listOf(MDiveTextRun("완료한 자식 작업")))
+                            }
+                            MDiveMarkdownText(listOf(MDiveTextRun("부모의 두 번째 문단")))
+                        }
+                    }
+                }
+            }
+        }
+        val layouts = mutableListOf<TextLayoutResult>()
+        val body = compose.onNodeWithTag("parent-body")
+        body.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        val layout = layouts.single()
+        if (wrapped) assertTrue(layout.lineCount > 1) else assertEquals(1, layout.lineCount)
+        val marker = compose.onNode(isToggleable().and(isOff())).assertHasNoClickAction().fetchSemanticsNode().boundsInRoot
+        val firstLineCenter = body.fetchSemanticsNode().boundsInRoot.top + (layout.getLineTop(0) + layout.getLineBottom(0)) / 2f
+        assertEquals(firstLineCenter, marker.center.y, 2f)
+        val child = compose.onNode(isToggleable().and(isOn())).assertHasNoClickAction().fetchSemanticsNode().boundsInRoot
+        assertTrue(marker.bottom < child.top)
+    }
+
+    @Test fun nestedTaskMarkerStaysBesideFirstWrappedBodyLine() {
+        assertNestedTaskMarkerMatchesFirstBodyLine(1f)
+    }
+
+    @Test fun nestedTaskMarkerFollowsLargeFontFirstLine() {
+        assertNestedTaskMarkerMatchesFirstBodyLine(1.6f)
+    }
+
+    @Test fun singleLineTaskMarkerMatchesFirstLine() {
+        assertNestedTaskMarkerMatchesFirstBodyLine(1f, wrapped = false)
+    }
+
+    @Test fun singleLineTaskMarkerMatchesLargeFontFirstLine() {
+        assertNestedTaskMarkerMatchesFirstBodyLine(1.6f, wrapped = false)
+    }
+
 }

@@ -2,6 +2,7 @@ package com.parka.mdive.ui
 
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -9,6 +10,9 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.hasText
 import androidx.test.platform.app.InstrumentationRegistry
 import com.parka.mdive.testing.FixtureDocumentsProvider
 import org.junit.Assert.assertTrue
@@ -105,4 +109,18 @@ class SystemPickerTest {
         awaitText("반가워요.")
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
     }
+    @Test fun actualGfmSelectionDisplaysMixedBodyAndReturnsHome() {
+        selectFixture("gfm.md")
+        awaitText("GFM 실제 선택")
+        compose.onNodeWithText("gfm.md").assertIsDisplayed()
+        compose.onNodeWithText("셀 본문").assertIsDisplayed()
+        compose.onNodeWithText("할 일").assertIsDisplayed()
+        compose.onNodeWithText("완료한 일").assertIsDisplayed()
+        compose.onNodeWithTag("markdown-body").performScrollToNode(hasText("마지막 혼합 본문"))
+        compose.onNodeWithText("[보존 링크](a.md)").assertHasNoClickAction()
+        compose.onNodeWithText("마지막 혼합 본문").assertIsDisplayed()
+        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+        compose.onNodeWithText("반가워요.").assertIsDisplayed()
+    }
+
 }

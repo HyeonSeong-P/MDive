@@ -118,7 +118,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 .ds-checkbox input:focus-visible+.ds-checkbox-box{outline:2px solid var(--primary);outline-offset:3px}
 .ds-checkbox:has(input:disabled){opacity:var(--opacity-disabledIcon);cursor:default}
 .ds-checkbox.is-readonly{min-height:0;cursor:default}
-.md-flow .ds-checkbox.is-readonly{font:inherit;align-items:center}
+.md-flow .ds-checkbox.is-readonly{font:inherit;align-items:flex-start}
+.md-flow .ds-checkbox.is-readonly>.ds-checkbox-box{margin-block-start:max(0px,calc((1lh - var(--size-checkbox))/2))}
+.md-flow .md-tasks .md-tasks{padding-inline-start:var(--space-documentMarker)}
 .md-flow .ds-checkbox.is-readonly>span:last-child{min-width:0}
 .md-content-banner{max-width:100%;font:var(--font-ui)/var(--leading-ui) var(--family-ui),sans-serif}
 
