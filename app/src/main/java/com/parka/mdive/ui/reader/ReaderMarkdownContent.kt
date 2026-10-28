@@ -22,7 +22,7 @@ import com.parka.mdive.domain.document.MarkdownDocument
 import com.parka.mdive.domain.document.MarkdownRun
 
 @Composable
-fun ReaderMarkdownContent(document: MarkdownDocument, modifier: Modifier = Modifier) {
+fun ReaderMarkdownContent(document: MarkdownDocument, modifier: Modifier = Modifier, onCopyCode: (String) -> Unit = {}) {
     // Measure once outside quote's intrinsic layout; nested blocks receive the remaining width.
     BoxWithConstraints(modifier.fillMaxWidth()) {
         val contentWidth = (maxWidth - 32.dp).coerceAtLeast(0.dp)
@@ -30,7 +30,7 @@ fun ReaderMarkdownContent(document: MarkdownDocument, modifier: Modifier = Modif
             items(document.blocks.size) { index ->
                 val block = document.blocks[index]
                 Column(Modifier.fillMaxWidth().padding(top = spaceBefore(document.blocks, index))) {
-                    Block(block, contentWidth)
+                    Block(block, contentWidth, onCopyCode)
                 }
             }
         }
@@ -42,19 +42,26 @@ private fun spaceBefore(blocks: List<MarkdownBlock>, index: Int): Dp =
     else if (blocks[index - 1] is MarkdownBlock.Heading) 8.dp else 16.dp
 
 @Composable
-private fun Blocks(blocks: List<MarkdownBlock>, availableWidth: Dp) {
+private fun Blocks(blocks: List<MarkdownBlock>, availableWidth: Dp, onCopyCode: (String) -> Unit) {
     blocks.forEachIndexed { index, block ->
-        Column(Modifier.fillMaxWidth().padding(top = spaceBefore(blocks, index))) { Block(block, availableWidth) }
+        Column(Modifier.fillMaxWidth().padding(top = spaceBefore(blocks, index))) { Block(block, availableWidth, onCopyCode) }
     }
 }
 
 @Composable
-private fun Block(block: MarkdownBlock, availableWidth: Dp) {
+private fun Block(block: MarkdownBlock, availableWidth: Dp, onCopyCode: (String) -> Unit) {
     val minimumTextWidth = 128.dp * LocalDensity.current.fontScale
     when (block) {
         is MarkdownBlock.Heading -> MDiveMarkdownHeading(block.level, block.runs.presentation())
         is MarkdownBlock.Paragraph -> MDiveMarkdownText(block.runs.presentation())
         is MarkdownBlock.Source -> MDiveMarkdownText(listOf(MDiveTextRun(block.source)))
+        is MarkdownBlock.Code -> MDiveCodeBlock(block.source, Modifier.testTag("markdown-code"),
+            language = block.language,
+            highlights = block.highlights.map { MDiveCodeHighlight(it.start, it.end, when (it.tone) {
+                com.parka.mdive.domain.document.CodeTone.Keyword -> MDiveCodeTone.Keyword
+                com.parka.mdive.domain.document.CodeTone.String -> MDiveCodeTone.String
+                com.parka.mdive.domain.document.CodeTone.Plain -> MDiveCodeTone.Plain
+            }) }, onCopy = onCopyCode)
         MarkdownBlock.Divider -> MDiveMarkdownDivider()
         is MarkdownBlock.Table -> MDiveMarkdownTable(
             block.columns.map { column -> MDiveTableColumn(column.header.presentation(), when (column.alignment) {
@@ -67,8 +74,8 @@ private fun Block(block: MarkdownBlock, availableWidth: Dp) {
         )
         is MarkdownBlock.Quote -> {
             val inset = 19.dp // DS quote rail 3dp + documentInset 16dp.
-            if (availableWidth - inset < minimumTextWidth) Blocks(block.blocks, availableWidth)
-            else MDiveMarkdownQuote { Blocks(block.blocks, availableWidth - inset) }
+            if (availableWidth - inset < minimumTextWidth) Blocks(block.blocks, availableWidth, onCopyCode)
+            else MDiveMarkdownQuote { Blocks(block.blocks, availableWidth - inset, onCopyCode) }
         }
         is MarkdownBlock.ListBlock -> {
             val measurer = rememberTextMeasurer()
@@ -88,9 +95,9 @@ private fun Block(block: MarkdownBlock, availableWidth: Dp) {
                     if (flatten) {
                         if (task != null) MDiveCheckbox(task, onCheckedChange = null)
                         else MDiveMarkdownText(listOf(MDiveTextRun(block.start?.let { "${it + index}." } ?: "•")))
-                        Blocks(item, availableWidth)
+                        Blocks(item, availableWidth, onCopyCode)
                     } else MDiveMarkdownListItem(marker) {
-                        Blocks(item, availableWidth - markerWidth)
+                        Blocks(item, availableWidth - markerWidth, onCopyCode)
                     }
                 }
             }

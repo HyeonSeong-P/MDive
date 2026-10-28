@@ -28,7 +28,7 @@ class CommonMarkParserTest {
         val blocks = parse(source)
         val text = (blocks[0] as MarkdownBlock.Paragraph).runs.joinToString("") { it.text }
         assertEquals("😀 [**이름**](https://example.com \"제목\") ![그림](a.png) <https://example.org>\n다음", text)
-        assertEquals("```kotlin\r\n a < b\r\n```", (blocks[1] as MarkdownBlock.Source).source)
+        assertEquals(" a < b\r\n", (blocks[1] as MarkdownBlock.Code).source)
         assertEquals("<div>\r\n **실행 안 함**\r\n</div>", (blocks[2] as MarkdownBlock.Source).source)
         assertEquals("끝", (blocks[3] as MarkdownBlock.Paragraph).runs.single().text)
     }

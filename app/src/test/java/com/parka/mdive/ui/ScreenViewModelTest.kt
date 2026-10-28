@@ -131,4 +131,24 @@ class ScreenViewModelTest {
         } finally { Dispatchers.resetMain() }
     }
 
+    @Test fun codeCopyEmitsExactBodyOnlyWhileReadingAndDoesNotChangeDocument() = runTest {
+        Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+        try {
+            val vm = ReaderViewModel(object : DocumentRepository {
+                override suspend fun read(reference: DocumentReference) = DocumentReadResult.Success(SourceDocument("code.md", "body"))
+            }, parser)
+            vm.onIntent(ReaderIntent.CopyCode("ignored before open"))
+            vm.onIntent(ReaderIntent.Open(DocumentReference("one")))
+            val before = vm.uiState.value
+            val code = " \tval x = 1  \r\n"
+            vm.onIntent(ReaderIntent.CopyCode(code))
+            assertEquals(ReaderEffect.CopyCode(code), vm.effects.first())
+            assertEquals(before, vm.uiState.value)
+            vm.onIntent(ReaderIntent.Back)
+            assertEquals(ReaderEffect.NavigateHome, vm.effects.first())
+            vm.onIntent(ReaderIntent.CopyCode("ignored after leaving"))
+            assertNull(kotlinx.coroutines.withTimeoutOrNull(1) { vm.effects.first() })
+        } finally { Dispatchers.resetMain() }
+    }
+
 }

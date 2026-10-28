@@ -1,6 +1,21 @@
 package com.parka.mdive.ui.reader
 
+import android.content.ClipData
+import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
+import com.parka.mdive.designsystem.MDiveToast
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,18 +49,33 @@ fun ReaderRoute(
     viewModel: ReaderViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val clipboard = LocalClipboard.current
+    val scope = rememberCoroutineScope()
+    var feedback by remember { mutableStateOf<Pair<Long, String>?>(null) }
+    LaunchedEffect(feedback) { if (feedback != null) { delay(3000); feedback = null } }
     LaunchedEffect(reference) { viewModel.onIntent(ReaderIntent.Open(reference)) }
     BackHandler { viewModel.onIntent(ReaderIntent.Back) }
     CollectEffects(viewModel.effects) { effect ->
         when (effect) {
             ReaderEffect.NavigateHome -> onNavigateHome()
+            is ReaderEffect.CopyCode -> scope.launch {
+                val message = copyCodeWithFeedback(Build.VERSION.SDK_INT, effect.source) {
+                    clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("코드", it)))
+                }
+                feedback = message?.let { System.nanoTime() to it }
+            }
         }
     }
-    ReaderScreen(
-        state = state,
-        onBack = { viewModel.onIntent(ReaderIntent.Back) },
-        onRetry = { viewModel.onIntent(ReaderIntent.Retry) },
-    )
+    Box {
+        ReaderScreen(
+            state = state,
+            onBack = { viewModel.onIntent(ReaderIntent.Back) },
+            onRetry = { viewModel.onIntent(ReaderIntent.Retry) },
+            onCopyCode = { viewModel.onIntent(ReaderIntent.CopyCode(it)) },
+        )
+        feedback?.let { (_, message) -> MDiveToast(message, Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(16.dp),
+            icon = if (message == COPY_FAILED) "warning" else "check") }
+    }
 }
 
 @Composable
@@ -55,6 +85,7 @@ fun ReaderScreen(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     sourcePreview: (@Composable (SourceDocument) -> Unit)? = null,
+    onCopyCode: (String) -> Unit = {},
 ) {
     Surface(modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().safeDrawingPadding()) {
@@ -66,7 +97,7 @@ fun ReaderScreen(
             )
             if (state.content == ReaderContent.Loading) ReaderLoadingContent(Modifier.weight(1f))
             else if (state.content == ReaderContent.SourceReady && sourcePreview == null) {
-                state.markdown?.let { ReaderMarkdownContent(it, Modifier.weight(1f)) }
+                state.markdown?.let { ReaderMarkdownContent(it, Modifier.weight(1f), onCopyCode) }
             } else CenteredScrollableState(Modifier.weight(1f)) {
                 when (state.content) {
                     ReaderContent.Loading -> Unit
@@ -119,3 +150,16 @@ private fun ReaderEmptyPreview() = MDiveDesignTheme { ReaderScreen(ReaderState("
 @Preview(showBackground = true)
 @Composable
 private fun ReaderFailurePreview() = MDiveDesignTheme { ReaderScreen(ReaderState("예시.md", ReaderContent.Failure), {}, {}) }
+
+internal const val COPY_FAILED = "복사하지 못했어요. 다시 시도해주세요"
+internal const val COPY_SUCCEEDED = "코드를 복사했어요"
+
+/** Completion means the platform write returned; do not read the clipboard back. */
+internal suspend fun copyCodeWithFeedback(apiLevel: Int, source: String, write: suspend (String) -> Unit): String? = try {
+    write(source)
+    if (apiLevel < 33) COPY_SUCCEEDED else null
+} catch (cancelled: CancellationException) {
+    throw cancelled
+} catch (_: Exception) {
+    COPY_FAILED
+}

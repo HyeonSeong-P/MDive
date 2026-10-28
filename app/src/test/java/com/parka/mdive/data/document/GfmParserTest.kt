@@ -86,7 +86,7 @@ class GfmParserTest {
         val runs = (blocks[0] as MarkdownBlock.Paragraph).runs
         assertEquals("~~코드~~ [~~링크~~](a.md) ![~~이미지~~](a.png)", runs.text())
         assertTrue(runs.none { it.strike })
-        assertEquals("```\n- [x] task\n| A |\n| - |\n~~source~~\n```", (blocks[1] as MarkdownBlock.Source).source)
+        assertEquals("- [x] task\n| A |\n| - |\n~~source~~\n", (blocks[1] as MarkdownBlock.Code).source)
         assertEquals("<div>~~HTML~~</div>", (blocks[2] as MarkdownBlock.Source).source)
         assertEquals("\$수식\$", (blocks[3] as MarkdownBlock.Paragraph).runs.text())
     }

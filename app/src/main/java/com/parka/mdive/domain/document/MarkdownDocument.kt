@@ -21,6 +21,7 @@ sealed interface MarkdownBlock {
         val tasks: List<Boolean?> = List(items.size) { null },
     ) : MarkdownBlock
     data class Table(val columns: List<MarkdownTableColumn>, val rows: List<List<List<MarkdownRun>>>) : MarkdownBlock
+    data class Code(val source: String, val language: String?, val highlights: List<CodeHighlight> = emptyList()) : MarkdownBlock
     data object Divider : MarkdownBlock
     /** Unsupported syntax remains readable, inert source in the document flow. */
     data class Source(val source: String) : MarkdownBlock
@@ -32,3 +33,7 @@ data class MarkdownTableColumn(val header: List<MarkdownRun>, val alignment: Mar
 interface MarkdownParser {
     suspend fun parse(source: String): MarkdownDocument
 }
+
+/** UTF-16 offsets into the unchanged code body; no engine or UI types. */
+data class CodeHighlight(val start: Int, val end: Int, val tone: CodeTone)
+enum class CodeTone { Keyword, String, Plain }

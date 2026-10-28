@@ -95,3 +95,14 @@ S03의 해석 기준과 중간 원문 대체 정책은 [제품 프로필](../pro
 task는 해석된 Text를 정규식으로 바꾸는 확장 대신 첫 문단의 원문 시작을 확인해 escape·문자 참조의 오인식을 방지한다. 취소선은 공식 `requireTwoTildes(true)` 옵션으로 제한한다. 기존 중첩 폭 보호를 task에도 적용하며 표의 가로 스크롤은 DS 블록 내부가 소유한다.
 
 근거: [0.31.0 표 factory](https://github.com/commonmark/commonmark-java/blob/commonmark-parent-0.31.0/commonmark-ext-gfm-tables/src/main/java/org/commonmark/ext/gfm/tables/internal/TableBlockParser.java), [0.31.0 취소선 API](https://github.com/commonmark/commonmark-java/blob/commonmark-parent-0.31.0/commonmark-ext-gfm-strikethrough/src/main/java/org/commonmark/ext/gfm/strikethrough/StrikethroughExtension.java).
+
+
+## S05 코드·강조·복사 경계
+
+제품 언어·별칭·대체 표시·복사 정책은 [S05 프로필](../product/document-viewing.md#s05-코드-프로필--확정)이 소유한다. `dev.snipme:highlights:1.1.0`의 동기 `getCodeStructure()`를 기존 파서의 `Dispatchers.Default` 안에서 블록별 새 인스턴스로 호출한다. 17개 언어의 기본 어휘 강조를 선택한 이유는 순수 Kotlin/JVM으로 별도 WebView·JavaScript 실행 엔진 없이 기존 DS의 Keyword/String/Plain 범위에 연결할 수 있기 때문이다. 최신 문법 전체 호환을 보장하지 않는다. 엔진 타입과 언어 매핑은 data 내부에 두고 UTF-16 범위·의미 tone만 domain 코드 모델로 전달한다. 잘못된 범위나 분석 예외는 강조만 제거하며 코루틴 취소는 다시 던진다. 동기 CPU 분석의 즉시 취소를 보장하지 않는다.
+
+CommonMark literal의 정규화된 본문을 그대로 복사하지 않는다. data의 `CodeSourceReader`는 literal의 구조 제거 후 선행 공백(부분 소비된 탭 잔여열 포함)과 source span의 원래 내용·CR/LF·EOF를 조합한다. fence·info·인용/목록/들여쓰기 코드 구조만 제거한다. `mermaid` fence는 기존 전체 원문 표시를 유지한다.
+
+UI는 `MDiveCodeBlock`에 원문·언어 라벨·강조 범위·복사 callback을 전달한다. 복사는 Reader Intent → Channel Effect → Route의 새 Compose `LocalClipboard`/`setClipEntry`로 실행한다. ViewModel에 Android 클립보드 타입을 넣지 않는다. 플랫폼 쓰기 직후 클립보드를 다시 읽지 않는다. API33 이상은 시스템 성공 안내, 이전 버전은 공통 `MDiveToast`, 실패는 같은 공통 피드백과 기존 복사 버튼으로 재시도한다. 일시 안내의 표시·3초 유지와 반복 표시 시간 갱신은 Route의 UI 로컬 상태가 소유한다. 새 공통 UI·모듈은 추가하지 않는다.
+
+근거: [Highlights 1.1.0 소스](https://github.com/SnipMeDev/Highlights/tree/1.1.0), [Compose Clipboard](https://developer.android.com/reference/kotlin/androidx/compose/ui/platform/Clipboard), [Android 복사 피드백](https://developer.android.com/develop/ui/compose/touch-input/copy-and-paste#feedback).

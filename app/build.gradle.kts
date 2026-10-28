@@ -40,6 +40,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.highlights)
     implementation(libs.commonmark)
     implementation(libs.commonmark.gfm.tables)
     implementation(libs.commonmark.gfm.strikethrough)

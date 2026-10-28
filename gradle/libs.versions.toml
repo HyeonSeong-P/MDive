@@ -16,6 +16,7 @@ ksp = "2.3.5"
 coroutines = "1.10.2"
 
 [libraries]
+highlights = { module = "dev.snipme:highlights", version = "1.1.0" }
 commonmark-gfm-tables = { module = "org.commonmark:commonmark-ext-gfm-tables", version = "0.31.0" }
 commonmark-gfm-strikethrough = { module = "org.commonmark:commonmark-ext-gfm-strikethrough", version = "0.31.0" }
 commonmark = { module = "org.commonmark:commonmark", version = "0.31.0" }

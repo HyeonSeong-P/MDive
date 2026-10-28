@@ -48,7 +48,7 @@ class ReaderMarkdownTest {
         compose.onNodeWithTag("markdown-body").performScrollToNode(hasText("[링크](https://example.com) ![이미지](image.png)"))
         compose.onNodeWithText("[링크](https://example.com) ![이미지](image.png)").assertHasNoClickAction()
         compose.onNodeWithTag("markdown-body").performScrollToNode(hasText("마지막"))
-        compose.onNodeWithText("```\n소스\n```").assertIsDisplayed()
+        compose.onNodeWithText("소스\n").assertIsDisplayed()
         compose.onNodeWithText("마지막").assertIsDisplayed()
     }
 
