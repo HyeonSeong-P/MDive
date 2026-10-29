@@ -29,10 +29,10 @@ class SystemPickerTest {
     private fun clickPlatform(label: String, timeout: Long = 8000): Boolean {
         val deadline = SystemClock.uptimeMillis() + timeout
         while (SystemClock.uptimeMillis() < deadline) {
-            val match = nodes(automation.rootInActiveWindow).firstOrNull {
+            val matches = nodes(automation.rootInActiveWindow).filter {
                 it.text?.toString() == label || it.contentDescription?.toString() == label
             }
-            if (match != null) {
+            for (match in matches) {
                 var clickable: AccessibilityNodeInfo? = match
                 while (clickable != null && !clickable.isClickable) clickable = clickable.parent
                 if (clickable?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) return true
@@ -44,14 +44,30 @@ class SystemPickerTest {
     private fun selectFixture(name: String) {
         compose.onNodeWithText("파일 열기").performClick()
         // DocumentsUI transitions asynchronously; re-read its current surface until ready.
-        val deadline = SystemClock.uptimeMillis() + 8000
+        val deadline = SystemClock.uptimeMillis() + 12000
+        var rootChosen = false
         while (SystemClock.uptimeMillis() < deadline) {
             if (clickPlatform(name, 250)) return
+            if (rootChosen) {
+                val root = automation.rootInActiveWindow
+                if (root != null) {
+                    // Some DocumentsUI releases omit scroll actions from their file RecyclerView.
+                    // Derive a vertical gesture from the live window bounds, not screen constants.
+                    val bounds = android.graphics.Rect()
+                    root.getBoundsInScreen(bounds)
+                    val x = bounds.centerX()
+                    val from = bounds.top + bounds.height() * 3 / 4
+                    val to = bounds.top + bounds.height() / 3
+                    android.os.ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand("input swipe $x $from $x $to 250")).use { it.readBytes() }
+                }
+                SystemClock.sleep(100)
+                continue
+            }
             val labels = platformLabels()
             if (labels.contains("Show roots") || labels.contains("Open navigation drawer")) {
                 clickPlatform("Show roots", 250) || clickPlatform("Open navigation drawer", 250)
             }
-            if (platformLabels().contains("MDive S02 tests")) clickPlatform("MDive S02 tests", 250)
+            if (platformLabels().contains("MDive S02 tests")) rootChosen = clickPlatform("MDive S02 tests", 250)
         }
         throw AssertionError("Fixture selection timed out: " + platformLabels())
     }
@@ -133,6 +149,22 @@ class SystemPickerTest {
             org.junit.Assert.assertEquals(FixtureDocumentsProvider.CODE_BODY, clipboard.primaryClip?.getItemAt(0)?.text?.toString())
         }
         compose.onNodeWithText("코드 뒤 본문").assertIsDisplayed()
+        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+        compose.onNodeWithText("반가워요.").assertIsDisplayed()
+    }
+
+    @Test fun actualMathSelectionKeepsPartialFailureSourceAndReturnsHome() {
+        selectFixture("math.md")
+        awaitText("수식 실제 선택")
+        compose.onNodeWithText("math.md").assertIsDisplayed()
+        compose.onNodeWithTag("math-block").assertIsDisplayed()
+        compose.onNodeWithText("수식을 표시하지 못했어요").assertIsDisplayed()
+        compose.onNodeWithText("원문 보기").performClick()
+        compose.onNodeWithText("수식 원문").assertIsDisplayed()
+        compose.onNodeWithText("\$\\unknown{x}\$").assertIsDisplayed()
+        compose.onNodeWithText("닫기").performClick()
+        compose.onNodeWithText("수식 원문").assertDoesNotExist()
+        compose.onNodeWithText("수식 뒤 본문").assertIsDisplayed()
         compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
     }

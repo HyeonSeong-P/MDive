@@ -174,7 +174,7 @@ data class MDiveTableColumn(val header: List<MDiveTextRun>, val alignment: TextA
 
 /** Column width is an explicit visual input, not a Markdown wrapping policy. */
 @Composable
-fun MDiveMarkdownTable(columns: List<MDiveTableColumn>, rows: List<List<List<MDiveTextRun>>>, modifier: Modifier = Modifier, onLink: ((String) -> Unit)? = null) {
+fun MDiveMarkdownTable(columns: List<MDiveTableColumn>, rows: List<List<List<MDiveTextRun>>>, modifier: Modifier = Modifier, onLink: ((String) -> Unit)? = null, cellContent: (@Composable (row: Int, column: Int, modifier: Modifier) -> Unit)? = null) {
     require(columns.isNotEmpty()) { "A table needs columns" }
     require(columns.all { it.width > 0.dp }) { "Column widths must be positive" }
     require(rows.all { it.size == columns.size }) { "Every row must match the columns" }
@@ -183,10 +183,12 @@ fun MDiveMarkdownTable(columns: List<MDiveTableColumn>, rows: List<List<List<MDi
             Row(Modifier.background(if (rowIndex == 0) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.background)) {
                 cells.forEachIndexed { columnIndex, cell ->
                     val column = columns[columnIndex]
-                    MDiveMarkdownText(cell, Modifier.width(column.width).padding(DesignTokens.Spacing.getValue("tableCell")).semantics {
+                    val cellModifier = Modifier.width(column.width).padding(DesignTokens.Spacing.getValue("tableCell")).semantics {
                         collectionItemInfo = CollectionItemInfo(rowIndex, 1, columnIndex, 1)
                         if (rowIndex == 0) heading() else contentDescription = column.header.joinToString("") { it.text } + ": " + cell.joinToString("") { it.text }
-                    }, onLink, mdiveTextStyle("documentTable"), column.alignment)
+                    }
+                    if (cellContent != null) cellContent(rowIndex, columnIndex, cellModifier)
+                    else MDiveMarkdownText(cell, cellModifier, onLink, mdiveTextStyle("documentTable"), column.alignment)
                 }
             }
             MDiveDivider()
@@ -227,7 +229,7 @@ fun MDiveRenderedBlock(
     require(state != MDiveResourceState.AccessRequired) { "Rendered blocks do not request file access" }
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (state == MDiveResourceState.Ready) Box(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).semantics { contentDescription = description }) { content() }
-        MDiveRecoveryBanner(
+        if (state != MDiveResourceState.Ready || onViewSource != null || onExpand != null) MDiveRecoveryBanner(
             title = when (state) { MDiveResourceState.Ready -> "렌더링된 콘텐츠"; MDiveResourceState.Loading -> "콘텐츠 렌더링 중"; else -> "콘텐츠를 표시하지 못했어요" },
             detail = description,
             icon = if (state == MDiveResourceState.Failure) "warning" else "file",
@@ -252,6 +254,6 @@ fun MDiveContentFallback(kind: String, reason: String, modifier: Modifier = Modi
 
 /** Prepared inline rendering placed in the same text flow; no math syntax is interpreted. */
 @Composable
-fun MDiveMathInline(text: AnnotatedString, inlineContent: Map<String, androidx.compose.foundation.text.InlineTextContent>, modifier: Modifier = Modifier) {
-    Text(text, modifier, inlineContent = inlineContent, style = mdiveTextStyle("body"))
+fun MDiveMathInline(text: AnnotatedString, inlineContent: Map<String, androidx.compose.foundation.text.InlineTextContent>, modifier: Modifier = Modifier, style: TextStyle = mdiveTextStyle("body"), textAlign: TextAlign = TextAlign.Start) {
+    Text(text, modifier, inlineContent = inlineContent, style = style, textAlign = textAlign)
 }

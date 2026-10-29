@@ -27,12 +27,15 @@ data class ReaderState(
     val document: SourceDocument? = null,
     val failure: DocumentFailure? = null,
     val markdown: MarkdownDocument? = null,
+    val mathSource: String? = null,
 ) : UiState
 
 sealed interface ReaderIntent : UiIntent {
     data class Open(val reference: DocumentReference) : ReaderIntent
     data class CopyCode(val source: String) : ReaderIntent
     data object Back : ReaderIntent
+    data class ViewMathSource(val source: String) : ReaderIntent
+    data object CloseMathSource : ReaderIntent
     data object Retry : ReaderIntent
 }
 
@@ -60,7 +63,9 @@ class ReaderViewModel @Inject constructor(
             is ReaderIntent.CopyCode -> if (!leaving && uiState.value.content == ReaderContent.SourceReady) {
                 viewModelScope.launch { emitEffect(ReaderEffect.CopyCode(intent.source)) }
             }
-            ReaderIntent.Back -> {
+            is ReaderIntent.ViewMathSource -> if (!leaving && uiState.value.content == ReaderContent.SourceReady) reduce { copy(mathSource = intent.source) }
+            ReaderIntent.CloseMathSource -> reduce { copy(mathSource = null) }
+            ReaderIntent.Back -> if (uiState.value.mathSource != null) reduce { copy(mathSource = null) } else {
                 leaving = true
                 readJob?.cancel()
                 viewModelScope.launch { emitEffect(ReaderEffect.NavigateHome) }

@@ -102,11 +102,60 @@ Highlights 1.1.0의 기본 토큰 강조를 사용하며 각 언어 최신 문�
 
 수용 기준: 지원 언어와 별칭·대소문자·추가 info, 무언어·미지원·강조 실패, 긴 줄·공백·탭·빈 줄·끝 개행 fixture를 확인한다. 실제 클립보드 텍스트가 코드 본문과 일치하고 OS별 성공 안내·복사 실패 후 재시도가 동작해야 한다. 좁은 폭·큰 글자에서도 블록 내부 가로 스크롤과 복사 버튼 접근을 유지하며 라이트/다크의 복사 버튼 정상·pressed 대비를 확인한다. S04 표/task/취소선·S03 기본 본문/미지원 원문·S02 실패 경로와 실제 파일 선택→혼합 본문→홈 복귀를 필요한 범위에서 회귀 검증한다.
 
+## S06 수식 프로필 · 확정
+
+2026-10-28 사용자 결정. [GitHub 수식 작성 안내](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions)의 입력 형식을 지향하며 렌더링은 오프라인 기본 TeX의 앱 제한 프로필을 사용한다. GitHub의 MathJax 전체 호환이나 모든 TeX 명령 지원을 뜻하지 않는다. 정책 확정은 구현·검증 완료와 구분하며 실제 결과는 [구현 계획](../implementation/open-markdown.md#현재-인계)을 따른다.
+
+- **인라인:** `$…$` 및 달러와 백틱으로 감싼 ``$`…`$``를 같은 줄 안에서 인식한다. 내용은 공백만으로 구성될 수 없지만 시작·끝 공백이나 인접 숫자에 별도 제한을 두지 않는다. 따라서 통화 표기에 달러가 짝으로 나타나면 수식으로 인식할 수 있으며 일반 달러는 `\$`로 escape한다. 닫는 구분자 직전 연속 역슬래시가 홀수 개면 escape된 것으로 보고 짝수 개면 구분자로 인식한다. 줄바꿈을 가로질러 인식하지 않는다. 인라인 시작·끝 구분자는 연속 달러의 일부로 인식하지 않으며 HTML 태그를 가로지르는 인라인 후보도 수식으로 만들지 않는다. 코드 내용과 원문 보존 중인 링크·HTML 내부는 수식으로 해석하지 않는다. 기본 Markdown과 중첩된 수식 및 표 셀의 수식은 주변 본문 구조를 유지한다.
+- **블록:** 새 줄의 첫 내용이 `$$`인 `$$…$$`를 같은 줄 또는 여러 줄로 작성할 수 있다. 시작 들여쓰기는 CommonMark 기준 4칸 미만이며 `$$$`로 시작하면 블록 수식으로 인식하지 않는다. 끝의 공백을 제외한 행 마지막의 escape되지 않은 정확히 두 개의 `$$`로 닫고 세 개 이상 연속된 달러는 닫는 구분자로 쓰지 않는다. 인용·목록 안에서는 해당 컨테이너의 내용 줄을 기준으로 처리한다. 닫힌 코드 fence의 info 첫 토큰이 소문자 `math`와 정확히 같을 때도 수식 블록으로 인식하며 뒤의 추가 info는 해석하지 않는다. 빈 내용이나 미완성 구분자·닫히지 않은 `math` fence는 원문으로 남긴다. escape와 일반 달러 표기를 보존하며 정밀한 공백·숫자 인식 휴리스틱까지 GitHub와 완전 호환이라고 주장하지 않는다.
+- **지원 프로필:** 분수·근호·첨자·그리스 문자·합/적분·행렬 등 기본 TeX를 지원한다. JLatexMath Android 0.2.0을 사용하며 허용 명령·환경은 아래 목록으로 제한한다. 목록에 있더라도 인자나 구문이 잘못돼 엔진이 표시하지 못하면 해당 수식의 실패로 처리한다. 사용자 정의 매크로, 외부 리소스 로딩, HTML/URL 명령은 지원하지 않는다. 미지원 명령을 조용히 없애거나 성공으로 표시하지 않는다.
+- **표시:** 정상 수식에 오류 배너나 별도 원문 보기·확대 동작을 추가하지 않는다. 긴 블록 수식은 해당 영역 안에서 가로로 읽는다. 가용 폭보다 긴 인라인 수식은 별도 행으로 옮겨 수식 영역 안에서 가로로 읽으며 문서 전체를 가로로 넘치게 하지 않는다. 본문과 함께 큰 글자·라이트/다크 표시를 확인한다.
+- **실패:** 인식된 수식의 미지원 명령·렌더링 실패에는 해당 위치에 `수식을 표시하지 못했어요`와 `원문 보기`를 제공하고 주변 본문 읽기를 유지한다. 미완성 또는 빈 수식의 원문 표시는 렌더링 실패와 구분한다.
+- **원문 보기:** 실패 영역의 버튼으로 읽기 전용 시트를 연다. 수식의 구분자 또는 fence를 포함한 원문을 보여주고, 닫기·시스템 뒤로로 시트만 닫아 기존 본문 위치에 복귀한다. 원문을 편집하거나 실행하지 않는다.
+- **접근성:** 정상 수식에는 `수식: TeX 원문`을 대체 설명으로 제공한다. 실패 영역의 안내·원문 보기와 시트 닫기에도 접근할 수 있어야 한다. 자연어 수학 낭독으로 변환하는 기능은 이 프로필에 포함하지 않는다.
+- **후속 경계:** Mermaid 종류·버전·확대, 이미지·링크·HTML 등 후속 정책은 확정하지 않는다. 일반 코드의 원문·강조·복사와 S02 로더 경계를 유지한다.
+
+### S06 허용 TeX 목록과 처리 한계
+
+각 항목은 역슬래시 뒤의 명령 이름이다. 목록 밖 명령은 실패 처리한다. `{…}` 그룹, 일반 문자·숫자·연산 기호, 첨자의 `^`·`_`는 TeX 구문으로 해석하며 원문을 Markdown 강조로 다시 해석하지 않는다.
+
+| 구분 | 허용 명령 |
+| --- | --- |
+| 분수·구조 | `frac dfrac tfrac sqrt left right middle over under atop choose binom` |
+| 큰 연산·함수 | `sum prod coprod int iint iiint oint lim min max inf sup log ln exp sin cos tan cot sec csc sinh cosh tanh arcsin arccos arctan det gcd deg dim ker hom Pr` |
+| 그리스 소문자 | `alpha beta gamma delta epsilon varepsilon zeta eta theta vartheta iota kappa lambda mu nu xi pi varpi rho varrho sigma varsigma tau upsilon phi varphi chi psi omega` |
+| 그리스 대문자 | `Gamma Delta Theta Lambda Xi Pi Sigma Upsilon Phi Psi Omega` |
+| 기호 | `infty partial nabla ell hbar imath jmath Re Im emptyset forall exists neg` |
+| 이항 연산 | `times cdot div pm mp ast star circ bullet cap cup setminus wedge vee oplus otimes` |
+| 관계 | `le leq ge geq ne neq approx sim simeq equiv propto in notin ni subset supset subseteq supseteq` |
+| 화살표 | `to gets rightarrow leftarrow leftrightarrow Rightarrow Leftarrow Leftrightarrow mapsto` |
+| 생략·도형 | `ldots cdots vdots ddots dots angle triangle perp parallel` |
+| 장식 | `hat widehat bar overline underline vec dot ddot tilde widetilde` |
+| 텍스트·서체 | `text textrm textbf textit mathrm mathbf mathit mathsf mathtt mathcal mathbb mathnormal` |
+| 배치·환경 | `limits nolimits displaystyle textstyle scriptstyle scriptscriptstyle begin end` |
+
+`begin`·`end`에 허용하는 환경은 `matrix`, `pmatrix`, `bmatrix`, `Bmatrix`, `vmatrix`, `Vmatrix`, `cases`, `aligned`, `gathered`, `smallmatrix`, `array`다. 이름은 대소문자를 구분한다. 비문자 제어 기호는 역슬래시 뒤의 `\`, `{`, `}`, `$`, `%`, `#`, `&`, `_`, 공백, `,`, `;`, `:`, `!`, `|`, `>`만 허용한다. 이 목록은 사용자 매크로 정의·색상·외부 자원·HTML/URL 명령을 허용하지 않는다.
+
+| 처리 단위 | 한계 |
+| --- | --- |
+| 수식 내용 | UTF-16 기준 4,096단위 이하 |
+| 중괄호 그룹 | 깊이 32 이하이며 짝이 맞아야 함 |
+| 문자 명령 | 수식 하나당 역슬래시 뒤 문자로 된 명령 256회 이하. `begin`·`end`도 각각 포함 |
+| 구조 구분자 | 수식 하나당 escape되지 않은 `&`와 행 구분자 `\\`의 합이 128회 이하. escape한 `\&`는 제외 |
+| `array` 열 선언 | `\begin{array}` 뒤 공백·줄바꿈을 건너뛴 다음 반드시 `{…}` 열 선언이 있어야 하며 그 안은 `l`·`c`·`r`·`|`·일반 공백만 허용하고 길이 64문자 이하. 사이의 주석이나 반복 선언 등 다른 문법은 허용하지 않음 |
+| 개별 래스터 | 64px/em 기준 폭 16,384px 이하·높이 4,096px 이하·면적 2,000,000픽셀 이하 |
+| 문서의 수식 개수 | 본문 처리 순서상 처음 256개까지만 렌더링 시도. 실패한 수식도 개수에 포함 |
+| 문서의 누적 래스터 | 성공 래스터의 면적 합계 4,000,000픽셀 이하 |
+
+한계를 초과한 인식 수식도 오류 안내·원문 보기를 제공하며 나머지 본문은 유지한다. 이 한계는 화면의 글자 크기나 표시 폭과 별개인 준비 단계의 한계다.
+
+수용 기준: 정상 인라인/블록·백틱 인라인·math fence, 기본 Markdown 중첩·표 셀, escape·통화 표기·빈/미완성 입력·미지원 명령·엔진 실패 fixture를 확인한다. 긴 식의 내부 스크롤·인라인 기준선·좁은 폭·큰 글자·라이트/다크·접근성 대체 설명을 검증한다. 부분 실패에서 오류→구분자 포함 원문 시트→닫기/시스템 뒤로→동일 본문 복귀를 확인한다. S05 코드·별칭·미지원·복사, S04 GFM, S03 기본 본문·원문 보존 및 S02 실패 복구를 영향 범위에서 회귀 검증한다.
+
 ## 첫 범위
 
 ### 문법과 코드
 
-- 기본 Markdown과 표·체크리스트·취소선·코드 블록, 수식, Mermaid 다이어그램 및 아래 채택한 확장 문법을 표시한다. CommonMark/GFM의 이번 확정 범위는 S03·S04, 코드 동작은 S05 프로필을 따르며, 그 외 예외와 합의한 구분자 외 수식·Mermaid 지원 범위는 미정이다.
+- 기본 Markdown과 표·체크리스트·취소선·코드 블록, 수식, Mermaid 다이어그램 및 아래 채택한 확장 문법을 표시한다. CommonMark/GFM의 이번 확정 범위는 S03·S04, 코드 동작은 S05 프로필을 따르며, 수식은 S06 제한 프로필을 따른다. 그 외 예외와 Mermaid 지원 범위는 미정이다.
 - 코드 문법 강조와 코드 블록 복사 버튼을 제공한다. 긴 줄은 자동 줄바꿈하지 않고 블록 내부에서 가로 스크롤해 원래 코드 모양을 유지한다.
 - 수식·Mermaid를 표시하지 못하면 해당 영역에 오류 안내와 원문 보기를 제공한다. 나머지 본문 읽기는 유지한다.
 
@@ -167,8 +216,8 @@ HTML·미디어를 채택해도 임의 스크립트 실행, 외부 요청·파�
 
 - S03·S04에서 확정한 프로필 외 GFM 예외·채택 확장의 방언·구분자·중첩 규칙과 위 표의 기능별 경계, GitHub 참조의 owner/repository 문맥·대상 해석·문맥이 없는 로컬 문서의 처리. 인증·네트워크·실제 GitHub 연동은 별도 결정.
 - HTML·미디어의 허용 태그·속성·URI·스크립트·외부 요청·파일 접근·자동 재생 정책.
-- 합의한 수식 구분자 외 명령·매크로·기능, Mermaid 다이어그램 종류·버전.
-- 수식·Mermaid 오류 문구와 원문 보기 동작.
+- S06 제한 프로필 외 수식 명령·기능, Mermaid 다이어그램 종류·버전.
+- Mermaid 오류 문구와 원문 보기 동작. 수식은 S06 프로필을 따른다.
 - 문서 기준 폴더의 하위 상대 경로 밖 처리, 잘못된 폴더 선택·권한 상실/거부 시 세부 복구. 기준 폴더 해석과 연결의 재실행 유지는 위 합의 사항이다. 파일 하나의 접근 허용이 주변 파일 접근을 보장하지는 않는다.
 - 웹 이미지의 오프라인 안내·실패 문구·이미지 대체 텍스트 상세. 온라인 읽기·실패 시 본문 유지·재시도는 위 합의 사항이다.
 - 이미지·Mermaid 확대 화면의 닫기·배율·탐색 방식.

@@ -17,6 +17,7 @@ class FixtureDocumentsProvider : DocumentsProvider() {
         const val GFM_SOURCE = "# GFM 실제 선택\n\n| 왼쪽 | 중앙 | 오른쪽 |\n| :-- | :-: | --: |\n| 셀 본문 | **굵게** | ~~삭제~~ |\n\n- [ ] 할 일\n  - [X] 완료한 일\n\n~~취소선~~ 뒤 본문\n\n[보존 링크](a.md)\n\n마지막 혼합 본문"
         const val CODE_BODY = "  val wave = \"🌊\"\t  \r\n\r\n"
         const val CODE_SOURCE = "# 코드 실제 선택\n\n```Kt\r\n$CODE_BODY```\n\n코드 뒤 본문"
+        const val MATH_SOURCE = "# 수식 실제 선택\n\n인라인 \$x_1^2\$ 뒤\n\n\$\$\\frac{1}{2}\$\$\n\n\$\\unknown{x}\$\n\n수식 뒤 본문"
         @Volatile var failReads = false
     }
     override fun onCreate() = true
@@ -29,7 +30,7 @@ class FixtureDocumentsProvider : DocumentsProvider() {
     }
     override fun queryDocument(documentId: String, projection: Array<out String>?): Cursor = cursor(projection).apply { addDocument(documentId) }
     override fun queryChildDocuments(parentDocumentId: String, projection: Array<out String>?, sortOrder: String?): Cursor = cursor(projection).apply {
-        listOf("code.md", "gfm.md", "source.md", "empty.txt", "utf16.markdown", "broken.md", "large.md", "unsupported.pdf", "missing.md", "nameless").forEach { addDocument(it) }
+        listOf("math.md", "code.md", "gfm.md", "source.md", "empty.txt", "utf16.markdown", "broken.md", "large.md", "unsupported.pdf", "missing.md", "nameless").forEach { addDocument(it) }
     }
     override fun isChildDocument(parentDocumentId: String, documentId: String) = parentDocumentId == "root" && documentId != "root"
     private fun cursor(projection: Array<out String>?) = MatrixCursor(projection ?: arrayOf(
@@ -43,6 +44,7 @@ class FixtureDocumentsProvider : DocumentsProvider() {
     override fun openDocument(documentId: String, mode: String, signal: android.os.CancellationSignal?): ParcelFileDescriptor {
         if (failReads || documentId == "missing.md") throw FileNotFoundException("Fixture unavailable")
         val bytes = when (documentId) {
+            "math.md" -> MATH_SOURCE.toByteArray()
             "source.md" -> SOURCE.toByteArray()
             "gfm.md" -> GFM_SOURCE.toByteArray()
             "code.md" -> CODE_SOURCE.toByteArray()

@@ -67,6 +67,16 @@ class MarkdownComponentsTest {
         compose.runOnIdle { assertEquals(listOf("connect", "retry", "source"), actions) }
     }
 
+    @Test fun preparedMathWithoutActionsHasNoRecoveryBanner() {
+        compose.setContent { MDiveDesignTheme {
+            MDiveRenderedBlock(MDiveResourceState.Ready, "수식: x") { Text("prepared formula") }
+        } }
+        compose.onNodeWithText("prepared formula").assertIsDisplayed()
+        compose.onNodeWithContentDescription("수식: x").assertExists()
+        compose.onNodeWithText("렌더링된 콘텐츠").assertDoesNotExist()
+        compose.onNodeWithText("원문 보기").assertDoesNotExist()
+    }
+
     @Test fun checkboxInteractiveDisabledAndReadonlyContracts() {
         var changed: Boolean? = null
         compose.setContent { MDiveDesignTheme {

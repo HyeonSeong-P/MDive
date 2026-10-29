@@ -72,6 +72,8 @@ fun ReaderRoute(
             onBack = { viewModel.onIntent(ReaderIntent.Back) },
             onRetry = { viewModel.onIntent(ReaderIntent.Retry) },
             onCopyCode = { viewModel.onIntent(ReaderIntent.CopyCode(it)) },
+            onViewMathSource = { viewModel.onIntent(ReaderIntent.ViewMathSource(it)) },
+            onCloseMathSource = { viewModel.onIntent(ReaderIntent.CloseMathSource) },
         )
         feedback?.let { (_, message) -> MDiveToast(message, Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(16.dp),
             icon = if (message == COPY_FAILED) "warning" else "check") }
@@ -86,7 +88,15 @@ fun ReaderScreen(
     modifier: Modifier = Modifier,
     sourcePreview: (@Composable (SourceDocument) -> Unit)? = null,
     onCopyCode: (String) -> Unit = {},
+    onViewMathSource: (String) -> Unit = {},
+    onCloseMathSource: () -> Unit = {},
 ) {
+    if (state.mathSource != null) com.parka.mdive.designsystem.MDiveBottomSheet("수식 원문", onCloseMathSource) { dismiss ->
+        androidx.compose.foundation.layout.Column {
+            com.parka.mdive.designsystem.MDiveCodeBlock(state.mathSource)
+            MDiveButton("닫기", dismiss, variant = MDiveButtonVariant.Quiet)
+        }
+    }
     Surface(modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().safeDrawingPadding()) {
             MDiveTopBar(
@@ -97,7 +107,7 @@ fun ReaderScreen(
             )
             if (state.content == ReaderContent.Loading) ReaderLoadingContent(Modifier.weight(1f))
             else if (state.content == ReaderContent.SourceReady && sourcePreview == null) {
-                state.markdown?.let { ReaderMarkdownContent(it, Modifier.weight(1f), onCopyCode) }
+                state.markdown?.let { ReaderMarkdownContent(it, Modifier.weight(1f), onCopyCode, onViewMathSource) }
             } else CenteredScrollableState(Modifier.weight(1f)) {
                 when (state.content) {
                     ReaderContent.Loading -> Unit

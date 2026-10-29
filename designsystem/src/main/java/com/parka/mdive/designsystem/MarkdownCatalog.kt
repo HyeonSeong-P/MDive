@@ -71,7 +71,7 @@ internal fun MarkdownCatalog(id: String, state: String) {
                     val formula = buildAnnotatedString { append("인라인 수식 "); appendInlineContent("math", CatalogSamples.markdownFormula); append(" 뒤에도 본문이 이어집니다.") }
                     MDiveMathInline(formula, mapOf("math" to InlineTextContent(Placeholder(70.sp, 24.sp, PlaceholderVerticalAlign.TextCenter)) { Text(CatalogSamples.markdownFormula) }))
                     listOf(MDiveResourceState.Ready, MDiveResourceState.Loading, MDiveResourceState.Failure).forEach { resource ->
-                        MDiveRenderedBlock(resource, "수식 · ${CatalogSamples.markdownFormula}", onViewSource = { event = "수식 원문 보기" }) { Text(CatalogSamples.markdownFormula.repeat(12), softWrap = false, style = mdiveTextStyle("body")) }
+                        MDiveRenderedBlock(resource, "수식 · ${CatalogSamples.markdownFormula}", onViewSource = if (resource == MDiveResourceState.Ready) null else { { event = "수식 원문 보기" } }) { Text(CatalogSamples.markdownFormula.repeat(12), softWrap = false, style = mdiveTextStyle("body")) }
                     }
                     MDiveRenderedBlock(MDiveResourceState.Ready, "다이어그램: 입력에서 출력으로", onViewSource = { event = "다이어그램 원문 보기" }, onExpand = { event = "다이어그램 확대" }) { Text("[입력] → [처리] → [출력]", Modifier.padding(16.dp)) }
                 }
