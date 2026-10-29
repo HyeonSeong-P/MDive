@@ -14,3 +14,6 @@
 참고: [Android Navigation 3 문서](https://developer.android.com/guide/navigation/navigation-3), [저장 가능한 백스택과 entry 상태](https://developer.android.com/guide/navigation/navigation-3/save-state)
 
 S02 Reader key는 `Reader(reference: String)`이며 원문을 백스택에 직렬화하지 않는다. 회전에서는 entry의 ViewModel을 유지하고, 재생성된 entry는 같은 참조로 재읽는다. 권한 소실은 일반 읽기 실패로 처리하며 영속 접근을 보장하지 않는다. 홈 선택 중 상태는 SavedStateHandle로 관리하고 Activity Result launcher는 조건 없이 등록한다.
+
+
+S07 Mermaid 확대는 Reader 내부의 전체 크기 Dialog 오버레이이며 새 Navigation 목적지로 이동하지 않는다. ReaderState의 원문 시트·확대 모델은 상호 배타적이고, 닫기·시스템 뒤로는 해당 오버레이만 제거한다. 같은 Reader와 LazyColumn을 유지해 본문 위치에 복귀하며 문서를 재읽거나 원문을 NavKey에 넣지 않는다. 이미지 확대·상대 문서 이동 정책을 선행 확정하지 않는다.

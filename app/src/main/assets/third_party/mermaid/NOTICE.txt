@@ -1,0 +1,8 @@
+Mermaid 11.15.0 — MIT
+Source: https://github.com/mermaid-js/mermaid/releases/tag/mermaid@11.15.0
+Distribution: https://registry.npmjs.org/mermaid/-/mermaid-11.15.0.tgz
+Distribution SHA-256: recorded in README.md beside the bundled runtime.
+The official dist/mermaid.min.js is included unmodified. It is a self-contained
+IIFE build; it requires no CDN, module chunks or runtime network access.
+Bundled dependency copyright and license notices are retained at the end of that
+file. The Mermaid license is included in LICENSE.txt.

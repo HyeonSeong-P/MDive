@@ -90,7 +90,10 @@ class CommonMarkParser @Inject constructor(private val codeHighlighter: CodeHigh
                     if (language == "math") {
                         if (codeSource.read(node).isBlank() || node.closingFenceLength == null) MarkdownBlock.Source(raw(node, source))
                         else MarkdownBlock.Math(MarkdownMath(codeSource.read(node), raw(node, source), true))
-                    } else if (language.equals("mermaid", ignoreCase = true)) MarkdownBlock.Source(raw(node, source))
+                    } else if (language.equals("mermaid", ignoreCase = true)) {
+                        val code = codeSource.read(node)
+                        MarkdownBlock.Mermaid(MarkdownMermaid(code, raw(node, source), node.closingFenceLength != null && MermaidProfile.accepts(code)))
+                    }
                     else codeSource.read(node).let { MarkdownBlock.Code(it, language, codeHighlighter.highlight(it, language)) }
                 }
                 is IndentedCodeBlock -> MarkdownBlock.Code(codeSource.read(node), null)

@@ -52,7 +52,7 @@ Gradle 모듈은 제품 앱 `app`, 공통 Android 라이브러리 `designsystem`
 
 ## Markdown 뷰어 경계
 
-파일 선택, 홈·읽기, 로컬 이미지 폴더 연결, 링크 처리와 수식·Mermaid를 포함한 표시 범위의 제품 방향은 [제품 문서](../product/overview.md)에서 관리한다. 책갈피와 즐겨찾기는 기기 내 영속 보관한다. 기본 파싱·DS 렌더링은 아래 S03 경계를 따른다. 수식은 아래 S06 경계를 따르며 Mermaid 등 후속 렌더 엔진, 영속화 기술, 후속 폴더 권한과 확장 문법의 세부 호환 범위는 아직 결정하지 않았다. Room·DataStore 등의 선택은 구현 단계에서 검토하며 이 문서에서 선행 확정하지 않는다. 화면 이동 라이브러리는 Navigation 3로 정했으며 세부 목적지·백스택 구성은 확정된 화면 흐름에 맞춰 정한다.
+파일 선택, 홈·읽기, 로컬 이미지 폴더 연결, 링크 처리와 수식·Mermaid를 포함한 표시 범위의 제품 방향은 [제품 문서](../product/overview.md)에서 관리한다. 책갈피와 즐겨찾기는 기기 내 영속 보관한다. 기본 파싱·DS 렌더링은 아래 S03 경계를 따른다. 수식은 아래 S06 경계를 따르며 Mermaid는 아래 S07 경계를 따르며 리소스·후속 렌더 엔진, 영속화 기술, 후속 폴더 권한과 확장 문법의 세부 호환 범위는 아직 결정하지 않았다. Room·DataStore 등의 선택은 구현 단계에서 검토하며 이 문서에서 선행 확정하지 않는다. 화면 이동 라이브러리는 Navigation 3로 정했으며 세부 목적지·백스택 구성은 확정된 화면 흐름에 맞춰 정한다.
 
 ## 근거 자료
 
@@ -101,7 +101,7 @@ task는 해석된 Text를 정규식으로 바꾸는 확장 대신 첫 문단의 
 
 제품 언어·별칭·대체 표시·복사 정책은 [S05 프로필](../product/document-viewing.md#s05-코드-프로필--확정)이 소유한다. `dev.snipme:highlights:1.1.0`의 동기 `getCodeStructure()`를 기존 파서의 `Dispatchers.Default` 안에서 블록별 새 인스턴스로 호출한다. 17개 언어의 기본 어휘 강조를 선택한 이유는 순수 Kotlin/JVM으로 별도 WebView·JavaScript 실행 엔진 없이 기존 DS의 Keyword/String/Plain 범위에 연결할 수 있기 때문이다. 최신 문법 전체 호환을 보장하지 않는다. 엔진 타입과 언어 매핑은 data 내부에 두고 UTF-16 범위·의미 tone만 domain 코드 모델로 전달한다. 잘못된 범위나 분석 예외는 강조만 제거하며 코루틴 취소는 다시 던진다. 동기 CPU 분석의 즉시 취소를 보장하지 않는다.
 
-CommonMark literal의 정규화된 본문을 그대로 복사하지 않는다. data의 `CodeSourceReader`는 literal의 구조 제거 후 선행 공백(부분 소비된 탭 잔여열 포함)과 source span의 원래 내용·CR/LF·EOF를 조합한다. fence·info·인용/목록/들여쓰기 코드 구조만 제거한다. `mermaid` fence는 기존 전체 원문 표시를 유지한다.
+CommonMark literal의 정규화된 본문을 그대로 복사하지 않는다. data의 `CodeSourceReader`는 literal의 구조 제거 후 선행 공백(부분 소비된 탭 잔여열 포함)과 source span의 원래 내용·CR/LF·EOF를 조합한다. fence·info·인용/목록/들여쓰기 코드 구조만 제거한다. S05 당시 `mermaid` fence는 전체 원문으로 남겼으며 S07에서 별도 다이어그램 모델로 연결한다.
 
 UI는 `MDiveCodeBlock`에 원문·언어 라벨·강조 범위·복사 callback을 전달한다. 복사는 Reader Intent → Channel Effect → Route의 새 Compose `LocalClipboard`/`setClipEntry`로 실행한다. ViewModel에 Android 클립보드 타입을 넣지 않는다. 플랫폼 쓰기 직후 클립보드를 다시 읽지 않는다. API33 이상은 시스템 성공 안내, 이전 버전은 공통 `MDiveToast`, 실패는 같은 공통 피드백과 기존 복사 버튼으로 재시도한다. 일시 안내의 표시·3초 유지와 반복 표시 시간 갱신은 Route의 UI 로컬 상태가 소유한다. 새 공통 UI·모듈은 추가하지 않는다.
 
@@ -114,8 +114,34 @@ UI는 `MDiveCodeBlock`에 원문·언어 라벨·강조 범위·복사 callback�
 
 엔진/파서 타입과 Android 그래픽 구현은 data 내부에서만 사용한다. domain에는 TeX·구분자 포함 원문과 앱 소유 픽셀·크기·기준선 정보를 전달하며 Android/Compose 타입을 넣지 않는다. 인라인은 text 스타일, 블록은 display 스타일로 렌더링하고 UI에서 본문 크기·fontScale·테마에 맞게 표시한다. 자연어 수학 낭독 대신 TeX 대체 설명을 제공한다. 긴 인라인은 별도 행으로 옮기고 수식 영역만 가로 스크롤한다.
 
-렌더 실패는 문서 열기 실패와 구분해 해당 수식에 오류·원문 보기만 제공한다. 원문 시트의 상태·Intent·닫기 동작은 Reader가 소유하고 DS 시트는 데이터와 이벤트만 받는다. 정상 수식에 실패 배너나 임의 상호작용을 붙이지 않는다. 일반 코드·Mermaid 원문·링크/HTML 보존 경계는 유지한다.
+렌더 실패는 문서 열기 실패와 구분해 해당 수식에 오류·원문 보기만 제공한다. 원문 시트의 상태·Intent·닫기 동작은 Reader가 소유하고 DS 시트는 데이터와 이벤트만 받는다. 정상 수식에 실패 배너나 임의 상호작용을 붙이지 않는다. 일반 코드·링크/HTML 보존 경계는 유지한다. Mermaid는 아래 S07에서 별도 처리한다.
 
 엔진은 전역 레지스트리의 동시 변경을 피하도록 직렬 호출한다. 입력 길이·중괄호 깊이·명령 수·행렬 구조·개별 및 문서 전체 픽셀 예산을 적용하고 초과 입력은 해당 수식만 실패 처리한다. 엔진의 StackOverflowError는 해당 수식의 실패로 격리한다. 동기 엔진 호출의 즉시 취소는 보장하지 않으며 취소 뒤 늦은 화면 반영은 기존 읽기 작업 경계에서 차단한다. 크기 예산은 64px/em 기준의 앱 렌더 결과에 적용하며 제품의 구체 한계는 S06 프로필에 기록한다.
 
 근거: [엔진 소스·보관 상태](https://github.com/noties/jlatexmath-android), [엔진 라이선스](https://github.com/noties/jlatexmath-android/blob/android/LICENSE), [GitHub 수식 작성 안내](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions).
+
+
+## S07 Mermaid 플랫폼 경계
+
+제품의 5종·입력/연결선/시간 한계·원문·확대 정책은 [S07 프로필](../product/document-viewing.md#s07-mermaid-프로필--확정)이 소유한다. Mermaid 11.15.0 공식 npm 배포의 self-contained IIFE를 APK assets에 그대로 고정한다. JS와 라이선스·종속성 고지를 보존하며 런타임 CDN이나 추가 Gradle 라이브러리는 사용하지 않는다. 버전·해시는 assets/mermaid/README.md에 기록한다.
+
+`data/document/MermaidProfile`은 지원 종류와 실행 가능한 설정·HTML·링크·CSS·리소스를 제한한다. CommonMark AST에서 코드 본문과 fence 포함 원문을 앱 소유 `MarkdownMermaid`로 변환하며 미완성/미지원 입력도 이 모델의 실패 상태로 보존한다. domain에는 Android·WebView·SVG·Mermaid 파서 타입을 넣지 않는다.
+
+WebView는 뷰 수명주기를 필요로 하므로 `ui/reader/MermaidWebView`의 플랫폼 어댑터 내부에 격리한다. 이는 데이터 저장소가 아니라 Compose slot의 렌더링 구현이다. 앱 소유 HTML/JS 세 파일만 가상 HTTPS origin에서 제공하고 모든 나머지 요청은 명시적으로 차단해 네트워크 fallback을 방지한다. 파일/content 접근·DOM 저장소·새 창을 끄고 JS native bridge를 노출하지 않는다. trusted host는 JSON 데이터만 받아 strict 프로필로 파싱하고 종류별 실제 연결 수를 확인한 뒤 SVG를 렌더링한다. 출력의 실행 요소·링크·외부 참조를 다시 검사하고 SVG viewBox를 전체 맞춤으로 표시한다. `minSdk24`와 오래된 WebView의 JavaScript 호환은 별개이며 엔진 구문 오류/준비 실패도 해당 영역의 원문 대체로 처리한다.
+
+로딩/정상/실패는 어댑터의 UI 로컬 상태이며 DS는 엔진을 모르는 기존 `MDiveRenderedBlock`/`MDiveContentFallback` slot과 callback을 받는다. main thread의 10초 타이머와 evaluateJavascript polling에는 dispose/완료 guard를 두고, timeout·실패·준비 후 renderer 종료에서 즉시 부모에서 제거하고 WebView를 destroy한다. 늦은 callback은 무시하며 중복 해제는 안전하다.
+
+원문·확대는 Reader의 State/Intent가 소유한다. 확대는 같은 Reader의 전체 크기 Dialog 오버레이이며 별도 문서 목적지/백스택 key나 원문 직렬화를 추가하지 않는다. 기존 문서를 재읽지 않고 같은 앱 모델을 사용하므로 권한 상실·원문 변경에 따라 다른 다이어그램으로 바뀌지 않는다. 본문 LazyColumn을 유지한 채 닫기·시스템 뒤로로 돌아오고 원문/수식/확대를 동시에 열지 않는다. 핀치/팬/배율은 오버레이의 최소 UI 로컬 상태이며 1–8배·경계 내 이동·맞춤 복원을 적용하고 재진입하면 초기화한다. 접근성에는 종류와 Mermaid 원문을 설명하고 핀치 대체 확대/축소/맞춤 버튼을 제공한다. 기존 DS 아이콘 버튼과 스켈레톤을 재사용한다. 확대 조작은 하단의 단일 표면 그룹으로 조합하고 공통 아이콘 원본에 minus/fit을 추가해 양쪽 카탈로그에 생성한다. 준비 중은 그림과 같은 영역의 비상호작용 스켈레톤으로 표시한다.
+
+근거: [고정 Mermaid 릴리스](https://github.com/mermaid-js/mermaid/releases/tag/mermaid@11.15.0), [Mermaid API](https://mermaid.js.org/config/usage.html), [Android 로컬 콘텐츠](https://developer.android.com/develop/ui/views/layout/webapps/load-local-content), [WebView 프로세스 수명주기](https://developer.android.com/develop/ui/views/layout/webapps/managing-webview).
+
+
+### S07 읽기 세션 SVG 캐시
+
+`ReaderScreen`은 현재 문서에 종속된 `MermaidSessionCache`를 기억하고 본문·확대에 같은 인스턴스를 전달한다. 완료된 안전 SVG와 엔진 실패만 보관하며 WebView·Context·진행 중 작업은 보관하지 않는다. LazyColumn에서 뷰가 dispose돼도 완료 결과는 남으므로 스크롤 복귀·확대에서 엔진을 다시 실행하지 않는다. 준비 도중 dispose된 작업에는 pending 항목을 남기지 않는다.
+
+키는 코드 본문·테마·엔진/프로필·1024px 고정 해석 폭이다. SVG의 viewBox와 표시 영역의 맞춤은 분리하므로 본문·확대의 표시 폭이 달라도 같은 해석 폭의 SVG를 사용할 수 있다. 소스·테마·프로필·해석 폭이 달라지면 다른 항목이고, 다른 문서를 열면 별도 세션 캐시를 만든다. LRU는 최대 64개·키와 SVG의 UTF-16 크기를 포함한 4MiB 예산이며 초과한 항목은 제거하거나 보관하지 않는다. 제거된 결과는 다시 나타날 때 재렌더링할 수 있다. 앱 전역·영속 저장·문서 간 공유는 하지 않는다.
+
+캐시 hit는 새 WebView에 이미 검사한 SVG만 제공한다. 이 페이지에는 Mermaid JS가 없고 JavaScript도 끄며 CSP script-src none과 기존 외부 요청 차단을 유지한다. 확대 품질을 위해 래스터가 아닌 SVG를 재사용한다. cache miss에서만 기존 strict 엔진·출력 검사를 거치며, 사용자 입력을 캐시 페이지 HTML에 직접 넣지 않는다. 실제 renderer 호출 횟수와 JavaScript 설정·픽셀 회귀로 스크롤/확대 재사용을 검증한다.
+
+실제 샘플 검증에서 `height:100%` 부모 체인이 0으로 계산돼 SVG viewBox가 정상이어도 그림 높이가 0인 결함을 발견했다. 호스트와 캐시 페이지의 그림 컨테이너는 fixed/inset 0으로 viewport에 맞추고, Ready 상태·외곽 크기만으로 표시 검증을 대체하지 않는다. 실제 화면의 그림 영역 PixelCopy 검사와 SAF 샘플을 함께 검증한다.

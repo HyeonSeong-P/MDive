@@ -22,6 +22,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    sourceSets {
+        // Reuse the repository sample only in the test APK, never the product assets.
+        getByName("androidTest").assets.srcDir(rootProject.file("samples"))
+    }
+
     buildTypes {
         release {
             optimization {

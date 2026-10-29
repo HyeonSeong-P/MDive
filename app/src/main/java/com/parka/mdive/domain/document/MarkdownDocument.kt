@@ -24,6 +24,7 @@ sealed interface MarkdownBlock {
     data class Table(val columns: List<MarkdownTableColumn>, val rows: List<List<List<MarkdownRun>>>) : MarkdownBlock
     data class Code(val source: String, val language: String?, val highlights: List<CodeHighlight> = emptyList()) : MarkdownBlock
     data class Math(val math: MarkdownMath) : MarkdownBlock
+    data class Mermaid(val diagram: MarkdownMermaid) : MarkdownBlock
     data object Divider : MarkdownBlock
     /** Unsupported syntax remains readable, inert source in the document flow. */
     data class Source(val source: String) : MarkdownBlock
@@ -46,3 +47,6 @@ class MathRaster(val width: Int, val height: Int, val depth: Int, pixels: IntArr
     fun copyPixels(): IntArray = pixels.copyOf()
 }
 data class MarkdownMath(val tex: String, val source: String, val display: Boolean, val raster: MathRaster? = null)
+
+/** Inert app-owned diagram input. Platform rendering never enters the domain contract. */
+data class MarkdownMermaid(val code: String, val source: String, val supported: Boolean)

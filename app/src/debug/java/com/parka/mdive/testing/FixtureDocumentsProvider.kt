@@ -18,6 +18,7 @@ class FixtureDocumentsProvider : DocumentsProvider() {
         const val CODE_BODY = "  val wave = \"🌊\"\t  \r\n\r\n"
         const val CODE_SOURCE = "# 코드 실제 선택\n\n```Kt\r\n$CODE_BODY```\n\n코드 뒤 본문"
         const val MATH_SOURCE = "# 수식 실제 선택\n\n인라인 \$x_1^2\$ 뒤\n\n\$\$\\frac{1}{2}\$\$\n\n\$\\unknown{x}\$\n\n수식 뒤 본문"
+        const val MERMAID_SOURCE = "# Mermaid 실제 선택\n\n인라인 \$x_1^2\$ 뒤\n\n```kotlin\nval wave = 1\n```\n\n```mermaid\nflowchart TD; A[시작]-->B[완료]\n```\n\n```mermaid\npie\n```\n\nMermaid 뒤 본문"
         @Volatile var failReads = false
     }
     override fun onCreate() = true
@@ -30,7 +31,7 @@ class FixtureDocumentsProvider : DocumentsProvider() {
     }
     override fun queryDocument(documentId: String, projection: Array<out String>?): Cursor = cursor(projection).apply { addDocument(documentId) }
     override fun queryChildDocuments(parentDocumentId: String, projection: Array<out String>?, sortOrder: String?): Cursor = cursor(projection).apply {
-        listOf("math.md", "code.md", "gfm.md", "source.md", "empty.txt", "utf16.markdown", "broken.md", "large.md", "unsupported.pdf", "missing.md", "nameless").forEach { addDocument(it) }
+        listOf("mermaid.md", "math.md", "code.md", "gfm.md", "source.md", "empty.txt", "utf16.markdown", "broken.md", "large.md", "unsupported.pdf", "missing.md", "nameless").forEach { addDocument(it) }
     }
     override fun isChildDocument(parentDocumentId: String, documentId: String) = parentDocumentId == "root" && documentId != "root"
     private fun cursor(projection: Array<out String>?) = MatrixCursor(projection ?: arrayOf(
@@ -44,6 +45,7 @@ class FixtureDocumentsProvider : DocumentsProvider() {
     override fun openDocument(documentId: String, mode: String, signal: android.os.CancellationSignal?): ParcelFileDescriptor {
         if (failReads || documentId == "missing.md") throw FileNotFoundException("Fixture unavailable")
         val bytes = when (documentId) {
+            "mermaid.md" -> MERMAID_SOURCE.toByteArray()
             "math.md" -> MATH_SOURCE.toByteArray()
             "source.md" -> SOURCE.toByteArray()
             "gfm.md" -> GFM_SOURCE.toByteArray()
