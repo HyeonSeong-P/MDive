@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Modifier
@@ -22,9 +23,10 @@ import com.parka.mdive.designsystem.*
 import com.parka.mdive.domain.document.MarkdownBlock
 import com.parka.mdive.domain.document.MarkdownDocument
 import com.parka.mdive.domain.document.MarkdownRun
+import com.parka.mdive.domain.document.MarkdownMermaid
 
 @Composable
-fun ReaderMarkdownContent(document: MarkdownDocument, modifier: Modifier = Modifier, onCopyCode: (String) -> Unit = {}, onViewMathSource: (String) -> Unit = {}) {
+internal fun ReaderMarkdownContent(document: MarkdownDocument, modifier: Modifier = Modifier, onCopyCode: (String) -> Unit = {}, onViewMathSource: (String) -> Unit = {}, onViewMermaidSource: (String) -> Unit = {}, onExpandMermaid: (MarkdownMermaid) -> Unit = {}, mermaidCache: MermaidSessionCache = remember(document) { MermaidSessionCache() }) {
     // Measure once outside quote's intrinsic layout; nested blocks receive the remaining width.
     BoxWithConstraints(modifier.fillMaxWidth()) {
         val contentWidth = (maxWidth - 32.dp).coerceAtLeast(0.dp)
@@ -32,7 +34,7 @@ fun ReaderMarkdownContent(document: MarkdownDocument, modifier: Modifier = Modif
             items(document.blocks.size) { index ->
                 val block = document.blocks[index]
                 Column(Modifier.fillMaxWidth().padding(top = spaceBefore(document.blocks, index))) {
-                    Block(block, contentWidth, onCopyCode, onViewMathSource)
+                    Block(block, contentWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache)
                 }
             }
         }
@@ -44,16 +46,17 @@ private fun spaceBefore(blocks: List<MarkdownBlock>, index: Int): Dp =
     else if (blocks[index - 1] is MarkdownBlock.Heading) 8.dp else 16.dp
 
 @Composable
-private fun Blocks(blocks: List<MarkdownBlock>, availableWidth: Dp, onCopyCode: (String) -> Unit, onViewMathSource: (String) -> Unit) {
+private fun Blocks(blocks: List<MarkdownBlock>, availableWidth: Dp, onCopyCode: (String) -> Unit, onViewMathSource: (String) -> Unit, onViewMermaidSource: (String) -> Unit, onExpandMermaid: (MarkdownMermaid) -> Unit, mermaidCache: MermaidSessionCache) {
     blocks.forEachIndexed { index, block ->
-        Column(Modifier.fillMaxWidth().padding(top = spaceBefore(blocks, index))) { Block(block, availableWidth, onCopyCode, onViewMathSource) }
+        Column(Modifier.fillMaxWidth().padding(top = spaceBefore(blocks, index))) { Block(block, availableWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache) }
     }
 }
 
 @Composable
-private fun Block(block: MarkdownBlock, availableWidth: Dp, onCopyCode: (String) -> Unit, onViewMathSource: (String) -> Unit) {
+private fun Block(block: MarkdownBlock, availableWidth: Dp, onCopyCode: (String) -> Unit, onViewMathSource: (String) -> Unit, onViewMermaidSource: (String) -> Unit, onExpandMermaid: (MarkdownMermaid) -> Unit, mermaidCache: MermaidSessionCache) {
     val minimumTextWidth = 128.dp * LocalDensity.current.fontScale
     when (block) {
+        is MarkdownBlock.Mermaid -> ReaderMermaidBlock(block.diagram, availableWidth, onViewMermaidSource, onExpandMermaid, mermaidCache)
         is MarkdownBlock.Math -> ReaderMathBlock(block.math, onViewMathSource)
         is MarkdownBlock.Heading -> if (block.runs.any { it.math != null }) ReaderMathText(block.runs, availableWidth, onViewMathSource, Modifier.semantics { heading() }, mdiveTextStyle("documentH${block.level}")) else MDiveMarkdownHeading(block.level, block.runs.presentation())
         is MarkdownBlock.Paragraph -> if (block.runs.any { it.math != null }) ReaderMathText(block.runs, availableWidth, onViewMathSource) else MDiveMarkdownText(block.runs.presentation())
@@ -81,8 +84,8 @@ private fun Block(block: MarkdownBlock, availableWidth: Dp, onCopyCode: (String)
         )
         is MarkdownBlock.Quote -> {
             val inset = 19.dp // DS quote rail 3dp + documentInset 16dp.
-            if (availableWidth - inset < minimumTextWidth) Blocks(block.blocks, availableWidth, onCopyCode, onViewMathSource)
-            else MDiveMarkdownQuote { Blocks(block.blocks, availableWidth - inset, onCopyCode, onViewMathSource) }
+            if (availableWidth - inset < minimumTextWidth) Blocks(block.blocks, availableWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache)
+            else MDiveMarkdownQuote { Blocks(block.blocks, availableWidth - inset, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache) }
         }
         is MarkdownBlock.ListBlock -> {
             val measurer = rememberTextMeasurer()
@@ -102,9 +105,9 @@ private fun Block(block: MarkdownBlock, availableWidth: Dp, onCopyCode: (String)
                     if (flatten) {
                         if (task != null) MDiveCheckbox(task, onCheckedChange = null)
                         else MDiveMarkdownText(listOf(MDiveTextRun(block.start?.let { "${it + index}." } ?: "•")))
-                        Blocks(item, availableWidth, onCopyCode, onViewMathSource)
+                        Blocks(item, availableWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache)
                     } else MDiveMarkdownListItem(marker) {
-                        Blocks(item, availableWidth - markerWidth, onCopyCode, onViewMathSource)
+                        Blocks(item, availableWidth - markerWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache)
                     }
                 }
             }

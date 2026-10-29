@@ -74,6 +74,10 @@ fun ReaderRoute(
             onCopyCode = { viewModel.onIntent(ReaderIntent.CopyCode(it)) },
             onViewMathSource = { viewModel.onIntent(ReaderIntent.ViewMathSource(it)) },
             onCloseMathSource = { viewModel.onIntent(ReaderIntent.CloseMathSource) },
+            onViewMermaidSource = { viewModel.onIntent(ReaderIntent.ViewMermaidSource(it)) },
+            onCloseMermaidSource = { viewModel.onIntent(ReaderIntent.CloseMermaidSource) },
+            onExpandMermaid = { viewModel.onIntent(ReaderIntent.ExpandMermaid(it)) },
+            onCloseMermaid = { viewModel.onIntent(ReaderIntent.CloseMermaid) },
         )
         feedback?.let { (_, message) -> MDiveToast(message, Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(16.dp),
             icon = if (message == COPY_FAILED) "warning" else "check") }
@@ -90,13 +94,19 @@ fun ReaderScreen(
     onCopyCode: (String) -> Unit = {},
     onViewMathSource: (String) -> Unit = {},
     onCloseMathSource: () -> Unit = {},
+    onViewMermaidSource: (String) -> Unit = {},
+    onCloseMermaidSource: () -> Unit = {},
+    onExpandMermaid: (com.parka.mdive.domain.document.MarkdownMermaid) -> Unit = {},
+    onCloseMermaid: () -> Unit = {},
 ) {
-    if (state.mathSource != null) com.parka.mdive.designsystem.MDiveBottomSheet("수식 원문", onCloseMathSource) { dismiss ->
-        androidx.compose.foundation.layout.Column {
-            com.parka.mdive.designsystem.MDiveCodeBlock(state.mathSource)
-            MDiveButton("닫기", dismiss, variant = MDiveButtonVariant.Quiet)
-        }
+    val mermaidCache = remember(state.document) { MermaidSessionCache() }
+    if (state.mathSource != null) com.parka.mdive.designsystem.MDiveBottomSheet("수식 원문", onCloseMathSource) { _ ->
+        com.parka.mdive.designsystem.MDiveCodeBlock(state.mathSource)
     }
+    if (state.mermaidSource != null) com.parka.mdive.designsystem.MDiveBottomSheet("Mermaid 원문", onCloseMermaidSource) { _ ->
+        com.parka.mdive.designsystem.MDiveCodeBlock(state.mermaidSource)
+    }
+    state.expandedMermaid?.let { MermaidExpanded(it, onCloseMermaid, onViewMermaidSource, mermaidCache) }
     Surface(modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().safeDrawingPadding()) {
             MDiveTopBar(
@@ -107,7 +117,7 @@ fun ReaderScreen(
             )
             if (state.content == ReaderContent.Loading) ReaderLoadingContent(Modifier.weight(1f))
             else if (state.content == ReaderContent.SourceReady && sourcePreview == null) {
-                state.markdown?.let { ReaderMarkdownContent(it, Modifier.weight(1f), onCopyCode, onViewMathSource) }
+                state.markdown?.let { ReaderMarkdownContent(it, Modifier.weight(1f), onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache) }
             } else CenteredScrollableState(Modifier.weight(1f)) {
                 when (state.content) {
                     ReaderContent.Loading -> Unit

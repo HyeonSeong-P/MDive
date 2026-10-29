@@ -57,7 +57,7 @@ class ReaderMathTest {
         }
     }
 
-    @Test fun sourceSheetClosesWithButtonAndSystemBackBeforeLeavingDocument() {
+    @Test fun sourceSheetDismissesWithSwipeAndSystemBackBeforeLeavingDocument() {
         var home = 0
         val vm = ReaderViewModel(object : DocumentRepository {
             override suspend fun read(reference: DocumentReference) = DocumentReadResult.Success(SourceDocument("math.md", "앞\n\n\$\\unknown{x}\$\n\n뒤"))
@@ -66,11 +66,21 @@ class ReaderMathTest {
         compose.onNodeWithText("원문 보기").performClick()
         compose.onNodeWithText("수식 원문").assertIsDisplayed()
         compose.onNodeWithText("\$\\unknown{x}\$").assertIsDisplayed()
-        compose.onNodeWithText("닫기").performClick()
+        compose.onNodeWithText("닫기").assertDoesNotExist()
+        compose.onNodeWithContentDescription("패널 닫기").performTouchInput {
+            down(center); moveTo(center + androidx.compose.ui.geometry.Offset(0f, 600f), delayMillis = 250); up()
+        }
         compose.onNodeWithText("수식 원문").assertDoesNotExist()
         compose.onNodeWithText("원문 보기").performClick()
         compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
         compose.onNodeWithText("수식 원문").assertDoesNotExist()
+        compose.onNodeWithText("원문 보기").performClick()
+        compose.onNodeWithText("수식 원문").assertIsDisplayed()
+        val automation = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().uiAutomation
+        val x = compose.activity.window.decorView.width / 2
+        val y = compose.activity.window.decorView.height / 4
+        android.os.ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand("input tap $x $y")).use { it.readBytes() }
+        compose.waitUntil(5_000) { compose.onAllNodesWithText("수식 원문").fetchSemanticsNodes().isEmpty() }
         compose.runOnIdle { assertEquals(0, home) }
         compose.onNodeWithText("뒤", substring = true).performScrollTo().assertIsDisplayed()
     }

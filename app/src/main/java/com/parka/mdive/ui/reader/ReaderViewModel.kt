@@ -1,6 +1,7 @@
 package com.parka.mdive.ui.reader
 
 import androidx.lifecycle.viewModelScope
+import com.parka.mdive.domain.document.MarkdownMermaid
 import com.parka.mdive.domain.document.MarkdownDocument
 import com.parka.mdive.domain.document.MarkdownParser
 import com.parka.mdive.domain.document.DocumentFailure
@@ -28,6 +29,8 @@ data class ReaderState(
     val failure: DocumentFailure? = null,
     val markdown: MarkdownDocument? = null,
     val mathSource: String? = null,
+    val mermaidSource: String? = null,
+    val expandedMermaid: MarkdownMermaid? = null,
 ) : UiState
 
 sealed interface ReaderIntent : UiIntent {
@@ -36,6 +39,10 @@ sealed interface ReaderIntent : UiIntent {
     data object Back : ReaderIntent
     data class ViewMathSource(val source: String) : ReaderIntent
     data object CloseMathSource : ReaderIntent
+    data class ViewMermaidSource(val source: String) : ReaderIntent
+    data object CloseMermaidSource : ReaderIntent
+    data class ExpandMermaid(val diagram: MarkdownMermaid) : ReaderIntent
+    data object CloseMermaid : ReaderIntent
     data object Retry : ReaderIntent
 }
 
@@ -63,9 +70,15 @@ class ReaderViewModel @Inject constructor(
             is ReaderIntent.CopyCode -> if (!leaving && uiState.value.content == ReaderContent.SourceReady) {
                 viewModelScope.launch { emitEffect(ReaderEffect.CopyCode(intent.source)) }
             }
-            is ReaderIntent.ViewMathSource -> if (!leaving && uiState.value.content == ReaderContent.SourceReady) reduce { copy(mathSource = intent.source) }
+            is ReaderIntent.ViewMathSource -> if (!leaving && uiState.value.content == ReaderContent.SourceReady) reduce { copy(mathSource = intent.source, mermaidSource = null, expandedMermaid = null) }
             ReaderIntent.CloseMathSource -> reduce { copy(mathSource = null) }
-            ReaderIntent.Back -> if (uiState.value.mathSource != null) reduce { copy(mathSource = null) } else {
+            is ReaderIntent.ViewMermaidSource -> if (!leaving && uiState.value.content == ReaderContent.SourceReady) reduce { copy(mermaidSource = intent.source, mathSource = null, expandedMermaid = null) }
+            ReaderIntent.CloseMermaidSource -> reduce { copy(mermaidSource = null) }
+            is ReaderIntent.ExpandMermaid -> if (!leaving && uiState.value.content == ReaderContent.SourceReady && intent.diagram.supported) reduce { copy(expandedMermaid = intent.diagram, mermaidSource = null, mathSource = null) }
+            ReaderIntent.CloseMermaid -> reduce { copy(expandedMermaid = null) }
+            ReaderIntent.Back -> if (uiState.value.expandedMermaid != null) reduce { copy(expandedMermaid = null) }
+            else if (uiState.value.mermaidSource != null) reduce { copy(mermaidSource = null) }
+            else if (uiState.value.mathSource != null) reduce { copy(mathSource = null) } else {
                 leaving = true
                 readJob?.cancel()
                 viewModelScope.launch { emitEffect(ReaderEffect.NavigateHome) }

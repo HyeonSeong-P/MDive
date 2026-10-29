@@ -14,6 +14,8 @@ object CatalogIcons {
         "bookmark" to "M6 4H18V21L12 17L6 21Z",
         "toc" to "M9 6H21 M9 12H21 M9 18H17 M3 6H4 M3 12H4 M3 18H4",
         "plus" to "M12 5V19 M5 12H19",
+        "minus" to "M5 12H19",
+        "fit" to "M9 4H4V9 M15 4H20V9 M20 15V20H15 M9 20H4V15",
         "close" to "M6 6L18 18 M18 6L6 18",
         "file" to "M14 3H5V21H19V8L14 3Z M14 3V8H19 M8 12H16 M8 16H14",
         "copy" to "M8 8H20V21H8Z M16 4V3H4V16H5",

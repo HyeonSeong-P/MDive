@@ -43,7 +43,7 @@ class CodeParserTest {
             assertTrue(block.highlights.isEmpty())
         }
         val source = "```mermaid\ngraph TD; A-->B\n```"
-        assertEquals(MarkdownBlock.Source(source), parse(source).single())
+        assertEquals(source, (parse(source).single() as MarkdownBlock.Mermaid).diagram.source)
         assertTrue(parse("앞\n\n```invalid\na\n```\n\n뒤").last() is MarkdownBlock.Paragraph)
     }
 
