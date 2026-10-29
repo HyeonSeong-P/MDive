@@ -9,6 +9,7 @@ data class MarkdownRun(
     val strong: Boolean = false,
     val code: Boolean = false,
     val strike: Boolean = false,
+    val math: MarkdownMath? = null,
 )
 
 sealed interface MarkdownBlock {
@@ -22,6 +23,7 @@ sealed interface MarkdownBlock {
     ) : MarkdownBlock
     data class Table(val columns: List<MarkdownTableColumn>, val rows: List<List<List<MarkdownRun>>>) : MarkdownBlock
     data class Code(val source: String, val language: String?, val highlights: List<CodeHighlight> = emptyList()) : MarkdownBlock
+    data class Math(val math: MarkdownMath) : MarkdownBlock
     data object Divider : MarkdownBlock
     /** Unsupported syntax remains readable, inert source in the document flow. */
     data class Source(val source: String) : MarkdownBlock
@@ -37,3 +39,10 @@ interface MarkdownParser {
 /** UTF-16 offsets into the unchanged code body; no engine or UI types. */
 data class CodeHighlight(val start: Int, val end: Int, val tone: CodeTone)
 enum class CodeTone { Keyword, String, Plain }
+
+/** Prepared monochrome coverage at [emPixels] pixels/em; engine/platform types stay in data. */
+class MathRaster(val width: Int, val height: Int, val depth: Int, pixels: IntArray, val emPixels: Int = 64) {
+    private val pixels = pixels.copyOf()
+    fun copyPixels(): IntArray = pixels.copyOf()
+}
+data class MarkdownMath(val tex: String, val source: String, val display: Boolean, val raster: MathRaster? = null)

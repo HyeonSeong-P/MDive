@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -22,7 +24,7 @@ import com.parka.mdive.domain.document.MarkdownDocument
 import com.parka.mdive.domain.document.MarkdownRun
 
 @Composable
-fun ReaderMarkdownContent(document: MarkdownDocument, modifier: Modifier = Modifier, onCopyCode: (String) -> Unit = {}) {
+fun ReaderMarkdownContent(document: MarkdownDocument, modifier: Modifier = Modifier, onCopyCode: (String) -> Unit = {}, onViewMathSource: (String) -> Unit = {}) {
     // Measure once outside quote's intrinsic layout; nested blocks receive the remaining width.
     BoxWithConstraints(modifier.fillMaxWidth()) {
         val contentWidth = (maxWidth - 32.dp).coerceAtLeast(0.dp)
@@ -30,7 +32,7 @@ fun ReaderMarkdownContent(document: MarkdownDocument, modifier: Modifier = Modif
             items(document.blocks.size) { index ->
                 val block = document.blocks[index]
                 Column(Modifier.fillMaxWidth().padding(top = spaceBefore(document.blocks, index))) {
-                    Block(block, contentWidth, onCopyCode)
+                    Block(block, contentWidth, onCopyCode, onViewMathSource)
                 }
             }
         }
@@ -42,18 +44,19 @@ private fun spaceBefore(blocks: List<MarkdownBlock>, index: Int): Dp =
     else if (blocks[index - 1] is MarkdownBlock.Heading) 8.dp else 16.dp
 
 @Composable
-private fun Blocks(blocks: List<MarkdownBlock>, availableWidth: Dp, onCopyCode: (String) -> Unit) {
+private fun Blocks(blocks: List<MarkdownBlock>, availableWidth: Dp, onCopyCode: (String) -> Unit, onViewMathSource: (String) -> Unit) {
     blocks.forEachIndexed { index, block ->
-        Column(Modifier.fillMaxWidth().padding(top = spaceBefore(blocks, index))) { Block(block, availableWidth, onCopyCode) }
+        Column(Modifier.fillMaxWidth().padding(top = spaceBefore(blocks, index))) { Block(block, availableWidth, onCopyCode, onViewMathSource) }
     }
 }
 
 @Composable
-private fun Block(block: MarkdownBlock, availableWidth: Dp, onCopyCode: (String) -> Unit) {
+private fun Block(block: MarkdownBlock, availableWidth: Dp, onCopyCode: (String) -> Unit, onViewMathSource: (String) -> Unit) {
     val minimumTextWidth = 128.dp * LocalDensity.current.fontScale
     when (block) {
-        is MarkdownBlock.Heading -> MDiveMarkdownHeading(block.level, block.runs.presentation())
-        is MarkdownBlock.Paragraph -> MDiveMarkdownText(block.runs.presentation())
+        is MarkdownBlock.Math -> ReaderMathBlock(block.math, onViewMathSource)
+        is MarkdownBlock.Heading -> if (block.runs.any { it.math != null }) ReaderMathText(block.runs, availableWidth, onViewMathSource, Modifier.semantics { heading() }, mdiveTextStyle("documentH${block.level}")) else MDiveMarkdownHeading(block.level, block.runs.presentation())
+        is MarkdownBlock.Paragraph -> if (block.runs.any { it.math != null }) ReaderMathText(block.runs, availableWidth, onViewMathSource) else MDiveMarkdownText(block.runs.presentation())
         is MarkdownBlock.Source -> MDiveMarkdownText(listOf(MDiveTextRun(block.source)))
         is MarkdownBlock.Code -> MDiveCodeBlock(block.source, Modifier.testTag("markdown-code"),
             language = block.language,
@@ -71,11 +74,15 @@ private fun Block(block: MarkdownBlock, availableWidth: Dp, onCopyCode: (String)
             }) },
             block.rows.map { row -> row.map { it.presentation() } },
             Modifier.testTag("markdown-table"),
+            cellContent = if (block.columns.any { c -> c.header.any { it.math != null } } || block.rows.any { row -> row.any { cell -> cell.any { it.math != null } } }) { row, column, modifier ->
+                val runs = if (row == 0) block.columns[column].header else block.rows[row - 1][column]
+                ReaderMathText(runs, 128.dp, onViewMathSource, modifier, mdiveTextStyle("documentTable"), when (block.columns[column].alignment) { MarkdownAlignment.Left -> TextAlign.Left; MarkdownAlignment.Center -> TextAlign.Center; MarkdownAlignment.Right -> TextAlign.Right })
+            } else null,
         )
         is MarkdownBlock.Quote -> {
             val inset = 19.dp // DS quote rail 3dp + documentInset 16dp.
-            if (availableWidth - inset < minimumTextWidth) Blocks(block.blocks, availableWidth, onCopyCode)
-            else MDiveMarkdownQuote { Blocks(block.blocks, availableWidth - inset, onCopyCode) }
+            if (availableWidth - inset < minimumTextWidth) Blocks(block.blocks, availableWidth, onCopyCode, onViewMathSource)
+            else MDiveMarkdownQuote { Blocks(block.blocks, availableWidth - inset, onCopyCode, onViewMathSource) }
         }
         is MarkdownBlock.ListBlock -> {
             val measurer = rememberTextMeasurer()
@@ -95,9 +102,9 @@ private fun Block(block: MarkdownBlock, availableWidth: Dp, onCopyCode: (String)
                     if (flatten) {
                         if (task != null) MDiveCheckbox(task, onCheckedChange = null)
                         else MDiveMarkdownText(listOf(MDiveTextRun(block.start?.let { "${it + index}." } ?: "•")))
-                        Blocks(item, availableWidth, onCopyCode)
+                        Blocks(item, availableWidth, onCopyCode, onViewMathSource)
                     } else MDiveMarkdownListItem(marker) {
-                        Blocks(item, availableWidth - markerWidth, onCopyCode)
+                        Blocks(item, availableWidth - markerWidth, onCopyCode, onViewMathSource)
                     }
                 }
             }

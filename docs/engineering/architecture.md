@@ -52,7 +52,7 @@ Gradle 모듈은 제품 앱 `app`, 공통 Android 라이브러리 `designsystem`
 
 ## Markdown 뷰어 경계
 
-파일 선택, 홈·읽기, 로컬 이미지 폴더 연결, 링크 처리와 수식·Mermaid를 포함한 표시 범위의 제품 방향은 [제품 문서](../product/overview.md)에서 관리한다. 책갈피와 즐겨찾기는 기기 내 영속 보관한다. 기본 파싱·DS 렌더링은 아래 S03 경계를 따른다. 수식·Mermaid 등 후속 렌더 엔진, 영속화 기술, 후속 폴더 권한과 확장 문법의 세부 호환 범위는 아직 결정하지 않았다. Room·DataStore 등의 선택은 구현 단계에서 검토하며 이 문서에서 선행 확정하지 않는다. 화면 이동 라이브러리는 Navigation 3로 정했으며 세부 목적지·백스택 구성은 확정된 화면 흐름에 맞춰 정한다.
+파일 선택, 홈·읽기, 로컬 이미지 폴더 연결, 링크 처리와 수식·Mermaid를 포함한 표시 범위의 제품 방향은 [제품 문서](../product/overview.md)에서 관리한다. 책갈피와 즐겨찾기는 기기 내 영속 보관한다. 기본 파싱·DS 렌더링은 아래 S03 경계를 따른다. 수식은 아래 S06 경계를 따르며 Mermaid 등 후속 렌더 엔진, 영속화 기술, 후속 폴더 권한과 확장 문법의 세부 호환 범위는 아직 결정하지 않았다. Room·DataStore 등의 선택은 구현 단계에서 검토하며 이 문서에서 선행 확정하지 않는다. 화면 이동 라이브러리는 Navigation 3로 정했으며 세부 목적지·백스택 구성은 확정된 화면 흐름에 맞춰 정한다.
 
 ## 근거 자료
 
@@ -106,3 +106,16 @@ CommonMark literal의 정규화된 본문을 그대로 복사하지 않는다. d
 UI는 `MDiveCodeBlock`에 원문·언어 라벨·강조 범위·복사 callback을 전달한다. 복사는 Reader Intent → Channel Effect → Route의 새 Compose `LocalClipboard`/`setClipEntry`로 실행한다. ViewModel에 Android 클립보드 타입을 넣지 않는다. 플랫폼 쓰기 직후 클립보드를 다시 읽지 않는다. API33 이상은 시스템 성공 안내, 이전 버전은 공통 `MDiveToast`, 실패는 같은 공통 피드백과 기존 복사 버튼으로 재시도한다. 일시 안내의 표시·3초 유지와 반복 표시 시간 갱신은 Route의 UI 로컬 상태가 소유한다. 새 공통 UI·모듈은 추가하지 않는다.
 
 근거: [Highlights 1.1.0 소스](https://github.com/SnipMeDev/Highlights/tree/1.1.0), [Compose Clipboard](https://developer.android.com/reference/kotlin/androidx/compose/ui/platform/Clipboard), [Android 복사 피드백](https://developer.android.com/develop/ui/compose/touch-input/copy-and-paste#feedback).
+
+
+## S06 수식 경계
+
+제품 입력·실패·원문 시트 정책은 [S06 프로필](../product/document-viewing.md#s06-수식-프로필--확정)이 소유한다. GitHub 문서의 수식 표기법을 지향하되 GitHub의 MathJax 전체와 동일한 프로필은 아니다. `ru.noties:jlatexmath-android:0.2.0`을 오프라인 네이티브 엔진으로 사용한다. WebView 없이 기존 본문·DS slot에 연결할 수 있고 minSdk24를 유지하기 때문에 선택했다. 엔진은 보관 처리된 라이브러리이므로 지원 명령을 앱 프로필로 한정하며, 라이선스·폰트 고지를 함께 보존한다.
+
+엔진/파서 타입과 Android 그래픽 구현은 data 내부에서만 사용한다. domain에는 TeX·구분자 포함 원문과 앱 소유 픽셀·크기·기준선 정보를 전달하며 Android/Compose 타입을 넣지 않는다. 인라인은 text 스타일, 블록은 display 스타일로 렌더링하고 UI에서 본문 크기·fontScale·테마에 맞게 표시한다. 자연어 수학 낭독 대신 TeX 대체 설명을 제공한다. 긴 인라인은 별도 행으로 옮기고 수식 영역만 가로 스크롤한다.
+
+렌더 실패는 문서 열기 실패와 구분해 해당 수식에 오류·원문 보기만 제공한다. 원문 시트의 상태·Intent·닫기 동작은 Reader가 소유하고 DS 시트는 데이터와 이벤트만 받는다. 정상 수식에 실패 배너나 임의 상호작용을 붙이지 않는다. 일반 코드·Mermaid 원문·링크/HTML 보존 경계는 유지한다.
+
+엔진은 전역 레지스트리의 동시 변경을 피하도록 직렬 호출한다. 입력 길이·중괄호 깊이·명령 수·행렬 구조·개별 및 문서 전체 픽셀 예산을 적용하고 초과 입력은 해당 수식만 실패 처리한다. 엔진의 StackOverflowError는 해당 수식의 실패로 격리한다. 동기 엔진 호출의 즉시 취소는 보장하지 않으며 취소 뒤 늦은 화면 반영은 기존 읽기 작업 경계에서 차단한다. 크기 예산은 64px/em 기준의 앱 렌더 결과에 적용하며 제품의 구체 한계는 S06 프로필에 기록한다.
+
+근거: [엔진 소스·보관 상태](https://github.com/noties/jlatexmath-android), [엔진 라이선스](https://github.com/noties/jlatexmath-android/blob/android/LICENSE), [GitHub 수식 작성 안내](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions).

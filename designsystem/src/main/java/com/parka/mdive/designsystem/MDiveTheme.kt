@@ -24,7 +24,8 @@ private fun fontFamilyForRole(role: String): FontFamily = when (val family = Des
     "JetBrains Mono" -> JetBrainsMono
     else -> error("Unregistered font family: $family")
 }
-internal fun mdiveTextStyle(role: String): TextStyle {
+/** Resolve a registered typography role for host-provided prepared content slots. */
+fun mdiveTextStyle(role: String): TextStyle {
     val token = DesignTokens.Typography.getValue(role)
     return TextStyle(
         fontFamily = fontFamilyForRole(token.familyRole),

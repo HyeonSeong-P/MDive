@@ -176,7 +176,7 @@ def generate():
         elif state == 'rendered':
             source = content_event('원문 보기 · 시연', 'source')
             inner = f'<p>인라인 수식 <span class="md-math" role="img" aria-label="에너지와 질량 관계">{e(sample["markdownFormula"])}</span> 이후에도 같은 문장입니다.</p><div class="md-rendered" role="img" aria-label="준비된 수식 예시">{e(sample["markdownFormula"])}</div>'
-            inner += content_banner('수식', '정적 slot 예시', source)
+            # Prepared math is neutral; source actions belong to failures, not successful math.
             inner += content_banner('콘텐츠 렌더링 중', sample['markdownFormula'], source, loading=True)
             inner += content_banner('콘텐츠를 표시하지 못했어요', sample['markdownReason'], source, symbol='warning', error=True)
             inner += '<div class="md-rendered" role="img" aria-label="시작에서 읽기로 이어지는 다이어그램">시작 → 읽기</div>'

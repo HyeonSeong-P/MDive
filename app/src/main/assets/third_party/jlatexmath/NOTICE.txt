@@ -1,0 +1,6 @@
+JLatexMath Android 0.2.0
+Source: https://github.com/noties/jlatexmath-android/tree/v0.2.0
+Artifact: ru.noties:jlatexmath-android:0.2.0 (Maven Central)
+Engine: GPL version 2 or later, with the independent-module linking exception in LICENSE.txt.
+Bundled fonts retain the separate licenses copied from the unmodified AAR.
+MDive uses the unmodified engine and bundled fonts offline. No additional Greek/Cyrillic font artifact is included.
