@@ -1,0 +1,5 @@
+OkHttp 4.12.0 and its runtime dependency Okio 3.6.0
+Copyright Square, Inc.
+https://github.com/square/okhttp/tree/parent-4.12.0
+https://github.com/square/okio/tree/parent-3.6.0
+Licensed under the Apache License, Version 2.0 (LICENSE.txt).

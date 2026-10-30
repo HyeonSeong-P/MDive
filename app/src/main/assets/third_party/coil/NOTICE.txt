@@ -1,0 +1,9 @@
+Coil 3.3.0 (coil-core and coil-svg)
+Copyright Coil Contributors.
+https://github.com/coil-kt/coil/tree/3.3.0
+Licensed under the Apache License, Version 2.0 (LICENSE.txt).
+Coil performs fetch orchestration and raster/static SVG decoding. Its native
+MemoryCache (64 MiB, weak fallback disabled) and web-only DiskCache (100 MiB)
+own reuse; explicit retry uses WRITE_ONLY cache policies. MDive's custom Fetcher
+enforces SAF permissions, bounded HTTPS, and image/SVG preflight before bytes
+reach a decoder or disk cache. Static SVG decoding uses AndroidSVG (../androidsvg).

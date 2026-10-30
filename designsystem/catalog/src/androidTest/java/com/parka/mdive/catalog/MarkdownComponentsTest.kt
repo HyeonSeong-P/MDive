@@ -59,7 +59,7 @@ class MarkdownComponentsTest {
             }
         } }
         compose.onNodeWithText("앞 본문").assertExists()
-        compose.onNodeWithText("폴더 연결").performScrollTo().performClick()
+        compose.onNodeWithText("이미지 폴더 연결").performScrollTo().performClick()
         compose.onNodeWithText("다시 시도").performScrollTo().performClick()
         compose.onNodeWithText("원문 보기").performScrollTo().performClick()
         compose.onNodeWithText("뒤 본문").assertExists()
@@ -92,7 +92,7 @@ class MarkdownComponentsTest {
         compose.onNodeWithTag("readonly").assertIsOn().assertHasNoClickAction()
     }
 
-    @Test fun imageAltOwnsSemanticsAndDecorativeContentIsSilent() {
+    @Test fun imageAltOwnsSemanticsAndEmptyAltUsesFallback() {
         compose.setContent { MDiveDesignTheme {
             Column {
                 MDiveMarkdownImage(MDiveResourceState.Ready, "이미지 대체 설명") { Text("slot 내부 낭독 중복") }
@@ -102,6 +102,30 @@ class MarkdownComponentsTest {
         compose.onNodeWithContentDescription("이미지 대체 설명").assertExists()
         compose.onNodeWithText("slot 내부 낭독 중복").assertDoesNotExist()
         compose.onNodeWithText("장식 slot 내부 텍스트").assertDoesNotExist()
+        compose.onNodeWithContentDescription("이미지").assertExists()
+    }
+
+    @Test fun imageTapExpandsWithoutExtraButtonAndLoadingIsNonInteractive() {
+        var expanded = 0
+        compose.setContent { MDiveDesignTheme {
+            Column {
+                MDiveMarkdownImage(MDiveResourceState.Ready, "준비된 그림", onExpand = { expanded++ }) {
+                    Box(Modifier.fillMaxWidth().height(120.dp)) { Text("그림 내부 중복 설명") }
+                }
+                MDiveMarkdownImage(MDiveResourceState.Loading, "로딩 그림") { Text("준비 전 콘텐츠") }
+                MDiveMarkdownImage(MDiveResourceState.Failure, "실패 그림", failureReason = "지원하지 않는 형식이에요") { }
+            }
+        } }
+        val picture = compose.onNodeWithContentDescription("준비된 그림")
+        picture.assertHasClickAction().performClick()
+        compose.runOnIdle { assertEquals(1, expanded) }
+        compose.onNodeWithText("이미지 확대").assertDoesNotExist()
+        compose.onNodeWithText("그림 내부 중복 설명").assertDoesNotExist()
+        compose.onNodeWithContentDescription("로딩 그림 준비 중").assertHasNoClickAction()
+        compose.onNodeWithText("이미지 준비 중").assertDoesNotExist()
+        compose.onNodeWithText("준비 전 콘텐츠").assertDoesNotExist()
+        compose.onNodeWithText("실패 그림 · 지원하지 않는 형식이에요").assertExists()
+        compose.onNodeWithText("다시 시도").assertDoesNotExist()
     }
 
     @Test fun narrowLargeTextRtlKeepsCodeAndTableLocallyScrollable() {

@@ -55,6 +55,16 @@ class GeneratorTest(unittest.TestCase):
         self.assertIn('class="ds-skeleton" role="status"', page)
         self.assertIn('class="ds-sheet-handle"', page)
 
+    def test_image_shell_uses_picture_action_skeleton_and_distinct_recovery(self):
+        self.assertEqual(0, self.run_generator().returncode)
+        page = (self.root / 'design-system/generated/catalog.html').read_text()
+        self.assertIn('class="md-image" aria-label="', page)
+        self.assertIn('이미지 확대" data-content-event="expand"', page)
+        self.assertNotIn('이미지 확대 · 시연', page)
+        self.assertIn('class="md-image-skeleton" role="status"', page)
+        self.assertIn('이미지 폴더 연결 · 시연', page)
+        self.assertIn('data-content-event="retry"', page)
+
     def test_button_size_matrix_and_shared_size_propagation(self):
         self.change('tokens.json', lambda t: t['sizes'].update(buttonS=38))
         self.assertEqual(0, self.run_generator().returncode)
@@ -164,7 +174,8 @@ class GeneratorTest(unittest.TestCase):
                 if tag == 'input' and any(a.get('aria-readonly') == 'true' for _, a in self.stack):
                     self.readonly_inputs.append(attrs)
                 if attrs.get('data-content-event') in ['source', 'expand', 'retry', 'connect']:
-                    if not any('md-content-banner' in a.get('class', '').split() for _, a in self.stack):
+                    picture_action = tag == 'button' and 'md-image' in attrs.get('class', '').split() and attrs.get('data-content-event') == 'expand'
+                    if not picture_action and not any('md-content-banner' in a.get('class', '').split() for _, a in self.stack):
                         self.outside.append(attrs)
                 if tag not in ['input', 'meta', 'link', 'br', 'hr', 'path']:
                     self.stack.append((tag, attrs))

@@ -48,6 +48,7 @@ fun ReaderRoute(
     reference: DocumentReference,
     viewModel: ReaderViewModel = hiltViewModel(),
 ) {
+    val folderPicker = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree()) { uri -> viewModel.onIntent(ReaderIntent.ImageFolderSelected(uri?.toString())) }
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
@@ -58,6 +59,7 @@ fun ReaderRoute(
     CollectEffects(viewModel.effects) { effect ->
         when (effect) {
             ReaderEffect.NavigateHome -> onNavigateHome()
+            ReaderEffect.SelectImageFolder -> folderPicker.launch(null)
             is ReaderEffect.CopyCode -> scope.launch {
                 val message = copyCodeWithFeedback(Build.VERSION.SDK_INT, effect.source) {
                     clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("코드", it)))
@@ -78,6 +80,11 @@ fun ReaderRoute(
             onCloseMermaidSource = { viewModel.onIntent(ReaderIntent.CloseMermaidSource) },
             onExpandMermaid = { viewModel.onIntent(ReaderIntent.ExpandMermaid(it)) },
             onCloseMermaid = { viewModel.onIntent(ReaderIntent.CloseMermaid) },
+            onImageVisible = { image, visible -> viewModel.onIntent(ReaderIntent.ImageVisibility(image, visible)) },
+            onLoadImage = { image, retry -> viewModel.onIntent(ReaderIntent.LoadImage(image, retry)) },
+            onConnectImageFolder = { viewModel.onIntent(ReaderIntent.ConnectImageFolder) },
+            onExpandImage = { image, raster -> viewModel.onIntent(ReaderIntent.ExpandImage(image, raster)) },
+            onCloseImage = { viewModel.onIntent(ReaderIntent.CloseImage) },
         )
         feedback?.let { (_, message) -> MDiveToast(message, Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(16.dp),
             icon = if (message == COPY_FAILED) "warning" else "check") }
@@ -98,7 +105,14 @@ fun ReaderScreen(
     onCloseMermaidSource: () -> Unit = {},
     onExpandMermaid: (com.parka.mdive.domain.document.MarkdownMermaid) -> Unit = {},
     onCloseMermaid: () -> Unit = {},
+    onImageVisible: (com.parka.mdive.domain.document.MarkdownImage, Boolean) -> Unit = { _, _ -> },
+    onLoadImage: (com.parka.mdive.domain.document.MarkdownImage, Boolean) -> Unit = { _, _ -> },
+    onConnectImageFolder: () -> Unit = {},
+    onExpandImage: (com.parka.mdive.domain.document.MarkdownImage, com.parka.mdive.domain.document.ImageRaster) -> Unit = { _, _ -> },
+    onCloseImage: () -> Unit = {},
 ) {
+    val images = ReaderImages(state.images, state.imageGeneration, onLoadImage, onImageVisible, onConnectImageFolder, onExpandImage)
+    state.expandedImage?.let { ImageExpanded(it, images, state.expandedImageRaster, onCloseImage) }
     val mermaidCache = remember(state.document) { MermaidSessionCache() }
     if (state.mathSource != null) com.parka.mdive.designsystem.MDiveBottomSheet("수식 원문", onCloseMathSource) { _ ->
         com.parka.mdive.designsystem.MDiveCodeBlock(state.mathSource)
@@ -115,9 +129,13 @@ fun ReaderScreen(
                 navigationDescription = "홈으로 돌아가기",
                 onNavigationClick = onBack,
             )
+            (state.images["__folder_failure"] as? com.parka.mdive.domain.document.ImageReadResult.Failure)?.let {
+                com.parka.mdive.designsystem.MDiveRecoveryBanner("폴더를 연결하지 못했어요", it.reason.description(), Modifier.padding(horizontal = 16.dp, vertical = 8.dp), error = true,
+                    action = { MDiveButton("이미지 폴더 연결", onConnectImageFolder, variant = MDiveButtonVariant.Outlined, size = com.parka.mdive.designsystem.MDiveButtonSize.S) })
+            }
             if (state.content == ReaderContent.Loading) ReaderLoadingContent(Modifier.weight(1f))
             else if (state.content == ReaderContent.SourceReady && sourcePreview == null) {
-                state.markdown?.let { ReaderMarkdownContent(it, Modifier.weight(1f), onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache) }
+                state.markdown?.let { ReaderMarkdownContent(it, Modifier.weight(1f), onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images) }
             } else CenteredScrollableState(Modifier.weight(1f)) {
                 when (state.content) {
                     ReaderContent.Loading -> Unit

@@ -155,6 +155,16 @@ class CommonMarkParser @Inject constructor(private val codeHighlighter: CodeHigh
                     result += MarkdownRun(literal, emphasis, strong, strike = strike)
                 }
                 node is MathInline -> result += MarkdownRun(node.source, emphasis, strong, strike = strike, math = if (htmlTags.isEmpty()) raw(node, source, tableCell).ifEmpty { node.source }.let { original -> MarkdownMath(if (original.startsWith("$`")) original.drop(2).dropLast(2) else original.drop(1).dropLast(1), original, false) } else null)
+                node is Image && htmlTags.isEmpty() -> {
+                    fun alt(node: Node): String = children(node).joinToString("") { child -> when (child) {
+                        is Text -> child.literal
+                        is Code -> child.literal
+                        is SoftLineBreak, is HardLineBreak -> " "
+                        else -> alt(child)
+                    } }
+                    val image = MarkdownImage(node.destination, alt(node), node.title)
+                    result += MarkdownRun(raw(node, source, tableCell), emphasis, strong, strike = strike, image = image)
+                }
                 node is Text -> result += MarkdownRun(node.literal, emphasis, strong, strike = strike)
                 node is Code -> result += MarkdownRun(node.literal, emphasis, strong, code = true, strike = strike)
                 node is SoftLineBreak || node is HardLineBreak -> result += MarkdownRun("\n", emphasis, strong, strike = strike)
