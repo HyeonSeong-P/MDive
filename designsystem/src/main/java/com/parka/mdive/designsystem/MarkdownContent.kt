@@ -1,6 +1,7 @@
 package com.parka.mdive.designsystem
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -203,17 +204,31 @@ enum class MDiveResourceState { Loading, Ready, AccessRequired, Failure }
 fun MDiveMarkdownImage(
     state: MDiveResourceState, alt: String, modifier: Modifier = Modifier, title: String? = null,
     onExpand: (() -> Unit)? = null, onConnect: (() -> Unit)? = null, onRetry: (() -> Unit)? = null,
+    failureReason: String? = null, loadingHeight: Dp = 180.dp,
     content: @Composable () -> Unit,
 ) {
+    val description = alt.ifBlank { "이미지" }
+    val failureDetail = listOfNotNull(description, failureReason?.takeIf { it.isNotBlank() }).joinToString(" · ")
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         when (state) {
             MDiveResourceState.Ready -> {
-                Box(Modifier.fillMaxWidth().clearAndSetSemantics { if (alt.isNotEmpty()) { contentDescription = alt; role = Role.Image } }) { content() }
-                if (onExpand != null) MDiveButton("이미지 확대", onExpand, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S)
+                val interaction = if (onExpand == null) Modifier else Modifier
+                    .heightIn(min = 48.dp).clickable(onClickLabel = "이미지 확대", onClick = onExpand)
+                Box(Modifier.fillMaxWidth().then(interaction).clearAndSetSemantics {
+                    contentDescription = description
+                    role = Role.Image
+                    if (onExpand != null) onClick("이미지 확대") { onExpand(); true }
+                }) { content() }
             }
-            MDiveResourceState.Loading -> MDiveRecoveryBanner("이미지 준비 중", alt, icon = "file", loading = true)
-            MDiveResourceState.AccessRequired -> MDiveRecoveryBanner("이미지 접근 연결 필요", alt, icon = "file", action = { if (onConnect != null) MDiveButton("폴더 연결", onConnect, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S) })
-            MDiveResourceState.Failure -> MDiveRecoveryBanner("이미지를 불러오지 못했어요", alt, error = true, action = { if (onRetry != null) MDiveButton("다시 시도", onRetry, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S) })
+            MDiveResourceState.Loading -> Box(Modifier.fillMaxWidth().height(loadingHeight).semantics {
+                contentDescription = "$description 준비 중"
+                stateDescription = "불러오는 중"
+                liveRegion = LiveRegionMode.Polite
+            }) { MDiveSkeleton(Modifier.fillMaxSize()) }
+            MDiveResourceState.AccessRequired -> MDiveRecoveryBanner("이미지 접근 연결 필요", failureDetail, icon = "file",
+                action = onConnect?.let { connect -> { MDiveButton("이미지 폴더 연결", connect, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S) } })
+            MDiveResourceState.Failure -> MDiveRecoveryBanner("이미지를 불러오지 못했어요", failureDetail, error = true,
+                action = onRetry?.let { retry -> { MDiveButton("다시 시도", retry, variant = MDiveButtonVariant.Outlined, size = MDiveButtonSize.S) } })
         }
         if (title != null) Text(title, style = mdiveTextStyle("caption"))
     }

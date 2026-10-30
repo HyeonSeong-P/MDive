@@ -172,7 +172,9 @@ def generate():
     def markdown_resource(state):
         alt = e(sample['markdownAlt'])
         if state == 'ready':
-            inner = f'<div class="md-image" role="img" aria-label="{alt}"><span aria-hidden="true">∿ ∿ ∿</span></div>' + content_banner('이미지', sample['markdownAlt'], content_event('이미지 확대 · 시연', 'expand'))
+            inner = f'<button type="button" class="md-image" aria-label="{alt} · 이미지 확대" data-content-event="expand"><span aria-hidden="true">∿ ∿ ∿</span></button>'
+        elif state == 'loading':
+            inner = f'<div class="md-image-skeleton" role="status" aria-label="{alt} 준비 중"><div class="ds-skeleton-line" aria-hidden="true"></div></div>'
         elif state == 'rendered':
             source = content_event('원문 보기 · 시연', 'source')
             inner = f'<p>인라인 수식 <span class="md-math" role="img" aria-label="에너지와 질량 관계">{e(sample["markdownFormula"])}</span> 이후에도 같은 문장입니다.</p><div class="md-rendered" role="img" aria-label="준비된 수식 예시">{e(sample["markdownFormula"])}</div>'
@@ -183,7 +185,7 @@ def generate():
             inner += content_banner('다이어그램', '정적 slot 예시 · 렌더 엔진 검증이 아닙니다.', content_event('원문 보기 · 시연', 'source') + content_event('확대 · 시연', 'expand'))
         else:
             title = {'loading':'이미지 준비 중','accessRequired':'이미지 접근 권한이 필요해요','failure':'이미지를 불러오지 못했어요','fallback':'콘텐츠 표시 실패 · 예시'}[state]
-            action = '' if state == 'loading' else content_event('폴더 연결 · 시연' if state == 'accessRequired' else '원문 보기 · 시연' if state == 'fallback' else '다시 시도 · 시연', 'connect' if state == 'accessRequired' else 'source' if state == 'fallback' else 'retry')
+            action = '' if state == 'loading' else content_event('이미지 폴더 연결 · 시연' if state == 'accessRequired' else '원문 보기 · 시연' if state == 'fallback' else '다시 시도 · 시연', 'connect' if state == 'accessRequired' else 'source' if state == 'fallback' else 'retry')
             inner = content_banner(title, sample['markdownAlt'] + ' · ' + sample['markdownReason'], action, symbol='warning', loading=state == 'loading', error=state == 'failure')
         return f'<div class="md-flow"><p>{e(sample["markdownBody"])}</p>{inner}<output class="md-result" aria-live="polite"></output><p>{e(sample["markdownBody"])}</p></div>'
 

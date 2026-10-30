@@ -52,7 +52,7 @@ Gradle 모듈은 제품 앱 `app`, 공통 Android 라이브러리 `designsystem`
 
 ## Markdown 뷰어 경계
 
-파일 선택, 홈·읽기, 로컬 이미지 폴더 연결, 링크 처리와 수식·Mermaid를 포함한 표시 범위의 제품 방향은 [제품 문서](../product/overview.md)에서 관리한다. 책갈피와 즐겨찾기는 기기 내 영속 보관한다. 기본 파싱·DS 렌더링은 아래 S03 경계를 따른다. 수식은 아래 S06 경계를 따르며 Mermaid는 아래 S07 경계를 따르며 리소스·후속 렌더 엔진, 영속화 기술, 후속 폴더 권한과 확장 문법의 세부 호환 범위는 아직 결정하지 않았다. Room·DataStore 등의 선택은 구현 단계에서 검토하며 이 문서에서 선행 확정하지 않는다. 화면 이동 라이브러리는 Navigation 3로 정했으며 세부 목적지·백스택 구성은 확정된 화면 흐름에 맞춰 정한다.
+파일 선택, 홈·읽기, 로컬 이미지 폴더 연결, 링크 처리와 수식·Mermaid를 포함한 표시 범위의 제품 방향은 [제품 문서](../product/overview.md)에서 관리한다. 책갈피와 즐겨찾기는 기기 내 영속 보관한다. 기본 파싱·DS 렌더링은 아래 S03 경계를 따른다. 수식은 아래 S06, Mermaid는 S07, 이미지는 S08+S09 경계를 따른다. 후속 렌더 엔진·홈/도구 영속화 기술과 확장 문법의 세부 호환 범위는 해당 단계에서 결정한다. Room·DataStore 등의 선택은 구현 단계에서 검토하며 이 문서에서 선행 확정하지 않는다. 화면 이동 라이브러리는 Navigation 3로 정했으며 세부 목적지·백스택 구성은 확정된 화면 흐름에 맞춰 정한다.
 
 ## 근거 자료
 
@@ -145,3 +145,22 @@ WebView는 뷰 수명주기를 필요로 하므로 `ui/reader/MermaidWebView`의
 캐시 hit는 새 WebView에 이미 검사한 SVG만 제공한다. 이 페이지에는 Mermaid JS가 없고 JavaScript도 끄며 CSP script-src none과 기존 외부 요청 차단을 유지한다. 확대 품질을 위해 래스터가 아닌 SVG를 재사용한다. cache miss에서만 기존 strict 엔진·출력 검사를 거치며, 사용자 입력을 캐시 페이지 HTML에 직접 넣지 않는다. 실제 renderer 호출 횟수와 JavaScript 설정·픽셀 회귀로 스크롤/확대 재사용을 검증한다.
 
 실제 샘플 검증에서 `height:100%` 부모 체인이 0으로 계산돼 SVG viewBox가 정상이어도 그림 높이가 0인 결함을 발견했다. 호스트와 캐시 페이지의 그림 컨테이너는 fixed/inset 0으로 viewport에 맞추고, Ready 상태·외곽 크기만으로 표시 검증을 대체하지 않는다. 실제 화면의 그림 영역 PixelCopy 검사와 SAF 샘플을 함께 검증한다.
+
+
+## S08+S09 이미지·폴더 연결 경계
+
+지원 형식·경로·복구·요청 한계·캐시·확대는 [이미지 제품 프로필](../product/document-viewing.md#s08s09-이미지-프로필--확정)이 소유한다. CommonMark 이미지 AST는 data에서 앱 소유 `MarkdownImage`로 변환하고, 문단·목록·인용·표 안의 이미지도 `MarkdownRun.image`로 전달한다. 후속 링크/HTML의 실행 정책을 바꾸지 않는다.
+
+`domain/document/ImageRepository`는 문서 참조·이미지 목적지 문자열·폴더 연결 문자열과 앱 소유 픽셀/실패 결과만 노출한다. Android URI·ContentResolver·Bitmap·SVG·HTTP 엔진 타입은 data 내부에 둔다. `di/DocumentModule`에서 구현을 바인딩하며 UI는 구체 저장소를 알지 못한다. 화면 ViewModel이 로딩·실패·준비 상태와 복구 Intent를 소유하고, 폴더 선택은 Effect로 Route의 Activity Result launcher에 전달한다. 폴더 선택 취소는 기존 연결과 본문을 유지한다.
+
+`ContentImageRepository`는 IO에서 SAF tree의 실제 child 항목을 이름으로 조회한다. percent 인코딩을 한 번 해석한 상대 경로를 정규화하고, 기준 폴더 밖 이동과 절대/금지 URI를 차단한다. document ID를 파일 경로처럼 이어 붙이지 않는다. 읽기 grant를 영속화한 뒤 문서 참조별 tree 연결을 SharedPreferences에 저장한다. 이는 이미지 연결의 최소 영속 저장이며 H01 최근/즐겨찾기 저장소를 선행 구현하지 않는다. 실제 읽기 시 파일 없음·권한 상실을 다시 판정한다.
+
+사용자 선호에 따라 실제 디코딩은 `io.coil-kt.coil3:coil-core:3.3.0`과 `coil-svg:3.3.0`의 `ImageLoader.execute`가 담당한다. 현재 Kotlin 2.2.10·minSdk24와 호환되는 고정 버전이며 SVG 디코더는 AndroidSVG를 사용한다. 로더는 data에서 재사용하고 Coil/Android 타입은 외부로 노출하지 않는다. SVG의 XML을 사전 검사해 DTD·스크립트·외부 리소스·지원 밖 요소를 거부하고 내부 entity 확장을 끈다. SVGZ는 지원하지 않는다. 요소 10,000개·깊이 128·내부 참조 10,000개·확장 작업량 50,000개의 예산과 참조 그래프 순환 검사를 적용하고 렌더러 StackOverflowError도 해당 그림의 실패로 격리한다. 스타일 텍스트는 XML 토큰 경계를 합쳐 검사하며 stylesheet의 모든 `url(...)`을 거부한다. 도형 속성의 안전한 내부 `url(#id)` 참조는 허용한다. Coil 호출 전에 실제 입력 바이트와 원본 출력 치수를 검사하고 GIF는 animated decoder 없이 첫 프레임만 표시한다. Android/엔진 타입을 숨기면서 기존 DS slot에 연결하기 위해 앱 소유 ARGB 픽셀을 반환한다.
+
+웹에는 `com.squareup.okhttp3:okhttp:4.12.0`을 사용한다. 쿠키/인증·프록시 인증과 자동 리다이렉트를 사용하지 않으며, 수동 리다이렉트의 각 HTTPS 목적지를 재검사한다. 모든 hop은 하나의 전체 deadline을 공유한다. 요청은 앱 이름·설치된 versionName·공개 프로젝트 연락 URL·OkHttp 버전으로 정직하게 식별한다. 문서·사용자·기기 식별자는 User-Agent에 넣지 않는다. 일반 라이브러리 User-Agent를 거절하는 서버에서도 앱을 정확히 식별하기 위한 헤더이며 인증이나 브라우저 위장을 추가하지 않는다. 이 의존성은 인증 없는 요청과 호출 제한을 명시하고 재현 가능한 HTTPS 경계 테스트를 수행하기 위해 추가했다. Coil·AndroidSVG·OkHttp는 Apache 2.0이며 새 모듈은 만들지 않는다.
+
+재사용할 디코딩 결과는 Coil의 제한된 메모리 캐시로 보관한다. 화면에 표시 중인 결과와 확대 결과는 캐시 회수와 분리해 유지하므로 동시에 보이는 그림의 합이 캐시 예산을 넘더라도 스켈레톤/재요청이 반복되지 않는다. 캐시 예산은 활성 화면의 픽셀·Compose 표시 Bitmap까지 포함한 앱 전체 메모리 상한이 아니다. 보이는 이미지의 요청과 확대는 같은 결과를 사용한다. 웹 원본은 Coil의 디스크 캐시를 사용하며 앱 cache 디렉터리에 둔다. Coil `MemoryCache` 64MiB·`DiskCache` 100MiB와 요청별 캐시 정책으로 예산과 읽기/쓰기를 관리하고 별도의 앱 LRU·디스크 회수 구현을 두지 않는다. 로컬 원본은 웹 디스크 캐시에 기록하지 않는다. 명시적 재시도는 캐시 읽기를 우회한다. 테마는 이미지 원본을 변경하지 않으며 문서·폴더 연결 변경 후 늦은 결과가 새 상태를 덮지 않도록 요청 세대를 구분한다. 영속 웹 캐시는 OS가 회수할 수 있으며 외부 파일 변경을 자동 감시하지 않는다.
+
+이미지 확대는 Reader 내부 Dialog 오버레이다. Navigation key나 문서 재읽기를 추가하지 않고 본문 LazyColumn을 유지한다. 핀치·팬·배율은 오버레이의 UI 로컬 상태이며 그림/실패/스켈레톤의 공통 외형과 접근성 액션은 DS가 소유한다. DS는 파일·권한·네트워크·도메인 규칙을 알지 못한다.
+
+근거: [Android SAF와 tree 제한](https://developer.android.com/training/data-storage/shared/documents-files), [BitmapFactory](https://developer.android.com/reference/android/graphics/BitmapFactory), [Coil 3.3.0](https://github.com/coil-kt/coil/tree/3.3.0), [AndroidSVG 공식 지원 범위](https://bigbadaboom.github.io/androidsvg/), [OkHttp 4.12 요구사항·라이선스](https://github.com/square/okhttp/tree/parent-4.12.0), [OkHttp TLS 테스트](https://github.com/square/okhttp/blob/parent-4.12.0/okhttp-tls/README.md). 실제 검증·미검증은 구현 계획의 현재 인계를 따른다.

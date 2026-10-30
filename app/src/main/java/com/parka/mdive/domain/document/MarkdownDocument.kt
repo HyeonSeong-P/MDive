@@ -10,6 +10,7 @@ data class MarkdownRun(
     val code: Boolean = false,
     val strike: Boolean = false,
     val math: MarkdownMath? = null,
+    val image: MarkdownImage? = null,
 )
 
 sealed interface MarkdownBlock {

@@ -45,6 +45,10 @@ android {
 }
 
 dependencies {
+    implementation(libs.coil.core)
+    implementation(libs.coil.svg)
+    implementation(libs.androidsvg)
+    implementation(libs.okhttp)
     implementation(libs.jlatexmath)
     implementation(libs.highlights)
     implementation(libs.commonmark)
@@ -71,6 +75,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     testImplementation(libs.junit)
+    testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.okhttp.tls)
+    androidTestImplementation(libs.okhttp.mockwebserver)
+    androidTestImplementation(libs.okhttp.tls)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)

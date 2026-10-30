@@ -62,7 +62,8 @@ internal fun MarkdownCatalog(id: String, state: String) {
                 "ready", "loading", "accessRequired", "failure" -> {
                     MDiveMarkdownText(body)
                     MDiveMarkdownImage(when (state) { "ready" -> MDiveResourceState.Ready; "loading" -> MDiveResourceState.Loading; "accessRequired" -> MDiveResourceState.AccessRequired; else -> MDiveResourceState.Failure }, CatalogSamples.markdownAlt,
-                        title = "이미지 content slot · 로더 없음", onExpand = { event = "이미지 확대" }, onConnect = { event = "폴더 연결" }, onRetry = { event = "이미지 다시 시도" }) {
+                        title = "이미지 content slot · 로더 없음", onExpand = { event = "이미지 확대" }, onConnect = { event = "이미지 폴더 연결" }, onRetry = { event = "이미지 다시 시도" },
+                        failureReason = if (state == "accessRequired" || state == "failure") CatalogSamples.markdownReason else null) {
                         Box(Modifier.fillMaxWidth().height(140.dp).background(MaterialTheme.colorScheme.surfaceVariant).padding(16.dp)) { Text(CatalogSamples.markdownAlt) }
                     }
                     MDiveMarkdownText(body)

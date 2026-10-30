@@ -45,8 +45,11 @@ class ReaderMarkdownTest {
         compose.onNodeWithText("인용").assertIsDisplayed()
         compose.onNodeWithText("3.").assertIsDisplayed()
         compose.onNodeWithText("중첩").assertIsDisplayed()
-        compose.onNodeWithTag("markdown-body").performScrollToNode(hasText("[링크](https://example.com) ![이미지](image.png)"))
-        compose.onNodeWithText("[링크](https://example.com) ![이미지](image.png)").assertHasNoClickAction()
+        compose.onNodeWithTag("markdown-body").performScrollToNode(hasText("[링크](https://example.com)", substring = true))
+        compose.onNodeWithText("[링크](https://example.com)", substring = true).assertHasNoClickAction()
+        // S08 replaces the image's inert source with a resource slot, while S10 links stay inert.
+        compose.onNodeWithTag("image-loading").assertExists()
+        compose.onNodeWithText("![이미지](image.png)", substring = true).assertDoesNotExist()
         compose.onNodeWithTag("markdown-body").performScrollToNode(hasText("마지막"))
         compose.onNodeWithText("소스\n").assertIsDisplayed()
         compose.onNodeWithText("마지막").assertIsDisplayed()
