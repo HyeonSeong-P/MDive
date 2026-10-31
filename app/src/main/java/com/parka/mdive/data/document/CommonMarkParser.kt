@@ -69,9 +69,12 @@ class CommonMarkParser @Inject constructor(private val codeHighlighter: CodeHigh
         .build()
 
     private suspend fun blocks(parent: Node, source: String, codeSource: CodeSourceReader, depth: Int = 0, taskPrefix: Int = 0): List<MarkdownBlock> =
-        children(parent).mapIndexed { index, node ->
+        children(parent).mapIndexedNotNull { index, node ->
             currentCoroutineContext().ensureActive()
             if (depth >= 128) MarkdownBlock.Source(raw(node, source)) else when (node) {
+                // CommonMark reference declarations are metadata for links, not body blocks.
+                // Footnote-shaped declarations remain source until S13 defines their grammar.
+                is LinkReferenceDefinition -> if (node.label.startsWith("^")) MarkdownBlock.Source(raw(node, source)) else null
                 is MathBlockNode -> {
                     val original = raw(node, source)
                     val normalized = node.lines.joinToString("\n")
@@ -164,6 +167,11 @@ class CommonMarkParser @Inject constructor(private val codeHighlighter: CodeHigh
                     } }
                     val image = MarkdownImage(node.destination, alt(node), node.title)
                     result += MarkdownRun(raw(node, source, tableCell), emphasis, strong, strike = strike, image = image)
+                }
+                node is Link && htmlTags.isEmpty() -> {
+                    val start = result.size
+                    children(node).forEach { visit(it, emphasis, strong, strike, depth + 1) }
+                    for (index in start until result.size) result[index] = result[index].copy(link = node.destination, math = null)
                 }
                 node is Text -> result += MarkdownRun(node.literal, emphasis, strong, strike = strike)
                 node is Code -> result += MarkdownRun(node.literal, emphasis, strong, code = true, strike = strike)

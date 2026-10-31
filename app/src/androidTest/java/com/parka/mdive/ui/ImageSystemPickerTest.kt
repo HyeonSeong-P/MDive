@@ -159,7 +159,7 @@ class ImageSystemPickerTest {
         assertEquals(1, prefs.all.values.filterIsInstance<String>().size)
         assertTrue(compose.activity.contentResolver.persistedUriPermissions.any { it.isReadPermission && it.uri.toString().contains("MDive-S08") })
         compose.activityRule.scenario.recreate(); ready(); pixels("산과 바다 · PNG")
-        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick(); compose.onNodeWithText("반가워요.").assertIsDisplayed()
+        compose.onNodeWithContentDescription("이전 화면으로 돌아가기").performClick(); compose.onNodeWithText("반가워요.").assertIsDisplayed()
     }
 
     @Test fun actualHttpsImageDisplaysPixelsAndExpands() {
@@ -187,7 +187,7 @@ class ImageSystemPickerTest {
         compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
         compose.onNodeWithTag("image-expanded").assertDoesNotExist()
         pixels("위키미디어 PNG 투명도 예제")
-        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+        compose.onNodeWithContentDescription("이전 화면으로 돌아가기").performClick()
     }
 
     /** Run in a separate instrumentation invocation after force-stop to verify persisted connection. */
@@ -201,7 +201,7 @@ class ImageSystemPickerTest {
         grants.forEach { compose.activity.contentResolver.releasePersistableUriPermission(it.uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION) }
         // Force-stop is performed by the calling harness before the next test invocation;
         // transient grants cannot be revoked while the current activity task still owns them.
-        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+        compose.onNodeWithContentDescription("이전 화면으로 돌아가기").performClick()
     }
     @Test fun revokedGrantShowsReconnectAndCanRecover() {
         assumeTrue("Explicit external revoke/force-stop harness only", InstrumentationRegistry.getArguments().getString("imageProcessPhase") == "revoked")
@@ -211,6 +211,6 @@ class ImageSystemPickerTest {
         compose.onAllNodesWithText("이미지 폴더 연결").onFirst().performClick(); chooseFolder()
         ready(); pixels("산과 바다 · PNG")
         capture("s08-after-reconnect.png")
-        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+        compose.onNodeWithContentDescription("이전 화면으로 돌아가기").performClick()
     }
 }

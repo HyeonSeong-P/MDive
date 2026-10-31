@@ -90,7 +90,7 @@ class ProductHostTest {
         val stack = NavBackStack<NavKey>(Destination.Home, Destination.Reader("content://test/pending.md"))
         compose.setContent { MDiveDesignTheme { MDiveApp(backStack = stack) } }
         compose.onNodeWithText("문서를 열지 못했어요").assertIsDisplayed()
-        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+        compose.onNodeWithContentDescription("이전 화면으로 돌아가기").performClick()
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
         compose.runOnIdle { stack.add(Destination.Reader("content://test/pending.md")) }
         compose.onNodeWithText("문서를 열지 못했어요").assertIsDisplayed()
@@ -115,7 +115,7 @@ class ProductHostTest {
         compose.onNodeWithText("문서를 열지 못했어요").assertIsDisplayed()
         restoration.emulateSavedInstanceStateRestore()
         compose.onNodeWithText("문서를 열지 못했어요").assertIsDisplayed()
-        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+        compose.onNodeWithContentDescription("이전 화면으로 돌아가기").performClick()
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
     }
 

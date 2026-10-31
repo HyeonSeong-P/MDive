@@ -11,6 +11,7 @@ data class MarkdownRun(
     val strike: Boolean = false,
     val math: MarkdownMath? = null,
     val image: MarkdownImage? = null,
+    val link: String? = null,
 )
 
 sealed interface MarkdownBlock {

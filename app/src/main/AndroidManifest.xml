@@ -4,6 +4,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <queries>
+        <intent><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.APP_BROWSER" /></intent>
+    </queries>
+
     <application
         android:name=".MDiveApplication"
         android:usesCleartextTraffic="false"

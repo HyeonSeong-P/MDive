@@ -16,6 +16,8 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DocumentModule {
+    @Binds abstract fun bindDocumentLinks(repository: com.parka.mdive.data.document.ContentDocumentLinkRepository): com.parka.mdive.domain.document.DocumentLinkRepository
+
     @Binds abstract fun bindImageRepository(repository: com.parka.mdive.data.document.ContentImageRepository): com.parka.mdive.domain.document.ImageRepository
 
     @Binds abstract fun bindMarkdownParser(parser: CommonMarkParser): MarkdownParser
