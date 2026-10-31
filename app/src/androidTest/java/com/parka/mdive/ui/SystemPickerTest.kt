@@ -104,7 +104,7 @@ class SystemPickerTest {
         compose.activityRule.scenario.recreate()
         awaitText("실제 선택")
         compose.onNodeWithText("source.md").assertIsDisplayed()
-        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+        compose.onNodeWithContentDescription("이전 화면으로 돌아가기").performClick()
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
     }
 
@@ -112,7 +112,7 @@ class SystemPickerTest {
         selectFixture("empty.txt")
         awaitText("빈 문서예요")
         compose.onNodeWithText("빈 문서예요").assertIsDisplayed()
-        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+        compose.onNodeWithContentDescription("이전 화면으로 돌아가기").performClick()
         try {
             FixtureDocumentsProvider.failReads = true
             selectFixture("source.md")
@@ -137,9 +137,9 @@ class SystemPickerTest {
         compose.onNodeWithText("할 일").assertIsDisplayed()
         compose.onNodeWithText("완료한 일").assertIsDisplayed()
         compose.onNodeWithTag("markdown-body").performScrollToNode(hasText("마지막 혼합 본문"))
-        compose.onNodeWithText("[보존 링크](a.md)").assertHasNoClickAction()
+        compose.onNodeWithText("보존 링크").assertExists()
         compose.onNodeWithText("마지막 혼합 본문").assertIsDisplayed()
-        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+        compose.onNodeWithContentDescription("이전 화면으로 돌아가기").performClick()
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
     }
 
@@ -153,7 +153,7 @@ class SystemPickerTest {
             org.junit.Assert.assertEquals(FixtureDocumentsProvider.CODE_BODY, clipboard.primaryClip?.getItemAt(0)?.text?.toString())
         }
         compose.onNodeWithText("코드 뒤 본문").assertIsDisplayed()
-        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+        compose.onNodeWithContentDescription("이전 화면으로 돌아가기").performClick()
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
     }
 
@@ -169,7 +169,7 @@ class SystemPickerTest {
         compose.onNodeWithContentDescription("패널 닫기").performClick()
         compose.onNodeWithText("수식 원문").assertDoesNotExist()
         compose.onNodeWithText("수식 뒤 본문").assertIsDisplayed()
-        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+        compose.onNodeWithContentDescription("이전 화면으로 돌아가기").performClick()
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
     }
 
@@ -188,7 +188,7 @@ class SystemPickerTest {
         compose.onNodeWithContentDescription("패널 닫기").performClick()
         compose.onNodeWithTag("markdown-body").performScrollToNode(hasText("Mermaid 뒤 본문"))
         compose.onNodeWithText("Mermaid 뒤 본문").assertIsDisplayed()
-        compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+        compose.onNodeWithContentDescription("이전 화면으로 돌아가기").performClick()
         compose.onNodeWithText("반가워요.").assertIsDisplayed()
     }
 
@@ -267,7 +267,7 @@ class SystemPickerTest {
             compose.waitUntil(5_000) { compose.onAllNodesWithText("Mermaid 원문").fetchSemanticsNodes().isEmpty() }
             compose.onNodeWithTag("markdown-body").performScrollToNode(hasText("마지막 본문입니다.", substring = true))
             compose.onNodeWithText("마지막 본문입니다.", substring = true).assertIsDisplayed()
-            compose.onNodeWithContentDescription("홈으로 돌아가기").performClick()
+            compose.onNodeWithContentDescription("이전 화면으로 돌아가기").performClick()
             compose.onNodeWithText("반가워요.").assertIsDisplayed()
         } finally {
             resolver.delete(sampleUri, null, null)

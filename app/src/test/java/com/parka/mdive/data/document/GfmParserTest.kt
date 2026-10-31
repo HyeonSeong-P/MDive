@@ -31,7 +31,7 @@ class GfmParserTest {
 
     @Test fun tableEscapedPipesIncludingCodeAndRawLinkOffsets() {
         val table = parse("| A | B |\n| - | - |\n| a\\|b [**링크**](a.md) | `a\\|b` |\n| ![그\\|림](img.png) 뒤 | 끝 |").single() as MarkdownBlock.Table
-        assertEquals("a|b [**링크**](a.md)", table.rows[0][0].text())
+        assertEquals("a|b 링크", table.rows[0][0].text())
         assertEquals("a|b", table.rows[0][1].text())
         assertEquals("![그\\|림](img.png) 뒤", table.rows[1][0].text())
     }
@@ -84,8 +84,10 @@ class GfmParserTest {
         val source = "`~~코드~~` [~~링크~~](a.md) ![~~이미지~~](a.png)\n\n```\n- [x] task\n| A |\n| - |\n~~source~~\n```\n\n<div>~~HTML~~</div>\n\n\$수식\$"
         val blocks = parse(source)
         val runs = (blocks[0] as MarkdownBlock.Paragraph).runs
-        assertEquals("~~코드~~ [~~링크~~](a.md) ![~~이미지~~](a.png)", runs.text())
-        assertTrue(runs.none { it.strike })
+        assertEquals("~~코드~~ 링크 ![~~이미지~~](a.png)", runs.text())
+        assertTrue(runs.first { it.text == "링크" }.strike)
+        assertEquals("a.md", runs.first { it.text == "링크" }.link)
+        assertFalse(runs.first().strike)
         assertEquals("- [x] task\n| A |\n| - |\n~~source~~\n", (blocks[1] as MarkdownBlock.Code).source)
         assertEquals("<div>~~HTML~~</div>", (blocks[2] as MarkdownBlock.Source).source)
         assertEquals("\$수식\$", (blocks[3] as MarkdownBlock.Paragraph).runs.text())

@@ -19,7 +19,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface Destination : NavKey {
     @Serializable data object Home : Destination
-    @Serializable data class Reader(val reference: String) : Destination
+    @Serializable data class Reader(val reference: String, val visit: String = java.util.UUID.randomUUID().toString()) : Destination
 }
 
 /** The UI owns both platform selection and the serializable document locator in the back stack. */
@@ -28,6 +28,7 @@ fun MDiveApp(
     modifier: Modifier = Modifier,
     backStack: NavBackStack<NavKey> = rememberNavBackStack(Destination.Home),
 ) {
+    val prepared = androidx.compose.runtime.remember { mutableMapOf<String, com.parka.mdive.ui.reader.PreparedDocument>() }
     NavDisplay(
         backStack = backStack,
         modifier = modifier,
@@ -45,7 +46,15 @@ fun MDiveApp(
             entry<Destination.Reader> { destination ->
                 val viewModel = hiltViewModel<ReaderViewModel>()
                 ReaderRoute(
-                    onNavigateHome = { if (backStack.size > 1) backStack.removeLastOrNull() },
+                    onNavigateHome = { if (backStack.lastOrNull() == destination && backStack.size > 1) { prepared.remove(destination.visit); backStack.removeLastOrNull() } },
+                    prepared = prepared[destination.visit],
+                    onNavigateDocument = { reference, document ->
+                        if (backStack.lastOrNull() == destination) {
+                            val next = Destination.Reader(reference.value)
+                            prepared[next.visit] = document
+                            backStack.add(next)
+                        }
+                    },
                     reference = DocumentReference(destination.reference),
                     viewModel = viewModel,
                 )

@@ -32,7 +32,7 @@ internal fun ReaderMathBlock(math: MarkdownMath, onViewSource: (String) -> Unit,
 /** Large/failed math leaves the inline flow; surrounding text stays in reading order. */
 @Composable
 internal fun ReaderMathText(runs: List<MarkdownRun>, width: Dp, onViewSource: (String) -> Unit, modifier: Modifier = Modifier,
-    style: TextStyle = mdiveTextStyle("body"), textAlign: TextAlign = TextAlign.Start) {
+    style: TextStyle = mdiveTextStyle("body"), textAlign: TextAlign = TextAlign.Start, onLink: (String) -> Unit = {}) {
     val density = LocalDensity.current
     val size = style.fontSize
     val widthSp = with(density) { width.toSp().value }
@@ -52,13 +52,13 @@ internal fun ReaderMathText(runs: List<MarkdownRun>, width: Dp, onViewSource: (S
             val only = group.singleOrNull()?.math
             if (only != null && (only.raster == null || only.raster.width.toFloat() / only.raster.emPixels * size.value > widthSp)) {
                 ReaderMathBlock(only, onViewSource, style = style)
-            } else InlineMathText(group, style, textAlign)
+            } else InlineMathText(group, style, textAlign, onLink)
         }
     }
 }
 
 @Composable
-private fun InlineMathText(runs: List<MarkdownRun>, style: TextStyle, textAlign: TextAlign) {
+private fun InlineMathText(runs: List<MarkdownRun>, style: TextStyle, textAlign: TextAlign, onLink: (String) -> Unit) {
     val inlines = mutableMapOf<String, InlineTextContent>()
     var largestHeight = style.lineHeight.value
     val text = buildAnnotatedString {
@@ -80,8 +80,15 @@ private fun InlineMathText(runs: List<MarkdownRun>, style: TextStyle, textAlign:
                 fontStyle = if (run.emphasis) FontStyle.Italic else null,
                 fontFamily = if (run.code) mdiveTextStyle("code").fontFamily else null,
                 background = if (run.code) MaterialTheme.colorScheme.surfaceVariant else androidx.compose.ui.graphics.Color.Unspecified,
-                textDecoration = if (run.strike) TextDecoration.LineThrough else null,
-            )) { append(run.text) }
+                color = if (run.link != null) MaterialTheme.colorScheme.primary else androidx.compose.ui.graphics.Color.Unspecified,
+                textDecoration = listOfNotNull(
+                    TextDecoration.Underline.takeIf { run.link != null },
+                    TextDecoration.LineThrough.takeIf { run.strike },
+                ).takeIf { it.isNotEmpty() }?.let(TextDecoration::combine),
+            )) {
+                if (run.link != null) withLink(LinkAnnotation.Clickable(run.link, linkInteractionListener = { onLink(run.link) })) { append(run.text) }
+                else append(run.text)
+            }
         }
     }
     MDiveMathInline(text, inlines, Modifier.fillMaxWidth().testTag("math-inline"), style.copy(lineHeight = largestHeight.sp), textAlign)

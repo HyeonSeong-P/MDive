@@ -77,7 +77,7 @@ private fun RasterImage(raster: ImageRaster, bitmap: androidx.compose.ui.graphic
 
 /** Images occupy their own row while text before and after retains its original formatting. */
 @Composable
-internal fun ReaderResourceText(runs: List<MarkdownRun>, width: Dp, onMath: (String) -> Unit, images: ReaderImages, modifier: Modifier = Modifier, style: TextStyle = mdiveTextStyle("body"), align: TextAlign = TextAlign.Start) {
+internal fun ReaderResourceText(runs: List<MarkdownRun>, width: Dp, onMath: (String) -> Unit, images: ReaderImages, modifier: Modifier = Modifier, style: TextStyle = mdiveTextStyle("body"), align: TextAlign = TextAlign.Start, onLink: (String) -> Unit = {}) {
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         val groups = mutableListOf<List<MarkdownRun>>()
         var pending = mutableListOf<MarkdownRun>()
@@ -91,8 +91,12 @@ internal fun ReaderResourceText(runs: List<MarkdownRun>, width: Dp, onMath: (Str
         if (pending.isNotEmpty()) groups += pending.toList()
         groups.forEach { group ->
             val image = group.singleOrNull()?.image
-            if (image != null) ReaderImageBlock(image, images)
-            else ReaderMathText(group, width, onMath, style = style, textAlign = align)
+            if (image != null) {
+                ReaderImageBlock(image, images)
+                group.single().link?.let { destination ->
+                    MDiveMarkdownText(listOf(MDiveTextRun(destination, link = destination)), onLink = onLink, style = style)
+                }
+            } else ReaderMathText(group, width, onMath, style = style, textAlign = align, onLink = onLink)
         }
     }
 }

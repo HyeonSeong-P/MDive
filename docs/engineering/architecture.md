@@ -52,7 +52,7 @@ Gradle 모듈은 제품 앱 `app`, 공통 Android 라이브러리 `designsystem`
 
 ## Markdown 뷰어 경계
 
-파일 선택, 홈·읽기, 로컬 이미지 폴더 연결, 링크 처리와 수식·Mermaid를 포함한 표시 범위의 제품 방향은 [제품 문서](../product/overview.md)에서 관리한다. 책갈피와 즐겨찾기는 기기 내 영속 보관한다. 기본 파싱·DS 렌더링은 아래 S03 경계를 따른다. 수식은 아래 S06, Mermaid는 S07, 이미지는 S08+S09 경계를 따른다. 후속 렌더 엔진·홈/도구 영속화 기술과 확장 문법의 세부 호환 범위는 해당 단계에서 결정한다. Room·DataStore 등의 선택은 구현 단계에서 검토하며 이 문서에서 선행 확정하지 않는다. 화면 이동 라이브러리는 Navigation 3로 정했으며 세부 목적지·백스택 구성은 확정된 화면 흐름에 맞춰 정한다.
+파일 선택, 홈·읽기, 로컬 이미지 폴더 연결, 링크 처리와 수식·Mermaid를 포함한 표시 범위의 제품 방향은 [제품 문서](../product/overview.md)에서 관리한다. 책갈피와 즐겨찾기는 기기 내 영속 보관한다. 기본 파싱·DS 렌더링은 아래 S03 경계를 따른다. 수식은 아래 S06, Mermaid는 S07, 이미지는 S08+S09, 기본 링크는 S10 경계를 따른다. 후속 렌더 엔진·홈/도구 영속화 기술과 확장 문법의 세부 호환 범위는 해당 단계에서 결정한다. Room·DataStore 등의 선택은 구현 단계에서 검토하며 이 문서에서 선행 확정하지 않는다. 화면 이동 라이브러리는 Navigation 3로 정했으며 세부 목적지·백스택 구성은 확정된 화면 흐름에 맞춰 정한다.
 
 ## 근거 자료
 
@@ -164,3 +164,14 @@ WebView는 뷰 수명주기를 필요로 하므로 `ui/reader/MermaidWebView`의
 이미지 확대는 Reader 내부 Dialog 오버레이다. Navigation key나 문서 재읽기를 추가하지 않고 본문 LazyColumn을 유지한다. 핀치·팬·배율은 오버레이의 UI 로컬 상태이며 그림/실패/스켈레톤의 공통 외형과 접근성 액션은 DS가 소유한다. DS는 파일·권한·네트워크·도메인 규칙을 알지 못한다.
 
 근거: [Android SAF와 tree 제한](https://developer.android.com/training/data-storage/shared/documents-files), [BitmapFactory](https://developer.android.com/reference/android/graphics/BitmapFactory), [Coil 3.3.0](https://github.com/coil-kt/coil/tree/3.3.0), [AndroidSVG 공식 지원 범위](https://bigbadaboom.github.io/androidsvg/), [OkHttp 4.12 요구사항·라이선스](https://github.com/square/okhttp/tree/parent-4.12.0), [OkHttp TLS 테스트](https://github.com/square/okhttp/blob/parent-4.12.0/okhttp-tls/README.md). 실제 검증·미검증은 구현 계획의 현재 인계를 따른다.
+
+
+## S10 기본 링크·SAF 상대 문서 경계
+
+제품의 허용 대상과 실패·취소·복귀는 [S10 링크 프로필](../product/document-viewing.md#s10-기본-링크-프로필--확정)이 소유한다. CommonMark 링크 AST는 data에서 앱 소유 `MarkdownRun.link` 목적지로 바꾼다. UI는 목적지 Intent를 전달하고 링크의 공통 외형은 DS에 조합한다. 이미지를 감싼 링크도 이미지 탭 확대를 유지하고 별도 목적지 행동으로 연결한다. 파서 AST·Android URI·provider 타입은 domain·DS에 노출하지 않는다.
+
+`DocumentLinkRepository`는 불투명 문서 참조·목적지 문자열과 웹/준비된 문서 참조/실패 결과만 노출한다. `ContentDocumentLinkRepository`가 IO에서 strict UTF-8 percent decoding 한 번, 현재 문서 디렉터리 기준 경로 정규화, SAF tree 경계와 실제 child 조회를 처리한다. provider의 opaque document ID를 파일 경로로 분해하지 않는다. 이름으로 탐색해 얻은 트리 내 디렉터리는 문서별 최소 연결 정보로 보존한다. 단일 파일 선택 권한은 부모·형제 권한으로 추론하지 않는다.
+
+S08의 문서별 `image-folders` 연결과 영속 읽기 grant를 공유하며 상대 대상 문서에는 같은 허용 트리와 탐색한 대상 디렉터리를 연결한다. 이미지는 기존 하위 상대 경로 정책을 유지하면서 대상 문서 디렉터리 아래에서 읽는다. 이미지와 문서 링크의 `../` 허용 정책은 서로 다르므로 링크 정규화를 이미지 입력 허용으로 확대하지 않는다. Coil 메모리/웹 디스크 캐시의 예산·정책은 유지하며 기존 웹·루트 문서의 Coil 키는 유지하고 중첩 대상 문서의 로컬 표시 키에만 실제 기준 디렉터리를 추가해 다른 기준의 픽셀이 재사용되지 않게 한다. 한 번의 이미지 읽기에서는 tree·연결 세대·디렉터리를 같은 연결 snapshot에서 읽는다. 홈 최근/즐겨찾기 저장소는 추가하지 않는다.
+
+외부 브라우저 실행은 UI 플랫폼 어댑터가 담당한다. 브라우저 앱 후보를 조회한 뒤 해당 패키지로 제한한 HTTP/HTTPS `ACTION_VIEW`를 실행해 검증된 앱 딥링크로 전환되지 않게 한다. 후보가 여럿이면 브라우저 후보만 선택하게 하며 실행 실패는 현재 Reader의 Intent/State로 돌려준다. 필요한 패키지 가시성 queries만 manifest에 선언한다. 별도 WebView·네트워크 로더·새 라이브러리는 추가하지 않는다. Navigation의 방문 key·준비 결과·세션 복귀는 [내비게이션 문서](navigation.md#s10-링크상대-문서-이동-경계)를 따른다.

@@ -27,7 +27,7 @@ class CommonMarkParserTest {
         val source = "😀 [**이름**](https://example.com \"제목\") ![그림](a.png) <https://example.org>\r\n다음\n\n```kotlin\r\n a < b\r\n```\n\n<div>\r\n **실행 안 함**\r\n</div>\n\n끝"
         val blocks = parse(source)
         val text = (blocks[0] as MarkdownBlock.Paragraph).runs.joinToString("") { it.text }
-        assertEquals("😀 [**이름**](https://example.com \"제목\") ![그림](a.png) <https://example.org>\n다음", text)
+        assertEquals("😀 이름 ![그림](a.png) https://example.org\n다음", text)
         assertEquals(" a < b\r\n", (blocks[1] as MarkdownBlock.Code).source)
         assertEquals("<div>\r\n **실행 안 함**\r\n</div>", (blocks[2] as MarkdownBlock.Source).source)
         assertEquals("끝", (blocks[3] as MarkdownBlock.Paragraph).runs.single().text)
@@ -48,16 +48,16 @@ class CommonMarkParserTest {
     @Test fun multilineUnsupportedLinkWithinQuotePreservesSourceAndSurroundings() {
         val blocks = parse("> 앞 [링크\r\n> 다음](a.md) 뒤\n\n[ref]: a.md\n\n[참조][ref]")
         val quote = (blocks[0] as MarkdownBlock.Quote).blocks.single() as MarkdownBlock.Paragraph
-        assertEquals("앞 [링크\r\n> 다음](a.md) 뒤", quote.runs.joinToString("") { it.text })
-        assertEquals("[ref]: a.md", (blocks[1] as MarkdownBlock.Source).source)
-        assertEquals("[참조][ref]", (blocks[2] as MarkdownBlock.Paragraph).runs.single().text)
+        assertEquals("앞 링크\n다음 뒤", quote.runs.joinToString("") { it.text })
+        assertEquals("a.md", quote.runs.first { it.text == "링크" }.link)
+        assertEquals(MarkdownRun("참조", link = "a.md"), (blocks[1] as MarkdownBlock.Paragraph).runs.single())
     }
-    @Test fun definitionsOnlyNestedDefinitionsAndWhitespaceDoNotDisappear() {
+    @Test fun referenceDeclarationsAreHiddenWhileIncompleteAndFootnoteSourceRemainReadable() {
         assertEquals(emptyList<MarkdownBlock>(), parse(" \r\n\t"))
-        assertEquals(listOf(MarkdownBlock.Source("[a]: /a"), MarkdownBlock.Source("[b]: /b")), parse("[a]: /a\n[b]: /b"))
+        assertEquals(emptyList<MarkdownBlock>(), parse("[a]: /a\n[b]: /b"))
+        assertEquals(listOf(MarkdownBlock.Source("[^foot]: 원문")), parse("[^foot]: 원문"))
         val quoted = (parse("> [a]: /a\n>\n> 본문").single() as MarkdownBlock.Quote).blocks
-        assertEquals(MarkdownBlock.Source("[a]: /a"), quoted[0])
-        assertEquals(MarkdownBlock.Paragraph(listOf(MarkdownRun("본문"))), quoted[1])
+        assertEquals(listOf(MarkdownBlock.Paragraph(listOf(MarkdownRun("본문")))), quoted)
         val mixed = parse("[a]: /a \"열리지 않음\n\n뒤 본문")
         assertEquals("뒤 본문", (mixed.last() as MarkdownBlock.Paragraph).runs.single().text)
     }

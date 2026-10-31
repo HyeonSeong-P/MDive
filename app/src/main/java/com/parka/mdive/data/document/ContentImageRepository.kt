@@ -38,7 +38,7 @@ class ContentImageRepository @Inject constructor(@ApplicationContext private val
             resolver.takePersistableUriPermission(tree, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             // Preserve the previous successful mapping if persistence cannot complete.
             ensureActive()
-            if (!connections.edit().putString(sha256(document.value), tree.toString()).putLong("generation:" + sha256(document.value), connections.getLong("generation:" + sha256(document.value), 0) + 1).commit()) return@withContext ImageFailure.Access
+            if (!connections.edit().putString(sha256(document.value), tree.toString()).remove("directory:" + sha256(document.value)).putLong("generation:" + sha256(document.value), connections.getLong("generation:" + sha256(document.value), 0) + 1).commit()) return@withContext ImageFailure.Access
             null
         } catch (cancelled: CancellationException) { throw cancelled }
         catch (_: Exception) { ImageFailure.Access }
@@ -49,13 +49,19 @@ class ContentImageRepository @Inject constructor(@ApplicationContext private val
             ensureActive()
             val isWeb = destination.startsWith("https:", true)
             val segments = if (isWeb) emptyList() else imageSegments(destination)
-            val tree = if (isWeb) null else connections.getString(sha256(document.value), null)?.let(Uri::parse) ?: throw ImageProblem(ImageFailure.FolderRequired)
-            val key = sha256("coil-static-v1|${document.value}|$documentVersion|${tree?.toString().orEmpty()}|${if (isWeb) 0 else connections.getLong("generation:" + sha256(document.value), 0)}|$destination")
+            val connection = connections.all
+            val documentKey = sha256(document.value)
+            val directory = (connection["directory:$documentKey"] as? String).orEmpty()
+            val generation = connection["generation:$documentKey"] as? Long ?: 0L
+            val tree = if (isWeb) null else (connection[documentKey] as? String)?.let(Uri::parse) ?: throw ImageProblem(ImageFailure.FolderRequired)
+            val directoryKey = if (!isWeb && directory.isNotEmpty()) "|directory:$directory" else ""
+            val key = sha256("coil-static-v1|${document.value}|$documentVersion|${tree?.toString().orEmpty()}|${if (isWeb) 0 else generation}|$destination$directoryKey")
             val raster = decoder.load(key, isWeb, bypassCache) {
                 if (isWeb) web.fetch(destination) else {
                 requireNotNull(tree)
                 var id = DocumentsContract.getTreeDocumentId(tree)
-                segments.forEachIndexed { index, segment ->
+                val imagePath = directory.split('/').filter { it.isNotEmpty() } + segments
+                imagePath.forEachIndexed { index, segment ->
                     ensureActive()
                     val children = DocumentsContract.buildChildDocumentsUriUsingTree(tree, id)
                     var found: Pair<String, String>? = null
@@ -68,8 +74,8 @@ class ContentImageRepository @Inject constructor(@ApplicationContext private val
                         }
                     } ?: throw ImageProblem(ImageFailure.Access)
                     val child = found ?: throw ImageProblem(ImageFailure.Missing)
-                    if (index < segments.lastIndex && child.second != DocumentsContract.Document.MIME_TYPE_DIR) throw ImageProblem(ImageFailure.Missing)
-                    if (index == segments.lastIndex && child.second == DocumentsContract.Document.MIME_TYPE_DIR) throw ImageProblem(ImageFailure.Missing)
+                    if (index < imagePath.lastIndex && child.second != DocumentsContract.Document.MIME_TYPE_DIR) throw ImageProblem(ImageFailure.Missing)
+                    if (index == imagePath.lastIndex && child.second == DocumentsContract.Document.MIME_TYPE_DIR) throw ImageProblem(ImageFailure.Missing)
                     id = child.first
                 }
                 val uri = DocumentsContract.buildDocumentUriUsingTree(tree, id)

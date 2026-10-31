@@ -47,19 +47,30 @@ fun ReaderRoute(
     onNavigateHome: () -> Unit,
     reference: DocumentReference,
     viewModel: ReaderViewModel = hiltViewModel(),
+    prepared: PreparedDocument? = null,
+    onNavigateDocument: (DocumentReference, PreparedDocument) -> Unit = { _, _ -> },
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val documentFolderPicker = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree()) { uri -> viewModel.onIntent(ReaderIntent.DocumentFolderSelected(uri?.toString())) }
     val folderPicker = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree()) { uri -> viewModel.onIntent(ReaderIntent.ImageFolderSelected(uri?.toString())) }
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
     var feedback by remember { mutableStateOf<Pair<Long, String>?>(null) }
     LaunchedEffect(feedback) { if (feedback != null) { delay(3000); feedback = null } }
-    LaunchedEffect(reference) { viewModel.onIntent(ReaderIntent.Open(reference)) }
+    LaunchedEffect(reference) { viewModel.onIntent(ReaderIntent.Open(reference, prepared)) }
+    androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
+        viewModel.onIntent(ReaderIntent.LinkReturned)
+        onPauseOrDispose { }
+    }
     BackHandler { viewModel.onIntent(ReaderIntent.Back) }
     CollectEffects(viewModel.effects) { effect ->
         when (effect) {
             ReaderEffect.NavigateHome -> onNavigateHome()
             ReaderEffect.SelectImageFolder -> folderPicker.launch(null)
+            ReaderEffect.SelectDocumentFolder -> documentFolderPicker.launch(null)
+            is ReaderEffect.NavigateDocument -> onNavigateDocument(effect.reference, effect.prepared)
+            is ReaderEffect.OpenBrowser -> if (!openBrowser(context, effect.destination)) viewModel.onIntent(ReaderIntent.BrowserFailed)
             is ReaderEffect.CopyCode -> scope.launch {
                 val message = copyCodeWithFeedback(Build.VERSION.SDK_INT, effect.source) {
                     clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("코드", it)))
@@ -85,6 +96,9 @@ fun ReaderRoute(
             onConnectImageFolder = { viewModel.onIntent(ReaderIntent.ConnectImageFolder) },
             onExpandImage = { image, raster -> viewModel.onIntent(ReaderIntent.ExpandImage(image, raster)) },
             onCloseImage = { viewModel.onIntent(ReaderIntent.CloseImage) },
+            onLink = { viewModel.onIntent(ReaderIntent.OpenLink(it)) },
+            onConnectDocumentFolder = { viewModel.onIntent(ReaderIntent.ConnectDocumentFolder) },
+            onDismissLinkFailure = { viewModel.onIntent(ReaderIntent.DismissLinkFailure) },
         )
         feedback?.let { (_, message) -> MDiveToast(message, Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(16.dp),
             icon = if (message == COPY_FAILED) "warning" else "check") }
@@ -110,6 +124,9 @@ fun ReaderScreen(
     onConnectImageFolder: () -> Unit = {},
     onExpandImage: (com.parka.mdive.domain.document.MarkdownImage, com.parka.mdive.domain.document.ImageRaster) -> Unit = { _, _ -> },
     onCloseImage: () -> Unit = {},
+    onLink: (String) -> Unit = {},
+    onConnectDocumentFolder: () -> Unit = {},
+    onDismissLinkFailure: () -> Unit = {},
 ) {
     val images = ReaderImages(state.images, state.imageGeneration, onLoadImage, onImageVisible, onConnectImageFolder, onExpandImage)
     state.expandedImage?.let { ImageExpanded(it, images, state.expandedImageRaster, onCloseImage) }
@@ -126,16 +143,23 @@ fun ReaderScreen(
             MDiveTopBar(
                 title = state.title ?: "문서",
                 navigationIcon = "back",
-                navigationDescription = "홈으로 돌아가기",
+                navigationDescription = "이전 화면으로 돌아가기",
                 onNavigationClick = onBack,
             )
             (state.images["__folder_failure"] as? com.parka.mdive.domain.document.ImageReadResult.Failure)?.let {
                 com.parka.mdive.designsystem.MDiveRecoveryBanner("폴더를 연결하지 못했어요", it.reason.description(), Modifier.padding(horizontal = 16.dp, vertical = 8.dp), error = true,
                     action = { MDiveButton("이미지 폴더 연결", onConnectImageFolder, variant = MDiveButtonVariant.Outlined, size = com.parka.mdive.designsystem.MDiveButtonSize.S) })
             }
+            if (state.linkLoading) com.parka.mdive.designsystem.MDiveRecoveryBanner("연결된 문서를 여는 중이에요", "뒤로를 누르면 이동을 취소해요.", Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+            state.linkFailure?.let { failure ->
+                com.parka.mdive.designsystem.MDiveRecoveryBanner("링크를 열지 못했어요", "${failure.description()}\n${state.linkDestination.orEmpty()}", Modifier.padding(horizontal = 16.dp, vertical = 8.dp), error = true, action = {
+                    if (failure in setOf(com.parka.mdive.domain.document.LinkFailure.FolderRequired, com.parka.mdive.domain.document.LinkFailure.Access, com.parka.mdive.domain.document.LinkFailure.Missing)) MDiveButton("문서 폴더 연결", onConnectDocumentFolder, variant = MDiveButtonVariant.Outlined, size = com.parka.mdive.designsystem.MDiveButtonSize.S)
+                    MDiveButton("닫기", onDismissLinkFailure, variant = MDiveButtonVariant.Quiet, size = com.parka.mdive.designsystem.MDiveButtonSize.S)
+                })
+            }
             if (state.content == ReaderContent.Loading) ReaderLoadingContent(Modifier.weight(1f))
             else if (state.content == ReaderContent.SourceReady && sourcePreview == null) {
-                state.markdown?.let { ReaderMarkdownContent(it, Modifier.weight(1f), onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images) }
+                state.markdown?.let { ReaderMarkdownContent(it, Modifier.weight(1f), onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink = onLink) }
             } else CenteredScrollableState(Modifier.weight(1f)) {
                 when (state.content) {
                     ReaderContent.Loading -> Unit
@@ -200,4 +224,15 @@ internal suspend fun copyCodeWithFeedback(apiLevel: Int, source: String, write: 
     throw cancelled
 } catch (_: Exception) {
     COPY_FAILED
+}
+
+internal fun com.parka.mdive.domain.document.LinkFailure.description(): String = when (this) {
+    com.parka.mdive.domain.document.LinkFailure.BrowserUnavailable -> "브라우저를 실행하지 못했어요. 설치된 브라우저를 확인해주세요."
+    com.parka.mdive.domain.document.LinkFailure.Fragment -> "문서 안 제목으로 이동하는 링크는 아직 지원하지 않아요."
+    com.parka.mdive.domain.document.LinkFailure.OutsideFolder -> "허용된 폴더 밖 경로나 절대 경로는 열 수 없어요."
+    com.parka.mdive.domain.document.LinkFailure.FolderRequired -> "상대 문서를 열려면 현재 문서가 있는 폴더를 연결해주세요."
+    com.parka.mdive.domain.document.LinkFailure.Access -> "폴더 접근 권한을 확인하고 다시 연결해주세요."
+    com.parka.mdive.domain.document.LinkFailure.Missing -> "연결된 폴더에서 문서를 찾지 못했어요."
+    com.parka.mdive.domain.document.LinkFailure.Read -> "문서를 읽을 수 없어요. 파일 형식·인코딩·크기를 확인해주세요."
+    com.parka.mdive.domain.document.LinkFailure.Unsupported -> "HTTP·HTTPS 브라우저 링크와 상대 md·markdown 문서만 열 수 있어요."
 }
