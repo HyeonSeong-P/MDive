@@ -76,7 +76,8 @@ class GfmParserTest {
         assertTrue(paragraph.runs.any { it.text == "굵게" && it.strong && it.strike })
         assertTrue(paragraph.runs.any { it.text == "강조" && it.emphasis && it.strike })
         val plain = paragraph.runs.filterNot { it.strike }.text()
-        assertTrue(plain.contains("~단일~ ~~~세개~~~ ~~미완성"))
+        assertTrue(paragraph.runs.any { it.text == "단일" && it.strike })
+        assertTrue(plain.contains("~~~세개~~~ ~~미완성"))
         assertEquals("~~불일치~", (parse("~~불일치~").single() as MarkdownBlock.Paragraph).runs.text())
     }
 

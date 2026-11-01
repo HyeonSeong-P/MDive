@@ -12,10 +12,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.*
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.*
 import androidx.compose.material3.MaterialTheme
 import com.parka.mdive.designsystem.*
@@ -75,17 +72,7 @@ private fun InlineMathText(runs: List<MarkdownRun>, style: TextStyle, textAlign:
                     MathImage(raster, style, Modifier, includeDepthInLayout = false)
                 }
                 appendInlineContent(id, "수식: ${math.tex}")
-            } else withStyle(SpanStyle(
-                fontWeight = if (run.strong) FontWeight.SemiBold else null,
-                fontStyle = if (run.emphasis) FontStyle.Italic else null,
-                fontFamily = if (run.code) mdiveTextStyle("code").fontFamily else null,
-                background = if (run.code) MaterialTheme.colorScheme.surfaceVariant else androidx.compose.ui.graphics.Color.Unspecified,
-                color = if (run.link != null) MaterialTheme.colorScheme.primary else androidx.compose.ui.graphics.Color.Unspecified,
-                textDecoration = listOfNotNull(
-                    TextDecoration.Underline.takeIf { run.link != null },
-                    TextDecoration.LineThrough.takeIf { run.strike },
-                ).takeIf { it.isNotEmpty() }?.let(TextDecoration::combine),
-            )) {
+            } else withStyle(mdiveMarkdownSpanStyle(run.presentation())) {
                 if (run.link != null) withLink(LinkAnnotation.Clickable(run.link, linkInteractionListener = { onLink(run.link) })) { append(run.text) }
                 else append(run.text)
             }

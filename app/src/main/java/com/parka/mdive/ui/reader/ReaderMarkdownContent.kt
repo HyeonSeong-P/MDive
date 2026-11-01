@@ -24,9 +24,16 @@ import com.parka.mdive.domain.document.MarkdownBlock
 import com.parka.mdive.domain.document.MarkdownDocument
 import com.parka.mdive.domain.document.MarkdownRun
 import com.parka.mdive.domain.document.MarkdownMermaid
+import com.parka.mdive.domain.document.MarkdownCalloutKind
+
+/** Expansion is owned by the Reader visit; this adapter carries controlled values/events. */
+internal class ReaderDetails(
+    val expanded: Map<String, Boolean> = emptyMap(),
+    val onExpandedChange: (String, Boolean) -> Unit = { _, _ -> },
+)
 
 @Composable
-internal fun ReaderMarkdownContent(document: MarkdownDocument, modifier: Modifier = Modifier, onCopyCode: (String) -> Unit = {}, onViewMathSource: (String) -> Unit = {}, onViewMermaidSource: (String) -> Unit = {}, onExpandMermaid: (MarkdownMermaid) -> Unit = {}, mermaidCache: MermaidSessionCache = remember(document) { MermaidSessionCache() }, images: ReaderImages = ReaderImages(), onLink: (String) -> Unit = {}) {
+internal fun ReaderMarkdownContent(document: MarkdownDocument, modifier: Modifier = Modifier, onCopyCode: (String) -> Unit = {}, onViewMathSource: (String) -> Unit = {}, onViewMermaidSource: (String) -> Unit = {}, onExpandMermaid: (MarkdownMermaid) -> Unit = {}, mermaidCache: MermaidSessionCache = remember(document) { MermaidSessionCache() }, images: ReaderImages = ReaderImages(), onLink: (String) -> Unit = {}, details: ReaderDetails = ReaderDetails()) {
     // Measure once outside quote's intrinsic layout; nested blocks receive the remaining width.
     BoxWithConstraints(modifier.fillMaxWidth()) {
         val contentWidth = (maxWidth - 32.dp).coerceAtLeast(0.dp)
@@ -34,7 +41,7 @@ internal fun ReaderMarkdownContent(document: MarkdownDocument, modifier: Modifie
             items(document.blocks.size) { index ->
                 val block = document.blocks[index]
                 Column(Modifier.fillMaxWidth().padding(top = spaceBefore(document.blocks, index))) {
-                    Block(block, contentWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink)
+                    Block(block, contentWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink, details)
                 }
             }
         }
@@ -46,14 +53,14 @@ private fun spaceBefore(blocks: List<MarkdownBlock>, index: Int): Dp =
     else if (blocks[index - 1] is MarkdownBlock.Heading) 8.dp else 16.dp
 
 @Composable
-private fun Blocks(blocks: List<MarkdownBlock>, availableWidth: Dp, onCopyCode: (String) -> Unit, onViewMathSource: (String) -> Unit, onViewMermaidSource: (String) -> Unit, onExpandMermaid: (MarkdownMermaid) -> Unit, mermaidCache: MermaidSessionCache, images: ReaderImages, onLink: (String) -> Unit) {
+private fun Blocks(blocks: List<MarkdownBlock>, availableWidth: Dp, onCopyCode: (String) -> Unit, onViewMathSource: (String) -> Unit, onViewMermaidSource: (String) -> Unit, onExpandMermaid: (MarkdownMermaid) -> Unit, mermaidCache: MermaidSessionCache, images: ReaderImages, onLink: (String) -> Unit, details: ReaderDetails) {
     blocks.forEachIndexed { index, block ->
-        Column(Modifier.fillMaxWidth().padding(top = spaceBefore(blocks, index))) { Block(block, availableWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink) }
+        Column(Modifier.fillMaxWidth().padding(top = spaceBefore(blocks, index))) { Block(block, availableWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink, details) }
     }
 }
 
 @Composable
-private fun Block(block: MarkdownBlock, availableWidth: Dp, onCopyCode: (String) -> Unit, onViewMathSource: (String) -> Unit, onViewMermaidSource: (String) -> Unit, onExpandMermaid: (MarkdownMermaid) -> Unit, mermaidCache: MermaidSessionCache, images: ReaderImages, onLink: (String) -> Unit) {
+private fun Block(block: MarkdownBlock, availableWidth: Dp, onCopyCode: (String) -> Unit, onViewMathSource: (String) -> Unit, onViewMermaidSource: (String) -> Unit, onExpandMermaid: (MarkdownMermaid) -> Unit, mermaidCache: MermaidSessionCache, images: ReaderImages, onLink: (String) -> Unit, details: ReaderDetails) {
     val minimumTextWidth = 128.dp * LocalDensity.current.fontScale
     when (block) {
         is MarkdownBlock.Mermaid -> ReaderMermaidBlock(block.diagram, availableWidth, onViewMermaidSource, onExpandMermaid, mermaidCache)
@@ -82,10 +89,60 @@ private fun Block(block: MarkdownBlock, availableWidth: Dp, onCopyCode: (String)
                 ReaderResourceText(runs, 128.dp, onViewMathSource, images, modifier, mdiveTextStyle("documentTable"), when (block.columns[column].alignment) { MarkdownAlignment.Left -> TextAlign.Left; MarkdownAlignment.Center -> TextAlign.Center; MarkdownAlignment.Right -> TextAlign.Right }, onLink = onLink)
             } else null,
         )
+        is MarkdownBlock.DefinitionList -> {
+            block.entries.forEachIndexed { index, entry ->
+                Column(Modifier.fillMaxWidth().padding(top = if (index == 0) 0.dp else 16.dp)) {
+                    entry.terms.forEachIndexed { termIndex, term ->
+                        Column(Modifier.fillMaxWidth().padding(top = if (termIndex == 0) 0.dp else 8.dp)) {
+                            if (term.any { it.image != null || it.math != null }) ReaderResourceText(term.map { it.copy(strong = true) }, availableWidth, onViewMathSource, images, onLink = onLink)
+                            else MDiveDefinitionList(listOf(MDiveDefinition(term.presentation(), emptyList())), onLink = onLink)
+                        }
+                    }
+                    val inset = if (availableWidth - 16.dp >= minimumTextWidth) 16.dp else 0.dp
+                    entry.definitions.forEach { definition ->
+                        Column(Modifier.fillMaxWidth().padding(start = inset, top = 8.dp)) {
+                            Blocks(definition, availableWidth - inset, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink, details)
+                        }
+                    }
+                }
+            }
+        }
+        is MarkdownBlock.Callout -> {
+            val kind = when (block.kind) {
+                MarkdownCalloutKind.Note -> MDiveCalloutKind.Note
+                MarkdownCalloutKind.Tip -> MDiveCalloutKind.Tip
+                MarkdownCalloutKind.Important -> MDiveCalloutKind.Important
+                MarkdownCalloutKind.Warning -> MDiveCalloutKind.Warning
+                MarkdownCalloutKind.Caution -> MDiveCalloutKind.Caution
+            }
+            val title = if (block.title.equals(kind.name, ignoreCase = true)) block.title else "${kind.name} · ${block.title}"
+            if (availableWidth - 32.dp < minimumTextWidth) {
+                MDiveMarkdownText(listOf(MDiveTextRun(title, strong = true)))
+                Blocks(block.blocks, availableWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink, details)
+            } else MDiveMarkdownCallout(title, Modifier.testTag("markdown-callout"), kind) {
+                Blocks(block.blocks, availableWidth - 32.dp, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink, details)
+            }
+        }
+        is MarkdownBlock.Details -> {
+            val expanded = details.expanded[block.id] ?: block.initiallyOpen
+            val summary = block.summary.joinToString("") { it.text }.ifBlank { "자세히 보기" }
+            val inset = if (availableWidth - 16.dp >= minimumTextWidth) 16.dp else 0.dp
+            MDiveMarkdownDetails(summary, expanded, { details.onExpandedChange(block.id, it) },
+                Modifier.testTag("markdown-details-${block.id}"), summaryContent = {
+                    if (block.summary.all { it.text.isBlank() }) MDiveMarkdownText(listOf(MDiveTextRun(summary, strong = true)))
+                    else if (block.summary.any { it.image != null || it.math != null }) ReaderResourceText(block.summary,
+                        (availableWidth - 56.dp).coerceAtLeast(0.dp), onViewMathSource, images, style = mdiveTextStyle("uiTitle"), onLink = onLink)
+                    else MDiveMarkdownText(block.summary.presentation(), style = mdiveTextStyle("uiTitle"), onLink = onLink)
+                }, contentIndent = inset) {
+                // The DS only invokes this slot while expanded: hidden children never enter
+                // composition, resource effects, focus traversal, or the accessibility tree.
+                Blocks(block.blocks, availableWidth - inset, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink, details)
+            }
+        }
         is MarkdownBlock.Quote -> {
             val inset = 19.dp // DS quote rail 3dp + documentInset 16dp.
-            if (availableWidth - inset < minimumTextWidth) Blocks(block.blocks, availableWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink)
-            else MDiveMarkdownQuote { Blocks(block.blocks, availableWidth - inset, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink) }
+            if (availableWidth - inset < minimumTextWidth) Blocks(block.blocks, availableWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink, details)
+            else MDiveMarkdownQuote { Blocks(block.blocks, availableWidth - inset, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink, details) }
         }
         is MarkdownBlock.ListBlock -> {
             val measurer = rememberTextMeasurer()
@@ -105,9 +162,9 @@ private fun Block(block: MarkdownBlock, availableWidth: Dp, onCopyCode: (String)
                     if (flatten) {
                         if (task != null) MDiveCheckbox(task, onCheckedChange = null)
                         else MDiveMarkdownText(listOf(MDiveTextRun(block.start?.let { "${it + index}." } ?: "•")))
-                        Blocks(item, availableWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink)
+                        Blocks(item, availableWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink, details)
                     } else MDiveMarkdownListItem(marker) {
-                        Blocks(item, availableWidth - markerWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink)
+                        Blocks(item, availableWidth - markerWidth, onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink, details)
                     }
                 }
             }
@@ -115,6 +172,9 @@ private fun Block(block: MarkdownBlock, availableWidth: Dp, onCopyCode: (String)
     }
 }
 
-private fun List<MarkdownRun>.presentation() = map {
-    MDiveTextRun(it.text, emphasis = it.emphasis, strong = it.strong, code = it.code, strike = it.strike, link = it.link)
-}
+internal fun List<MarkdownRun>.presentation() = map { it.presentation() }
+
+internal fun MarkdownRun.presentation() = MDiveTextRun(text, emphasis = emphasis, strong = strong, code = code,
+    strike = strike, link = link, mark = highlight,
+    baseline = when { subscript -> MDiveTextBaseline.Subscript; superscript -> MDiveTextBaseline.Superscript; else -> MDiveTextBaseline.Normal },
+    inserted = inserted, underline = underline)

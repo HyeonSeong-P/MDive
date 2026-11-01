@@ -38,6 +38,12 @@ internal fun MarkdownExtensionCatalog(state: String) {
             "details" -> {
                 var expanded by remember { mutableStateOf(false) }
                 MDiveMarkdownDetails("추가 설명", expanded, { expanded = it; event = "펼침: $it" }, summaryContent = { MDiveMarkdownText(listOf(MDiveTextRun("추가 설명 · ", strong = true), MDiveTextRun("누르면 펼칩니다"))) }) { MDiveMarkdownText(note); MDiveCodeBlock(CatalogSamples.code) }
+                var initiallyExpanded by remember { mutableStateOf(true) }
+                var nestedExpanded by remember { mutableStateOf(true) }
+                MDiveMarkdownDetails("처음부터 펼친 예시", initiallyExpanded, { initiallyExpanded = it }) {
+                    MDiveMarkdownText(note)
+                    MDiveMarkdownDetails("들여쓰기를 줄인 중첩 예시", nestedExpanded, { nestedExpanded = it }, contentIndent = 0.dp) { MDiveMarkdownText(note) }
+                }
             }
             "metadata" -> MDiveMarkdownMetadata(CatalogSamples.extensionMetadata.map { MDiveMetadataField(it[0], listOf(MDiveTextRun(it[1]))) })
             "toc" -> MDiveMarkdownToc(CatalogSamples.extensionTocTargets.map { MDiveTocEntry(MDiveDocumentReference(it[0], it[1]), it[2].toInt()) }, navigate)

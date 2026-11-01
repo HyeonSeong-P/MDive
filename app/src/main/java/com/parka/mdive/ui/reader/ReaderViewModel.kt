@@ -48,9 +48,11 @@ data class ReaderState(
     val linkDestination: String? = null,
     val linkLoading: Boolean = false,
     val linkFolderPending: Boolean = false,
+    val detailsExpanded: Map<String, Boolean> = emptyMap(),
 ) : UiState
 
 sealed interface ReaderIntent : UiIntent {
+    data class SetDetailsExpanded(val id: String, val expanded: Boolean) : ReaderIntent
     data class Open(val reference: DocumentReference, val prepared: PreparedDocument? = null) : ReaderIntent
     data class OpenLink(val destination: String) : ReaderIntent
     data object ConnectDocumentFolder : ReaderIntent
@@ -106,6 +108,9 @@ class ReaderViewModel @Inject constructor(
 
     override fun onIntent(intent: ReaderIntent) {
         when (intent) {
+            is ReaderIntent.SetDetailsExpanded -> if (!leaving && uiState.value.content == ReaderContent.SourceReady && uiState.value.markdown?.containsDetails(intent.id) == true) {
+                reduce { copy(detailsExpanded = detailsExpanded + (intent.id to intent.expanded)) }
+            }
             is ReaderIntent.OpenLink -> if (!leaving && !uiState.value.folderPickerPending && !navigationPending && !uiState.value.linkLoading && !uiState.value.linkFolderPending && uiState.value.content == ReaderContent.SourceReady) openLink(intent.destination)
             ReaderIntent.LinkReturned -> { navigationPending = false }
             ReaderIntent.BrowserFailed -> { navigationPending = false; reduce { copy(linkFailure = LinkFailure.BrowserUnavailable) } }
@@ -127,7 +132,11 @@ class ReaderViewModel @Inject constructor(
                     loadImage(intent.image, false)
                 } else {
                     val count = (visibleImages[key] ?: 1) - 1
-                    if (count <= 0) { visibleImages.remove(key); reduce { copy(images = images - key) } }
+                    if (count <= 0) {
+                        visibleImages.remove(key)
+                        imageJobs.remove(key)?.cancel()
+                        reduce { copy(images = images - key) }
+                    }
                     else visibleImages[key] = count
                 }
             }
@@ -281,4 +290,19 @@ class ReaderViewModel @Inject constructor(
             }
         }
     }
+}
+
+/** IDs come from the parsed document, never from an arbitrary expansion event. */
+private fun MarkdownDocument.containsDetails(id: String): Boolean {
+    fun contains(blocks: List<com.parka.mdive.domain.document.MarkdownBlock>): Boolean = blocks.any { block ->
+        when (block) {
+            is com.parka.mdive.domain.document.MarkdownBlock.Details -> block.id == id || contains(block.blocks)
+            is com.parka.mdive.domain.document.MarkdownBlock.Callout -> contains(block.blocks)
+            is com.parka.mdive.domain.document.MarkdownBlock.DefinitionList -> block.entries.any { entry -> entry.definitions.any(::contains) }
+            is com.parka.mdive.domain.document.MarkdownBlock.Quote -> contains(block.blocks)
+            is com.parka.mdive.domain.document.MarkdownBlock.ListBlock -> block.items.any(::contains)
+            else -> false
+        }
+    }
+    return contains(blocks)
 }

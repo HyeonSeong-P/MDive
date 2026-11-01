@@ -42,23 +42,29 @@ data class MDiveTextRun(
 
 enum class MDiveTextBaseline { Normal, Subscript, Superscript }
 
+/** The same document style is shared by text and host-provided inline resource adapters. */
+@Composable
+fun mdiveMarkdownSpanStyle(run: MDiveTextRun): SpanStyle {
+    val decoration = buildList {
+        if (run.strike) add(TextDecoration.LineThrough)
+        if (run.link != null || run.underline || run.inserted) add(TextDecoration.Underline)
+    }
+    return SpanStyle(
+        fontWeight = if (run.strong) FontWeight.SemiBold else null,
+        fontStyle = if (run.emphasis) FontStyle.Italic else null,
+        fontFamily = if (run.code) mdiveTextStyle("code").fontFamily else null,
+        background = when { run.mark -> LocalOceanColors.current.getValue("documentMarkBackground"); run.code || run.highlighted -> MaterialTheme.colorScheme.surfaceVariant; else -> androidx.compose.ui.graphics.Color.Unspecified },
+        baselineShift = when (run.baseline) { MDiveTextBaseline.Normal -> null; MDiveTextBaseline.Subscript -> androidx.compose.ui.text.style.BaselineShift.Subscript; MDiveTextBaseline.Superscript -> androidx.compose.ui.text.style.BaselineShift.Superscript },
+        fontSize = if (run.baseline != MDiveTextBaseline.Normal) .75f.em else androidx.compose.ui.unit.TextUnit.Unspecified,
+        color = when { run.link != null -> MaterialTheme.colorScheme.primary; run.mark -> LocalOceanColors.current.getValue("documentMarkText"); else -> androidx.compose.ui.graphics.Color.Unspecified },
+        textDecoration = if (decoration.isEmpty()) null else TextDecoration.combine(decoration),
+    )
+}
+
 @Composable
 private fun annotatedRuns(runs: List<MDiveTextRun>, onLink: ((String) -> Unit)?): AnnotatedString = buildAnnotatedString {
     runs.forEach { run ->
-        val decoration = buildList {
-            if (run.strike) add(TextDecoration.LineThrough)
-            if (run.link != null || run.underline || run.inserted) add(TextDecoration.Underline)
-        }
-        val style = SpanStyle(
-            fontWeight = if (run.strong) FontWeight.SemiBold else null,
-            fontStyle = if (run.emphasis) FontStyle.Italic else null,
-            fontFamily = if (run.code) mdiveTextStyle("code").fontFamily else null,
-            background = when { run.mark -> LocalOceanColors.current.getValue("documentMarkBackground"); run.code || run.highlighted -> MaterialTheme.colorScheme.surfaceVariant; else -> androidx.compose.ui.graphics.Color.Unspecified },
-            baselineShift = when (run.baseline) { MDiveTextBaseline.Normal -> null; MDiveTextBaseline.Subscript -> androidx.compose.ui.text.style.BaselineShift.Subscript; MDiveTextBaseline.Superscript -> androidx.compose.ui.text.style.BaselineShift.Superscript },
-            fontSize = if (run.baseline != MDiveTextBaseline.Normal) .75f.em else androidx.compose.ui.unit.TextUnit.Unspecified,
-            color = when { run.link != null -> MaterialTheme.colorScheme.primary; run.mark -> LocalOceanColors.current.getValue("documentMarkText"); else -> androidx.compose.ui.graphics.Color.Unspecified },
-            textDecoration = if (decoration.isEmpty()) null else TextDecoration.combine(decoration),
-        )
+        val style = mdiveMarkdownSpanStyle(run)
         withStyle(style) {
             if (run.link != null && onLink != null) {
                 withLink(LinkAnnotation.Clickable(run.link, linkInteractionListener = { onLink(run.link) })) { append(run.text) }

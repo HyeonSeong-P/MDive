@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import com.parka.mdive.designsystem.generated.DesignTokens
 
 /** Resolved destinations are opaque values; the host decides how to navigate. */
@@ -70,13 +71,13 @@ fun MDiveMarkdownCallout(title: String, modifier: Modifier = Modifier, kind: MDi
 
 /** Controlled expansion: initial state, persistence and hidden-content policies belong to the host. */
 @Composable
-fun MDiveMarkdownDetails(summary: String, expanded: Boolean, onExpandedChange: (Boolean) -> Unit, modifier: Modifier = Modifier, summaryContent: @Composable () -> Unit = { Text(summary, style = mdiveTextStyle("uiTitle")) }, content: @Composable ColumnScope.() -> Unit) {
+fun MDiveMarkdownDetails(summary: String, expanded: Boolean, onExpandedChange: (Boolean) -> Unit, modifier: Modifier = Modifier, summaryContent: @Composable () -> Unit = { Text(summary, style = mdiveTextStyle("uiTitle")) }, contentIndent: Dp = DesignTokens.Spacing.getValue("documentInset"), content: @Composable ColumnScope.() -> Unit) {
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { onExpandedChange(!expanded) }.semantics { stateDescription = if (expanded) "펼쳐짐" else "접힘" }.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.fillMaxWidth().heightIn(min = DesignTokens.Sizes.getValue("touch")).clickable(role = Role.Button) { onExpandedChange(!expanded) }.semantics { stateDescription = if (expanded) "펼쳐짐" else "접힘" }.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             MDiveIcon(if (expanded) "up" else "down")
             Box(Modifier.weight(1f)) { summaryContent() }
         }
-        if (expanded) Column(Modifier.fillMaxWidth().padding(start = DesignTokens.Spacing.getValue("documentInset")), verticalArrangement = Arrangement.spacedBy(8.dp), content = content)
+        if (expanded) Column(Modifier.fillMaxWidth().padding(start = contentIndent), verticalArrangement = Arrangement.spacedBy(8.dp), content = content)
     }
 }
 

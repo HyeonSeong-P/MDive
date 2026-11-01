@@ -144,7 +144,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 .md-callout-danger{border-color:var(--calloutDanger);background:var(--calloutDangerBackground)}.md-callout-danger>div{color:var(--calloutDanger)}
 .md-details{border:0;padding:0}
 .md-details summary{font:600 var(--font-uiTitle)/var(--leading-ui) var(--family-ui),sans-serif;cursor:pointer;min-height:var(--size-touch);padding:var(--space-control);align-content:center}
-.md-details>div{padding-inline-start:var(--space-documentInset);padding-block-start:var(--space-sm)}
+.md-details>div{padding-inline-start:var(--details-indent,var(--space-documentInset));padding-block-start:var(--space-sm)}
 .md-metadata{margin:0;background:transparent;font:var(--font-ui)/var(--leading-ui) var(--family-ui),sans-serif}
 .md-metadata>div{display:block;margin-block-end:var(--space-sm)}.md-metadata dt{font-weight:600}.md-metadata dd{margin:var(--space-xs) 0 0}
 .md-flow .md-toc{position:static;display:block;background:transparent;font:inherit}.md-flow .md-toc a{display:inline;color:var(--primary);border:0;padding:0;font:inherit;text-decoration:underline}.md-flow .md-toc ol{list-style:decimal;display:block}

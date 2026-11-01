@@ -1,6 +1,6 @@
 # 파일 선택부터 문서 읽기 · 세션별 구현 계획
 
-상태: **S10 완료 / 기존 카탈로그 기기 회귀 1건 별도 잔여 / 2026-10-31**. 기본 웹·상대 Markdown 링크·실패/권한 복구·세션 내 본문 복귀의 구현·관련 검증·독립 검토·수정을 완료했다. 빌드·단위·영향 회귀와 실제 SAF 검증 결과를 아래에 기록한다. S08+S09의 Coil 캐시·SAF 권한 경계를 유지한다. S11+S12는 다음 별도 요청 범위이며 stash 원본은 보존한다.
+상태: **S11+S12 승인 프로필 완료 / typography 자동 치환 보류 / 기존 카탈로그 기기 회귀 1건 별도 잔여 / 2026-11-01**. 인라인·정의 목록·Unicode emoji·일반 callout·GitHub alerts·controlled details의 구현·관련 검증·독립 검토·수정을 완료했다. CommonMark/GitHub 합집합을 기본 목표로 유지하며 typography 자동 치환 보류와 이미지 전용 custom emoji 원문 유지는 사용자 승인 예외다. S10 링크·S08+S09 Coil 캐시·SAF 권한 경계를 유지한다. 다음 별도 요청 범위는 S14+R02다. 구현 완료 후 사용자 후속 요청으로 S11+S12 커밋·푸시·develop 대상 PR 작성을 승인받았으며 실제 게시·병합 상태는 다음 시작 시 확인한다. stash 원본은 보존한다.
 
 ## 운영 방법
 
@@ -17,13 +17,13 @@
 
 시각 조합은 [40개 화면 보드](../design/screens/index.html)와 [DS 사용 대응표](../design/screens/component-usage.md)를 참고한다. 실제 구현은 기존 `designsystem` Compose API를 사용한다. HTML/CSS를 Android 화면으로 복사하거나 버튼·배너·시트의 공통 외형을 화면에서 재작성하지 않는다. [DS 가이드](../product/design-system.md)의 4버튼 타입·S/M/L·라이트/다크 pressed·공통 배너 행동 영역·시트 기준을 따른다. 화면 전용 목차·책갈피 행과 배치는 UI가 소유한다.
 
-현재 코드는 `app`의 제품 홈·읽기 호스트와 공통 MVI 베이스, 공통 `designsystem` 라이브러리 및 별도 `designsystem/catalog` 카탈로그 앱이다. S01에서 DS·lifecycle Compose·Hilt·Navigation 3, S02에서 실제 파일 선택·제목·로더를 연결했다. S02 당시 성공 중간 안내는 S03 이후 실제 본문으로 교체했고 S09까지의 승인 프로필을 표시한다. 원문 로더 개발 테스트 호스트도 유지한다. 필요가 없는 새 모듈·렌더러 프레임워크·저장소 추상화·유즈케이스는 만들지 않는다.
+현재 코드는 `app`의 제품 홈·읽기 호스트와 공통 MVI 베이스, 공통 `designsystem` 라이브러리 및 별도 `designsystem/catalog` 카탈로그 앱이다. S01에서 DS·lifecycle Compose·Hilt·Navigation 3, S02에서 실제 파일 선택·제목·로더를 연결했다. S02 당시 성공 중간 안내는 S03 이후 실제 본문으로 교체했고 S12까지의 승인 프로필을 표시한다. 원문 로더 개발 테스트 호스트도 유지한다. 필요가 없는 새 모듈·렌더러 프레임워크·저장소 추상화·유즈케이스는 만들지 않는다.
 
 공통 기준은 [아키텍처](../engineering/architecture.md), [MVI](../engineering/mvi.md), [Navigation 3](../engineering/navigation.md)다. 사용자 후속 요청에 따라 `app`·`designsystem`·`:designsystem:catalog` 구조와 `minSdk 24`를 사용한다. 카탈로그 앱은 제품 앱에 의존하지 않고 DS 라이브러리를 참조한다. UI → domain ← data 경계를 지키고 Android URI·파일/권한 구현·특정 라이브러리의 파서 AST가 domain 계약을 침범하지 않도록 해당 기능을 도입할 때 경계를 정한다.
 
 ## 실행 묶음 · 2026-10-28 재편
 
-S01–S04 완료 후 **19개 기능 ID를 13개 실행 묶음**으로 재편한 순서를 아래에 보존한다. S10 완료 후 현재 남은 범위는 **13개 기능 ID·8개 실행 묶음**이다. 아래 순서는 기존 번호순보다 우선하며, 기능 채택 범위·미정 정책·ID별 완료 기준은 바꾸지 않는다. 다음 요청 예시는 `S11+S12만 진행해줘`다.
+S01–S04 완료 후 **19개 기능 ID를 13개 실행 묶음**으로 재편한 순서를 아래에 보존한다. S11+S12 승인 프로필 완료 후 현재 남은 범위는 **11개 기능 ID·7개 실행 묶음**이다. S11 typography 자동 치환은 사용자 결정으로 보류하며 완료 항목으로 세지 않는다. 아래 순서는 기존 번호순보다 우선하며, 기능 채택 범위·미정 정책·ID별 완료 기준은 바꾸지 않는다. 다음 요청 예시는 `S14+R02만 진행해줘`다.
 
 | 순서 | 실행 묶음 | 함께 완성할 범위·이유 | 선행·결정 게이트 |
 | --- | --- | --- | --- |
@@ -32,7 +32,7 @@ S01–S04 완료 후 **19개 기능 ID를 13개 실행 묶음**으로 재편한 
 | 3 | S07 · 완료 | Mermaid·확대. 수식과 엔진·지원 범위를 함께 확정하지 않음 | S06 / G-렌더 중 Mermaid |
 | 4 | S08+S09 · 완료 | 로컬·웹 이미지·확대. 표시·대체 설명·확대를 함께 연결 | S07 / G-리소스의 로컬·웹 경계 |
 | 5 | S10 · 완료 | 기본 웹·상대 문서 링크와 복귀·실패 처리 | S08+S09 / G-연결 중 기본 링크 |
-| 6 | S11+S12 | 인라인 표현·정의 목록·문자 치환과 callout·alerts·details. 파서·DS 어댑터와 혼합 fixture를 함께 검증 | S10 / 해당 G-확장 |
+| 6 | S11+S12 · 승인 프로필 완료 | 인라인 표현·정의 목록·문자 치환과 callout·alerts·details. 파서·DS 어댑터와 혼합 fixture를 함께 검증 | S10 / 해당 G-확장 |
 | 7 | S14+R02 | 메타데이터·제목 ID/속성·문법 목차·도구 목차·확장 문서 참조. 제목·목적지·목차의 위치 계약을 함께 정함 | S11+S12, S10 / G-확장·G-연결·목차 도구 경계 |
 | 8 | S13 | 각주·인용·참고문헌과 본문 왕복. 참조 형식과 복귀 검증 때문에 독립 유지 | S14+R02 / 학술 참조 G-확장 |
 | 9 | S15 | HTML·미디어·주석. 실행·외부 요청 정책 때문에 독립 유지 | 앞선 문서 표시 묶음 / G-실행 |
@@ -83,8 +83,8 @@ S01–S04 완료 후 **19개 기능 ID를 13개 실행 묶음**으로 재편한 
 | S08 | 로컬 이미지와 폴더 연결 | G-리소스 로컬 경계 확정. 본문 우선, 접근 위치의 연결·취소·잘못된 폴더·권한 상실 복구, 문서 기준 하위 경로 해석·재실행 연결 유지 확인. 파일 선택 권한이 주변 파일 권한으로 확대되지 않음 | 완료. 승인 프로필 구현·독립 재검토 및 API37 실기 검증 완료. 상세 아래 인계 |
 | S09 | 웹 이미지와 이미지 확대 | 웹 이미지 온라인 표시·실패/재시도·오프라인 경계 확정. 로딩/정상/실패, 대체 설명·확대/축소/닫기 확인. 로컬 폴더 연결과 웹 재시도 구분, 실패 후 본문 유지 | 완료. 승인 프로필 구현·독립 재검토 및 API37 실기 검증 완료. 상세 아래 인계 |
 | S10 | 기본 웹·상대 문서 링크 | G-연결 중 기본 대상/복귀 정책 확정. 웹은 브라우저·접근 가능한 상대 Markdown은 앱에서 열기, 실패 시 현재 본문 유지. 경로·권한 경계·지원 밖 URI fixture. 확장 참조는 S14와 별도 | 완료. 승인된 기본 링크·실패/권한 복구·세션 복귀 구현, 단위70개·API37 영향 회귀27개·실제 SAF3단계와 독립 검토·수정 완료 |
-| S11 | 인라인 확장·정의 목록·문자 치환 | 해당 G-확장 프로필 확정. highlight/sub/sup/삽입/밑줄·정의 목록·emoji shortcode·typography 치환 fixture, 중첩/오입력/지원 밖 변형 확인. 문서 강조와 검색 장식 구별 | 미착수 |
-| S12 | callout·GitHub alerts·details | 방언·종류·초기 펼침 정책 확정 후 두 컨테이너 fixture 분리. controlled 펼침·숨긴 콘텐츠 구성·접근성·큰 글자, 앱 복구 배너와 문서 callout 구분 | 미착수 |
+| S11 | 인라인 확장·정의 목록·문자 치환 | 해당 G-확장 프로필 확정. highlight/sub/sup/삽입/밑줄·정의 목록·emoji shortcode·typography 치환 fixture, 중첩/오입력/지원 밖 변형 확인. 문서 강조와 검색 장식 구별 | 승인 프로필 완료. 인라인·정의 목록·Unicode emoji와 원문/충돌 fixture 검증. typography 자동 치환은 사용자 결정으로 보류하고 원문 유지 검증; 이미지 전용 custom emoji도 승인 예외로 원문 유지. 상세 아래 인계 |
+| S12 | callout·GitHub alerts·details | 방언·종류·초기 펼침 정책 확정 후 두 컨테이너 fixture 분리. controlled 펼침·숨긴 콘텐츠 구성·접근성·큰 글자, 앱 복구 배너와 문서 callout 구분 | 승인 프로필 완료. 별도 callout/alerts fixture·controlled details·숨긴 구성/리소스/접근성·방문 복귀와 실제 SAF 흐름 검증, 독립 재검토 완료. 상세 아래 인계 |
 | S13 | 각주·인용·참고문헌 | 참조/중복/순서·이동/되돌아가기·인용 키/데이터 형식 확정. 참조 목록/본문 왕복·없는 대상·중첩 fixture, 본문 읽기 지속. 데이터/위치 해석은 DS 밖에서 처리 | 미착수 |
 | S14 | 메타데이터·제목 속성·문서 연결 확장 | YAML/TOML front matter 필드/노출, heading ID/attributes, 문법 자동 목차, wiki/확장 자동 링크·GitHub mention/issue/commit 대상 프로필 확정 후 각각 fixture. 서비스 인증·API 연동은 추가하지 않음. 크면 S14a/S14b로 분할 | 미착수 |
 | S15 | HTML·미디어·주석 | G-실행 확정 전 실행·외부 요청을 도입하지 않음. 합의한 허용/비허용·실패 대체·주석 비노출 fixture와 준비/실패/원문 상태 검증. 채택 범위를 임의 스크립트·자동 재생 허용으로 해석하지 않음 | 미착수 |
@@ -117,8 +117,8 @@ S04–S15의 세부 완료 범위는 게이트에서 합의한 프로필로 제�
 
 | 항목 | 현황 |
 | --- | --- |
-| 완료 단계 | S01–S10 승인 프로필 완료. S08+S09 [PR #19](https://github.com/HyeonSeong-P/MDive/pull/19)는 2026-10-30 21:53 KST develop 병합을 확인했다. 최신 origin/develop(`84bc88e`)에서 `feat/s10-links`를 생성했다. S10은 승인 정책의 구현·관련 검증·독립 검토·현황 갱신을 완료했다. 2026-10-31 사용자 후속 요청으로 S10 커밋·푸시·develop 대상 PR 작성을 승인받았다. 다음 세션은 실제 PR 게시·병합 상태를 확인한다 |
-| 현재 수정 요약 | S10 HTTP/HTTPS 브라우저·SAF 허용 트리 내 상대 Markdown·실패/권한 복구·방문별 본문 복귀를 Reader MVI·UI 소유 Navigation 3에 연결하고 명세·엔지니어링 문서를 맞췄다. S08+S09의 이미지 로더·Coil 캐시·영속 권한은 유지한다. 아래 이전 단계 기록은 당시 결과다 |
+| 완료 단계 | S01–S12 승인 프로필 완료. S10 [PR #20](https://github.com/HyeonSeong-P/MDive/pull/20)의 2026-10-31 15:11 KST develop 병합을 확인하고 최신 `215da71`에서 이번 작업을 시작했다. S11+S12는 2026-11-01 구현·관련 검증·독립 재검토·현황 갱신을 완료했다. typography 자동 치환은 사용자 결정으로 보류하며 이미지 전용 custom emoji는 원문을 유지한다. 구현 완료 후 사용자 후속 요청으로 S11+S12 커밋·푸시·develop 대상 PR 작성을 승인받았다. 커밋·푸시 후 PR 작성 절차로 이어가며 실제 게시·병합 여부는 다음 세션에서 확인한다 |
+| 현재 수정 요약 | S11 인라인·정의 목록·Unicode emoji와 S12 일반 callout·GitHub alerts·controlled details를 앱 소유 모델·Reader MVI·기존 DS에 연결했다. 단일 물결표 취소선도 GitHub 기준으로 지원한다. 파서 AST·고정 gemoji 사전은 data 내부에 두고 새 런타임 의존성 없이 DS 원본·HTML/Compose 카탈로그·제품/구조 문서를 맞췄다. S10 이동/복귀와 S08+S09 이미지 로더·캐시·영속 권한을 유지한다. 아래 이전 단계 기록은 당시 결과다 |
 | S01 초기 검증 | `:app:assembleDebug`, `:app:assembleRelease`, `:app:testDebugUnitTest`(5개), instrumentation APK 컴파일. API 37 `emulator-5554`에서 제품 테스트 5개를 두 전체 실행에서 모두 통과: Hilt 홈, 읽기 상태·복구 콜백, 상단/시스템 뒤로, STARTED Effect 단일 수집, key 저장·복원 후 홈 복귀. APK 설치·콜드 실행과 UIAutomator 첫 홈 확인. `git diff --check` 통과 |
 | 이전 전체 기기 회귀 | 최신 디자인 반영 전 실행에서 27개 중 26개 통과. 기존 `CatalogSmokeTest`의 코드 예제 중복 matcher를 수정. 기존 `CatalogControlsTest.searchInputAcceptsFocusAndTextInNarrowBar`가 입력 후 `1/3` 표시 확인에서 실패하고 단독 실행에서도 재현됨. 첫 전체 실행에서는 통과했으며 원인은 미확정. 전체 suite 통과로 표시하지 않음 |
 | S01 독립 검토 | `change_reviewer`가 새 파일 포함 S01 diff 검토. 조치가 필요한 결함 없음. 후속 테스트 변경도 별도 검토 |
@@ -170,6 +170,7 @@ S04–S15의 세부 완료 범위는 게이트에서 합의한 프로필로 제�
 | S08+S09 직접 확인·예제 | samples/images.md와 images/를 저장소 및 기기 Download/MDive-S08에 준비했다. 메인이 실제 로컬 본문·로컬 확대 라이트·웹 본문/부분 실패·최종 다크 확대의 최소 캡처를 직접 확인해 공백 그림·잘림·alt 오표시가 없는지 점검했다. 자동 픽셀 검사와 직접 확인은 별도 증거다. 초기 다크 캡처가 본문 프레임을 담은 것을 발견해 확대 표시/픽셀/idle 대기 뒤 다시 캡처했다. 실행 캡처는 /tmp/mdive-s08-artifacts/에 보존했으며 사용자 검토 원본은 실행 가능한 앱·HTML/Compose 카탈로그다. |
 | S08+S09 독립 검토·수정 | change_reviewer가 SVG 순환/참조 확장·CSS 토큰 우회, 가시 결과 전달/캐시 반복 로딩, 폴더 연결 순서 경쟁, Coil 예외 분류와 SVG 메모리 적중을 검토하고 발견 사항을 수정·재검토했다. Back의 이미지 작업 취소 snapshot과 늦은 결과 차단도 회귀로 확인했다. app_designer 검토로 이미지 탭/접근성·스켈레톤·복구 행동·16dp 배너를 맞추고 DS 원본/양쪽 카탈로그를 갱신했다. 최종 소스와 테스트·UA 보완의 독립 검토에 남은 조치 사항 없음. |
 | S08+S09 검증 한계·잔여 | API24 실제 실행·실제 TalkBack 낭독·태블릿·OEM/클라우드 provider·큰 혼합 문서 성능·실제 비행기 모드 토글/시스템 거부 버튼은 미검증이다. 접근/오프라인/시간 실패는 저장소·UI fixture 및 실제 grant 상실/403으로 검증했다. 초기 장비가 함께 선택된 Coil 디코더 전환 단계에서 실기기 Compose 테스트2개가 No compose hierarchies found로 실패했으며 화면/잠금 상태 또는 제품 원인인지는 미확정, 최종 Coil 캐시/UA 버전은 에뮬레이터로만 확인했다. 기존 카탈로그 검색 회귀1건은 미재실행·별도 잔여다. 초기 파일 MediaStore 미등록·선택기 UI 차이·Hilt 테스트 EntryPoint 위치·JUnit 반환형/캡처 프레임은 하네스 결함으로 수정하고 해당 흐름만 재검증했다. 전체 기기·전체 Markdown 지원 완료를 뜻하지 않는다. |
+| S10 시작·게시 인계 | S08+S09 PR #19의 2026-10-30 21:53 KST develop 병합과 깨끗한 작업 트리를 확인하고 당시 최신 origin/develop(`84bc88e`)에서 `feat/s10-links`를 생성했다. S10 구현·검증·독립 검토·현황 갱신 후 사용자 후속 승인으로 커밋·푸시·PR #20을 게시했으며, 이번 시작 시 해당 PR의 develop 병합을 확인했다. |
 | S10 확정·구현 | 승인된 HTTP/HTTPS 외부 브라우저·상대 md/markdown·UTF-8 percent 1회·허용 트리 안 ../·fragment 보류·실패/취소/복귀를 제품 명세와 Reader MVI에 연결했다. 기본 참조 링크 정의는 목적지로 해석해 선언을 숨기고 각주 원문 경계는 S13 전까지 유지한다. 링크 AST는 앱 소유 목적지로 변환하고 data의 실제 SAF child 탐색과 문서별 디렉터리를 사용한다. 방문별 Navigation 3 key와 세션 준비 결과로 연속 이동·본문 위치 복귀를 제공한다. 이미지 링크는 그림 탭 확대와 별도 목적지 링크를 유지한다. 새 모듈·의존성·DS 변경 없음. |
 | S10 빌드·단위·정적 검증 | 최종 제품 debug/release·AndroidTest APK 빌드와 단위70개(실패0) 통과. 단위 fixture로 경로/인코딩·중첩/참조 링크·비동기 중복/취소/늦은 결과를 검증했다. Python27개·DS 생성물 최신성·reader HTML 고유ID17개/참조34개의 로컬 대상·anchor·변경 Markdown의 코드 예시를 제외한 로컬 링크69개·diff 검사 통과. 실제 HTML 브라우저 렌더는 도구 부재로 미검증이다. |
 | S10 영향 기기 회귀 | API37 emulator-5554의 고유 영향 회귀27개: 링크4·기본본문7·수식4·코드3·이미지6·Mermaid3. 먼저26개 단일 실행이 통과했고 수식 옆 링크/취소선 장식 보완 후 링크4+수식4의8개를 재검증했다. 이후 정상 참조 정의 비표시 보완 뒤 링크4+기본본문7의11개도 재검증했다. 후속8개·11개는 중복을 포함하며 고유 검증 범위27개를 단일27개 전체 suite 성공으로 합산하지 않는다. 브라우저 후보 없음/실행 예외도 결정적 어댑터 fixture로 확인했다. |
@@ -177,10 +178,17 @@ S04–S15의 세부 완료 범위는 게이트에서 합의한 프로필로 제�
 | S10 실제 그림·예제 | samples/links/와 LINKS-README.md를 저장소 및 기기 Download/MDive-S10에 준비했다. 대상 문서 디렉터리의 실제 그림 픽셀·확대/복귀를 자동 검사했고 메인이 /tmp/mdive-s10-artifacts/target-body.png·returned-body.png를 직접 확인해 그림 표시와 원본문 위치 복귀를 점검했다. 자동 픽셀 검사와 최소 직접 확인은 별도 증거다. |
 | S10 독립 검토·수정 | change_reviewer가 SAF 연결 snapshot·폴더 선택 경쟁·늦은 결과·파서/Navigation 경계를 독립 검토했다. 연결 snapshot·이미지/문서 picker 상호 배제·picker 중 링크 실행 경쟁을 수정하고 단위/기기 재검증으로 확인했다. 수식 옆 링크/취소선 장식 결합과 정상 참조 정의의 비표시도 보완했다. 최종 파서 보완의 독립 재검토에도 추가 조치 사항이 없다. 초기 실제 기기 하네스의 링크 탭 영역·선택기 전환 대기·merged 이미지 semantics 문제는 하네스를 수정하고 관련 흐름을 재검증했으며 제품 실패와 구분한다. |
 | S10 검증 한계·잔여 | API24 실제 실행·실제 TalkBack 낭독·태블릿·OEM/클라우드 provider·큰 혼합 문서 성능은 미검증이다. 브라우저 첫 실행 이후 웹 페이지 내용·모든 브라우저 조합은 미검증이다. S08+S09 이미지 캐시/권한과 S07–S02는 위 영향 회귀 범위에서 확인했으며 첫 버전 전체 지원 완료나 전체 기기 suite 성공을 뜻하지 않는다. 기존 카탈로그 검색 회귀1건은 DS 미변경으로 재실행하지 않고 별도 잔여로 유지한다. |
-| 다음 시작점 | S10을 완료했다. 다음 별도 요청은 [S11+S12 지시문](session-prompts.md#session-s11-s12)을 따른다. S11+S12 정책 확정·구현과 해당 단계의 커밋·푸시·PR은 이번 요청에 포함하지 않는다 |
-| 이번 시작점 | PR #19의 develop 병합과 깨끗한 작업 트리를 확인하고 최신 origin/develop(`84bc88e`)에서 `feat/s10-links` 생성. 사용자 요청은 S10 구현·검증·독립 검토·수정·현황 갱신과 다음 S11+S12 지시문 작성까지다. S11+S12 구현·커밋·푸시·PR은 제외 |
-| 선택 기술·후속 결정 | CommonMark 0.31.0·JLatexMath Android 0.2.0·Mermaid 11.15.0을 유지한다. S08+S09는 Coil 3.3.0 core/SVG·OkHttp 4.12.0과 SAF 영속 read grant·문서별 SharedPreferences 연결을 사용한다. 홈/도구 저장 기술은 해당 후속 단계에서 선택한다 |
-| 아직 남은 제품 결정 | S02–S09와 S10 기본 링크 프로필은 확정. 확장·제목/fragment·홈/도구 저장·읽기 도구 정책은 후속 게이트와 원본 기능 명세의 열린 결정을 따른다. |
+| S11+S12 확정·구현 | CommonMark/GitHub 합집합을 기본 목표로 기존 구조를 유지하며 highlight·sub/sup·삽입/밑줄·정의 목록·Unicode emoji·일반 callout·GitHub alerts·details를 연결했다. `__`는 굵게, 단일 `~`는 취소선으로 유지해 아래첨자와 충돌하지 않는다. typography 자동 치환과 이미지 전용 custom emoji는 사용자 승인에 따라 원문으로 남긴다. details 펼침은 방문별 Reader MVI가 소유하며 접힌 본문은 구성·이미지/Mermaid 요청·접근성에서 제외한다. 일반 HTML 실행이나 후속 fragment/목차를 선행 구현하지 않았다. |
+| S11+S12 빌드·단위·정적 검증 | 최종 app debug/release·AndroidTest APK, catalog debug·AndroidTest APK 빌드와 단위88개(실패0) 통과. Python27개·DS/emoji 생성물 최신성·diff 검사 통과. 파서 fixture로 중첩·escape·지원 밖/오입력·정의 다중 블록·코드/수식/URI 원문·CR/LF/CRLF와 공백/끝 개행을 확인했다. |
+| S11+S12 영향 기기 회귀 | API37의 영향 회귀36개가 통과했다: 확장4·기본본문7·코드3·수식4·링크4·이미지6·Mermaid8. 이 실행은 마지막 details 문단 interrupt/summary 들여쓰기 보완 전 APK이며, 해당 보완의 단위 회귀와 최신 APK 확장4개 재검증·실제 SAF1개를 별도로 통과했다. 중복을 합쳐 단일 최종 전체 suite 성공으로 표기하지 않는다. 초기36개 중 summary 링크1개 실패는 merged 부모와 Text 자식의 좌표 차이인 테스트 하네스 문제로, unmerged Text 좌표를 사용해 수정 후 관련1개와 재개36개를 통과했다. |
+| S11+S12 실제 SAF·그림·예제 | 최신 APK로 실제 파일 선택→details 숨김/중첩 토글→문서 폴더 연결→상대 target 문서의 이미지 픽셀·확대/복귀→외부 브라우저 왕복→뒤로 본문 위치·펼침 복귀→회전·부모 접기/재펼침→홈의1개 흐름을 통과했다. `samples/extensions/`와 `samples/EXTENSIONS-README.md` 및 기기 `Download/MDive-S11-S12`에 재현 예제를 준비했다. 메인은 `/tmp/mdive-s11-artifacts/target-body.png`·`returned-body.png`를 최소 직접 확인해 실제 그림과 본문 복귀를 점검했다. 자동 픽셀 검사와 직접 확인은 별도 증거다. |
+| S11+S12 DS·HTML 검증 | API37 카탈로그 관련16개(Extensions4·Components12)가 통과했다. 기존 검색 회귀1건은 미재실행·별도 잔여다. 메인이 로컬 HTTP에서 reader 명세·iframe과 생성 HTML 카탈로그의 정상 로드, 확장 내용·details 기본 접힘/open 상태를 브라우저로 확인했다. 전체 디자인·인쇄·모든 상태의 시각 검증 완료를 뜻하지 않는다. |
+| S11+S12 독립 검토·수정 | 독립 change_reviewer 발견의 emoji alt·정의 marker 뒤 콜론 소실, 공백 포함 details 닫힘의 전체 파싱 실패, 코드 내용의 컨테이너 경계 오인, 줄끝/공백/끝 개행 손실, escaped alerts 오인, 잘못된 backtick fence의 뒤 본문 삼킴, 문단 직후 details와 들여쓴 summary 인식 누락을 수정하고 회귀 fixture를 추가했다. app_designer가 발견한 좁은 폭/큰 글자 callout 종류 소실도 보완했다. 최종 독립 재검토에 남은 조치 사항은 없다. |
+| S11+S12 검증 한계·잔여 | API24 실제 실행·실제 TalkBack 낭독·태블릿·OEM/클라우드 provider·큰 혼합 문서 성능은 미검증이다. 브라우저 왕복은 확인했으나 모든 브라우저 조합·웹 페이지 내용 검증을 뜻하지 않는다. 기존 카탈로그 검색 회귀1건과 이전 인계의 영향 범위 밖 미검증은 유지한다. typography 자동 치환 보류·custom emoji 원문 유지는 승인된 정책 경계이며 전체 CommonMark/GitHub/HTML 지원 완료를 주장하지 않는다. |
+| 다음 시작점 | 다음 별도 요청은 [S14+R02 지시문](session-prompts.md#session-s14-r02)을 따른다. 시작 시 S11+S12의 실제 게시·병합 상태와 이 인계를 확인한다. PR 미게시·미병합이면 기준 브랜치를 확인하고 임의 게시·병합하지 않는다. S14+R02 구현은 진행하지 않았으며 S11+S12 Git 게시는 사용자 후속 승인 범위다 |
+| 이번 시작점 | S10 PR #20의 develop 병합·검증/잔여 인계와 깨끗한 작업 트리를 확인하고 최신 origin/develop(`215da71`)에서 `codex/feat/s11-s12-extensions`를 생성했다. 2026-11-01 중단 지점부터 재개했다. 사용자 요청은 S11+S12 구현·검증·독립 검토·수정·현황 갱신과 다음 S14+R02 지시문 작성까지였다. 완료 후 별도 사용자 요청으로 이번 변경의 커밋·푸시·develop 대상 PR 작성을 승인받았다 |
+| 선택 기술·후속 결정 | CommonMark 0.31.0·JLatexMath Android 0.2.0·Mermaid 11.15.0을 유지한다. S08+S09는 Coil 3.3.0 core/SVG·OkHttp 4.12.0과 SAF 영속 read grant·문서별 SharedPreferences 연결을 사용한다. S11+S12는 기존 CommonMark 확장 API와 MIT 고지 포함 고정 gemoji Unicode 사전을 사용하며 런타임 의존성을 추가하지 않았다. 홈/도구 저장 기술은 해당 후속 단계에서 선택한다 |
+| 아직 남은 제품 결정 | S02–S12 승인 프로필은 확정. S11 typography 자동 치환은 보류이고 custom emoji 원문 유지는 승인 예외다. 제목/fragment·나머지 확장·홈/도구 저장·읽기 도구 정책은 후속 게이트와 원본 기능 명세의 열린 결정을 따른다. |
 | 공통 UI 준비 | 기존 Compose DS·별도 카탈로그 앱(`:designsystem:catalog`)과 HTML 시각 초안 제공. 디자인 전체 시각 승인/실제 문서 통합 검증과 구분 |
 
 각 구현 세션은 이 표에 실행 묶음과 포함 ID별 완료 상태, 수정 요약, 실제 검증·미검증, 열린 결정, 다음 실행 묶음을 짧게 갱신한다. 상세 로그는 붙이지 않는다.

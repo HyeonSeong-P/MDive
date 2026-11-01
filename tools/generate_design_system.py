@@ -209,7 +209,7 @@ def generate():
             kinds = [('info', '일반 안내'), ('info', 'NOTE'), ('success', 'TIP'), ('important', 'IMPORTANT'), ('warning', 'WARNING'), ('danger', 'CAUTION')]
             inner = ''.join(f'<aside class="md-callout md-callout-{kind}" aria-label="{label}"><div>{icon("warning" if kind in ["warning", "danger"] else "file")}<strong>{label}</strong></div><p>{note}</p></aside>' for kind, label in kinds)
         elif state == 'details':
-            inner = f'<details class="md-details"><summary>{term} · 자세히 보기</summary><div><p>{note}</p><dl class="md-definitions"><dt>{term}</dt><dd>{e(sample["extensionDefinition"])}</dd></dl></div></details><details class="md-details" open><summary>처음부터 펼친 예시</summary><div><p>{note}</p></div></details>'
+            inner = f'<details class="md-details"><summary>{term} · 자세히 보기</summary><div><p>{note}</p><dl class="md-definitions"><dt>{term}</dt><dd>{e(sample["extensionDefinition"])}</dd></dl></div></details><details class="md-details" open><summary>처음부터 펼친 예시</summary><div><p>{note}</p><details class="md-details" open style="--details-indent:0px"><summary>들여쓰기를 줄인 중첩 예시</summary><div><p>{note}</p></div></details></div></details>'
         elif state == 'metadata':
             inner = '<dl class="md-metadata">' + ''.join(f'<div><dt>{e(key)}</dt><dd>{e(value)}</dd></div>' for key, value in sample['extensionMetadata']) + '</dl>'
         elif state == 'toc':
