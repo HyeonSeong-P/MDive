@@ -12,6 +12,11 @@ data class MarkdownRun(
     val math: MarkdownMath? = null,
     val image: MarkdownImage? = null,
     val link: String? = null,
+    val highlight: Boolean = false,
+    val subscript: Boolean = false,
+    val superscript: Boolean = false,
+    val inserted: Boolean = false,
+    val underline: Boolean = false,
 )
 
 sealed interface MarkdownBlock {
@@ -27,6 +32,9 @@ sealed interface MarkdownBlock {
     data class Code(val source: String, val language: String?, val highlights: List<CodeHighlight> = emptyList()) : MarkdownBlock
     data class Math(val math: MarkdownMath) : MarkdownBlock
     data class Mermaid(val diagram: MarkdownMermaid) : MarkdownBlock
+    data class DefinitionList(val entries: List<MarkdownDefinition>) : MarkdownBlock
+    data class Callout(val kind: MarkdownCalloutKind, val title: String, val blocks: List<MarkdownBlock>) : MarkdownBlock
+    data class Details(val id: String, val summary: List<MarkdownRun>, val initiallyOpen: Boolean, val blocks: List<MarkdownBlock>) : MarkdownBlock
     data object Divider : MarkdownBlock
     /** Unsupported syntax remains readable, inert source in the document flow. */
     data class Source(val source: String) : MarkdownBlock
@@ -52,3 +60,7 @@ data class MarkdownMath(val tex: String, val source: String, val display: Boolea
 
 /** Inert app-owned diagram input. Platform rendering never enters the domain contract. */
 data class MarkdownMermaid(val code: String, val source: String, val supported: Boolean)
+
+/** Container presentation remains independent of a parser or Compose. */
+enum class MarkdownCalloutKind { Note, Tip, Important, Warning, Caution }
+data class MarkdownDefinition(val terms: List<List<MarkdownRun>>, val definitions: List<List<MarkdownBlock>>)

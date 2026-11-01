@@ -1,0 +1,4 @@
+GitHub gemoji
+https://github.com/github/gemoji/tree/fadaeaf1f1a9be82b321316a6c5502e43138b2f6
+Revision: fadaeaf1f1a9be82b321316a6c5502e43138b2f6
+Only Unicode emoji entries are rendered; custom image entries remain source.

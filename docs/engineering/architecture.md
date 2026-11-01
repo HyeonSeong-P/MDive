@@ -92,7 +92,7 @@ S03의 해석 기준과 중간 원문 대체 정책은 [제품 프로필](../pro
 
 표 확장의 기본 factory가 헤더보다 구분 행 열 수가 많은 입력도 허용하므로, data의 `GfmTableFactory`가 정확한 동수를 먼저 검사한 뒤 고정 버전 factory에 위임한다. 라이브러리의 `internal` 패키지 Java API를 사용하는 작은 호환 경계이므로 버전 갱신 시 표 fixture를 함께 확인한다. 표 확장이 escaped pipe를 제거한 뒤 인라인을 파싱하므로 미지원 링크·이미지 등의 source offset을 원래 셀 위치로 역변환한다. 표 셀 안전 한도 초과 시에는 표 확장을 끄고 기본 본문으로 다시 파싱해 읽기를 유지한다.
 
-task는 해석된 Text를 정규식으로 바꾸는 확장 대신 첫 문단의 원문 시작을 확인해 escape·문자 참조의 오인식을 방지한다. 취소선은 공식 `requireTwoTildes(true)` 옵션으로 제한한다. 기존 중첩 폭 보호를 task에도 적용하며 표의 가로 스크롤은 DS 블록 내부가 소유한다.
+task는 해석된 Text를 정규식으로 바꾸는 확장 대신 첫 문단의 원문 시작을 확인해 escape·문자 참조의 오인식을 방지한다. 취소선은 S04 당시 `requireTwoTildes(true)`로 제한했으나 S11+S12에서는 GitHub 호환을 위해 `requireTwoTildes(false)`로 단일·이중 물결표를 지원한다. 기존 중첩 폭 보호를 task에도 적용하며 표의 가로 스크롤은 DS 블록 내부가 소유한다.
 
 근거: [0.31.0 표 factory](https://github.com/commonmark/commonmark-java/blob/commonmark-parent-0.31.0/commonmark-ext-gfm-tables/src/main/java/org/commonmark/ext/gfm/tables/internal/TableBlockParser.java), [0.31.0 취소선 API](https://github.com/commonmark/commonmark-java/blob/commonmark-parent-0.31.0/commonmark-ext-gfm-strikethrough/src/main/java/org/commonmark/ext/gfm/strikethrough/StrikethroughExtension.java).
 
@@ -175,3 +175,13 @@ WebView는 뷰 수명주기를 필요로 하므로 `ui/reader/MermaidWebView`의
 S08의 문서별 `image-folders` 연결과 영속 읽기 grant를 공유하며 상대 대상 문서에는 같은 허용 트리와 탐색한 대상 디렉터리를 연결한다. 이미지는 기존 하위 상대 경로 정책을 유지하면서 대상 문서 디렉터리 아래에서 읽는다. 이미지와 문서 링크의 `../` 허용 정책은 서로 다르므로 링크 정규화를 이미지 입력 허용으로 확대하지 않는다. Coil 메모리/웹 디스크 캐시의 예산·정책은 유지하며 기존 웹·루트 문서의 Coil 키는 유지하고 중첩 대상 문서의 로컬 표시 키에만 실제 기준 디렉터리를 추가해 다른 기준의 픽셀이 재사용되지 않게 한다. 한 번의 이미지 읽기에서는 tree·연결 세대·디렉터리를 같은 연결 snapshot에서 읽는다. 홈 최근/즐겨찾기 저장소는 추가하지 않는다.
 
 외부 브라우저 실행은 UI 플랫폼 어댑터가 담당한다. 브라우저 앱 후보를 조회한 뒤 해당 패키지로 제한한 HTTP/HTTPS `ACTION_VIEW`를 실행해 검증된 앱 딥링크로 전환되지 않게 한다. 후보가 여럿이면 브라우저 후보만 선택하게 하며 실행 실패는 현재 Reader의 Intent/State로 돌려준다. 필요한 패키지 가시성 queries만 manifest에 선언한다. 별도 WebView·네트워크 로더·새 라이브러리는 추가하지 않는다. Navigation의 방문 key·준비 결과·세션 복귀는 [내비게이션 문서](navigation.md#s10-링크상대-문서-이동-경계)를 따른다.
+
+## S11+S12 인라인·컨테이너 경계
+
+CommonMark custom block/delimiter/inline/link processor와 AST는 data 내부에 둔다. 추가 컨테이너의 본문은 같은 파서 프로필로 해석하고 바깥 참조 정의를 link processor로 전달한다. 원문 뒤에 정의를 붙이지 않아 미완성 코드·복사 내용·줄끝을 오염시키지 않는다. source span을 이용해 LF/CRLF/CR과 코드 공백을 보존하며 잘못된 컨테이너는 원문으로 남긴다. 앱 소유 MarkdownRun의 문서 highlight·첨자·삽입·밑줄과 DefinitionList/Callout/Details 모델만 UI에 전달한다.
+
+고정 GitHub gemoji revision과 MIT 사전/고지는 `app/src/main/assets/emoji/`에 두고 `tools/generate_emoji_aliases.py`로 Unicode alias 맵을 오프라인 생성한다. 새 런타임 라이브러리·모듈은 추가하지 않는다. custom 이미지 emoji는 승인에 따라 원문으로 보존한다. typography는 자동 변환하지 않는다.
+
+ReaderState의 detailsExpanded와 SetDetailsExpanded Intent가 방문별 controlled 펼침을 소유한다. 새 문서를 읽으면 초기화하고 동일 방문의 회전·스크롤·Navigation3 뒤로에서는 유지한다. 접힌 자식은 Compose 트리에서 제외되어 이미지/Mermaid 준비와 접근성 노출을 시작하지 않는다. 마지막 표시 이미지 참조가 사라지면 진행 중 준비 작업을 취소하며 완료된 Coil 메모리/웹 디스크 캐시는 기존 data 예산으로 재사용한다. 수식은 기존 문서 전체 bounded 오프라인 준비 예산을 유지한다.
+
+기존 DS의 문서 callout·정의 용어·details slot을 재사용한다. 여러 블록 정의의 조합과 좁은 폭에서의 들여쓰기 제한은 Reader가 소유한다. 공통 details는 선택적 contentIndent와 48dp 최소 터치 영역·상태 설명을 제공하며 일반 텍스트와 수식 옆 텍스트는 같은 DS SpanStyle 함수를 사용한다.

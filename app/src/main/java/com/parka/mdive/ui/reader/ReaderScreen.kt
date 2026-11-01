@@ -99,6 +99,7 @@ fun ReaderRoute(
             onLink = { viewModel.onIntent(ReaderIntent.OpenLink(it)) },
             onConnectDocumentFolder = { viewModel.onIntent(ReaderIntent.ConnectDocumentFolder) },
             onDismissLinkFailure = { viewModel.onIntent(ReaderIntent.DismissLinkFailure) },
+            onDetailsExpandedChange = { id, expanded -> viewModel.onIntent(ReaderIntent.SetDetailsExpanded(id, expanded)) },
         )
         feedback?.let { (_, message) -> MDiveToast(message, Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(16.dp),
             icon = if (message == COPY_FAILED) "warning" else "check") }
@@ -127,6 +128,7 @@ fun ReaderScreen(
     onLink: (String) -> Unit = {},
     onConnectDocumentFolder: () -> Unit = {},
     onDismissLinkFailure: () -> Unit = {},
+    onDetailsExpandedChange: (String, Boolean) -> Unit = { _, _ -> },
 ) {
     val images = ReaderImages(state.images, state.imageGeneration, onLoadImage, onImageVisible, onConnectImageFolder, onExpandImage)
     state.expandedImage?.let { ImageExpanded(it, images, state.expandedImageRaster, onCloseImage) }
@@ -159,7 +161,7 @@ fun ReaderScreen(
             }
             if (state.content == ReaderContent.Loading) ReaderLoadingContent(Modifier.weight(1f))
             else if (state.content == ReaderContent.SourceReady && sourcePreview == null) {
-                state.markdown?.let { ReaderMarkdownContent(it, Modifier.weight(1f), onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink = onLink) }
+                state.markdown?.let { ReaderMarkdownContent(it, Modifier.weight(1f), onCopyCode, onViewMathSource, onViewMermaidSource, onExpandMermaid, mermaidCache, images, onLink = onLink, details = ReaderDetails(state.detailsExpanded, onDetailsExpandedChange)) }
             } else CenteredScrollableState(Modifier.weight(1f)) {
                 when (state.content) {
                     ReaderContent.Loading -> Unit

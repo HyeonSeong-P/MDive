@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.test.*
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -35,6 +36,7 @@ class MarkdownExtensionsTest {
             MDiveMarkdownDetails("추가 설명", expanded, { expanded = it; changes.add(it) }) { Text("접힌 자식의 내용") }
         } }
         compose.onNodeWithText("접힌 자식의 내용").assertDoesNotExist()
+        compose.onNodeWithText("추가 설명").assertHeightIsAtLeast(48.dp)
         compose.onNodeWithText("추가 설명").performClick()
         compose.onNodeWithText("접힌 자식의 내용").assertExists()
         compose.onNodeWithText("추가 설명").performClick()

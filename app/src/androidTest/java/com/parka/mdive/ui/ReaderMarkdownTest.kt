@@ -114,7 +114,9 @@ class ReaderMarkdownTest {
         val layouts = mutableListOf<TextLayoutResult>()
         compose.onNodeWithText("완료").performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
         assertTrue(layouts.single().layoutInput.text.spanStyles.any { it.item.textDecoration == TextDecoration.LineThrough })
-        compose.onNodeWithText("~단일~").assertIsDisplayed()
+        val singleLayouts = mutableListOf<TextLayoutResult>()
+        compose.onNodeWithText("단일").performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(singleLayouts) }
+        assertTrue(singleLayouts.single().layoutInput.text.spanStyles.any { it.item.textDecoration == TextDecoration.LineThrough })
     }
 
     @Test fun deeplyNestedTasksKeepStatesAndBodyAtLargeFont() {
